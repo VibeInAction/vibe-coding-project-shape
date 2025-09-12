@@ -107,32 +107,90 @@
         <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
     </div>
 
-    <!-- 导航 -->
-    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
                     <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>返回游戏主页</span>
+                        <i class="fas fa-arrow-left text-gray-400"></i>
                     </a>
-                    <div class="w-px h-8 bg-gray-600"></div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-book text-white text-sm"></i>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
+                        <i class="fas fa-book text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        故事剧情
+                    </span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <!-- 快速访问 -->
+                    <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span>游戏主页</span>
+                    </a>
+                    <a href="../world-lore.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-globe text-purple-400"></i>
+                        <span>世界观</span>
+                    </a>
+                    <a href="#" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2 bg-gray-700/30">
+                        <i class="fas fa-book text-green-400"></i>
+                        <span>故事剧情</span>
+                    </a>
+                    <a href="../game/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-gamepad text-yellow-400"></i>
+                        <span>游戏原型</span>
+                    </a>
+                    <a href="../terrain/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-map text-orange-400"></i>
+                        <span>地形图</span>
+                    </a>
+
+                    <!-- 页内导航 -->
+                    <div class="border-l border-gray-600 mx-2"></div>
+                    <a href="#overview" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition text-sm">故事概览</a>
+                    <a href="#chapters" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition text-sm">章节</a>
+
+                    <!-- 更多下拉菜单 -->
+                    <div class="relative group">
+                        <button class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-1 text-sm">
+                            <span>更多</span>
+                            <i class="fas fa-chevron-down text-xs mt-0.5"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <a href="#worldview" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">世界观</a>
+                            <a href="characters.html" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">角色</a>
+                            <a href="world-building.html" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">世界设定</a>
+                            <a href="media-resources.html" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">媒体资源</a>
+                            <a href="timeline.html" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">时间线</a>
                         </div>
-                        <span class="text-lg font-bold">故事</span>
                     </div>
                 </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="#overview" class="hover:text-blue-400 transition">故事概览</a>
-                    <a href="#worldview" class="hover:text-blue-400 transition">世界观</a>
-                    <a href="#chapters" class="hover:text-blue-400 transition">章节</a>
-                    <a href="characters.html" class="hover:text-blue-400 transition">角色</a>
-                    <a href="world-building.html" class="hover:text-blue-400 transition">世界设定</a>
-                    <a href="media-resources.html" class="hover:text-blue-400 transition">媒体资源</a>
-                    <a href="timeline.html" class="hover:text-blue-400 transition">时间线</a>
-                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+            <div class="px-4 py-2 space-y-1">
+                <a href="../index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">游戏主页</a>
+                <a href="../world-lore.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">世界观</a>
+                <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition bg-gray-700">故事剧情</a>
+                <a href="../game/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">游戏原型</a>
+                <a href="../terrain/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">地形图</a>
+                <a href="#overview" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">故事概览</a>
+                <a href="#worldview" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">世界观</a>
+                <a href="#chapters" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">章节</a>
+                <a href="characters.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">角色</a>
+                <a href="world-building.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">世界设定</a>
+                <a href="media-resources.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">媒体资源</a>
+                <a href="timeline.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">时间线</a>
             </div>
         </div>
     </nav>
@@ -718,7 +776,7 @@
                         <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
                     </div>
                     <div class="flex space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-white transition">
+                        <a href="https://github.com/VibeInAction/vibe-coding-project-shape" target="_blank" class="text-gray-400 hover:text-white transition">
                             <i class="fab fa-github text-xl"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white transition">
@@ -764,6 +822,14 @@
                     this.style.transform = 'translateY(0)';
                 }
             });
+        });
+
+        // 移动端菜单
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
         });
     </script>
 </body>

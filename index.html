@@ -115,7 +115,8 @@
     <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-2">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
                         <i class="fas fa-shapes text-white"></i>
                     </div>
@@ -123,20 +124,73 @@
                         几何境域：形态之战
                     </span>
                 </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="#overview" class="nav-item px-3 py-2 hover:text-blue-400 transition">游戏概览</a>
-                    <a href="world-lore.html" class="nav-item px-3 py-2 hover:text-blue-400 transition">世界观</a>
-                    <a href="story/index.html" class="nav-item px-3 py-2 hover:text-blue-400 transition">故事剧情</a>
-                    <a href="game/index.html" class="nav-item px-3 py-2 hover:text-green-400 transition">游戏原型</a>
-                    <a href="terrain/index.html" class="nav-item px-3 py-2 hover:text-yellow-400 transition">地形图</a>
-                    <a href="#factions" class="nav-item px-3 py-2 hover:text-blue-400 transition">种族介绍</a>
-                    <a href="#tech-tree" class="nav-item px-3 py-2 hover:text-blue-400 transition">科技树</a>
-                    <a href="#skills" class="nav-item px-3 py-2 hover:text-blue-400 transition">技能系统</a>
-                    <a href="#units" class="nav-item px-3 py-2 hover:text-blue-400 transition">兵种单位</a>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <!-- 快速访问 -->
+                    <a href="#" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span>首页</span>
+                    </a>
+                    <a href="world-lore.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-globe text-purple-400"></i>
+                        <span>世界观</span>
+                    </a>
+                    <a href="story/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-book text-green-400"></i>
+                        <span>故事剧情</span>
+                    </a>
+                    <a href="game/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-gamepad text-yellow-400"></i>
+                        <span>游戏原型</span>
+                    </a>
+                    <a href="terrain/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-map text-orange-400"></i>
+                        <span>地形图</span>
+                    </a>
+
+                    <!-- 页内导航 -->
+                    <div class="border-l border-gray-600 mx-2"></div>
+                    <a href="#overview" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition text-sm">游戏概览</a>
+                    <a href="#factions" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition text-sm">种族介绍</a>
+
+                    <!-- 更多下拉菜单 -->
+                    <div class="relative group">
+                        <button class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-1 text-sm">
+                            <span>更多</span>
+                            <i class="fas fa-chevron-down text-xs mt-0.5"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <a href="#tech-tree" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">科技树</a>
+                            <a href="#skills" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">技能系统</a>
+                            <a href="#units" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">兵种单位</a>
+                            <a href="https://github.com/VibeInAction/vibe-coding-project-shape" target="_blank" class="block px-4 py-2 hover:bg-gray-700 transition text-sm">
+                                <i class="fab fa-github mr-2"></i>GitHub
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <button id="mobile-menu-btn" class="md:hidden">
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+            <div class="px-4 py-2 space-y-1">
+                <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">首页</a>
+                <a href="world-lore.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">世界观</a>
+                <a href="story/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">故事剧情</a>
+                <a href="game/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">游戏原型</a>
+                <a href="terrain/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">地形图</a>
+                <a href="#overview" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">游戏概览</a>
+                <a href="#factions" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">种族介绍</a>
+                <a href="#tech-tree" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">科技树</a>
+                <a href="#skills" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">技能系统</a>
+                <a href="#units" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition">兵种单位</a>
             </div>
         </div>
     </nav>
@@ -1811,7 +1865,7 @@
                         <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
                     </div>
                     <div class="flex space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-white transition">
+                        <a href="https://github.com/VibeInAction/vibe-coding-project-shape" target="_blank" class="text-gray-400 hover:text-white transition">
                             <i class="fab fa-github text-xl"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white transition">
@@ -1946,18 +2000,10 @@
 
         // 移动端菜单
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const nav = document.querySelector('nav .hidden.md\\:flex');
+        const mobileMenu = document.getElementById('mobile-menu');
 
         mobileMenuBtn.addEventListener('click', () => {
-            nav.classList.toggle('hidden');
-            nav.classList.toggle('absolute');
-            nav.classList.toggle('top-16');
-            nav.classList.toggle('left-0');
-            nav.classList.toggle('right-0');
-            nav.classList.toggle('bg-gray-800');
-            nav.classList.toggle('flex-col');
-            nav.classList.toggle('p-4');
-            nav.classList.toggle('space-y-4');
+            mobileMenu.classList.toggle('hidden');
         });
 
         // 滚动时添加导航栏阴影
