@@ -9,5 +9,8 @@ release-minor:
 release-major:
     release-it -i major
 
+stat:
+    tokei
+
 deploy:
     scp -r ./* ${HOST}:${DEPLOY_PATH}
