@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角议会 - 力量与效率 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse-triangle {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        .triangle-theme {
+            background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);
+        }
+        .triangle-pattern {
+            background-image: 
+                linear-gradient(30deg, rgba(220, 38, 38, 0.1) 12%, transparent 12.5%, transparent 87%, rgba(220, 38, 38, 0.1) 87.5%, rgba(220, 38, 38, 0.1)),
+                linear-gradient(150deg, rgba(220, 38, 38, 0.1) 12%, transparent 12.5%, transparent 87%, rgba(220, 38, 38, 0.1) 87.5%, rgba(220, 38, 38, 0.1)),
+                linear-gradient(30deg, rgba(220, 38, 38, 0.1) 12%, transparent 12.5%, transparent 87%, rgba(220, 38, 38, 0.1) 87.5%, rgba(220, 38, 38, 0.1)),
+                linear-gradient(150deg, rgba(220, 38, 38, 0.1) 12%, transparent 12.5%, transparent 87%, rgba(220, 38, 38, 0.1) 87.5%, rgba(220, 38, 38, 0.1)),
+                linear-gradient(60deg, rgba(239, 68, 68, 0.1) 25%, transparent 25.5%, transparent 75%, rgba(239, 68, 68, 0.1) 75%, rgba(239, 68, 68, 0.1)),
+                linear-gradient(60deg, rgba(239, 68, 68, 0.1) 25%, transparent 25.5%, transparent 75%, rgba(239, 68, 68, 0.1) 75%, rgba(239, 68, 68, 0.1));
+            background-size: 80px 140px;
+            background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+        }
+        .triangle-text {
+            background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .triangle-icon {
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 52px solid #ef4444;
+            animation: pulse-triangle 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-red-500/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold triangle-text">几何境域</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="../index.html" class="hover:text-red-400 transition">首页</a>
+                    <a href="../story/index.html" class="hover:text-red-400 transition">世界观</a>
+                    <a href="../game-modes.html" class="hover:text-red-400 transition">游戏模式</a>
+                    <a href="../terrain/index.html" class="hover:text-red-400 transition">地形系统</a>
+                    <a href="index.html" class="text-red-400 font-semibold">种族阵营</a>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen triangle-theme triangle-pattern flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 text-center">
+            <div class="relative inline-block mb-8">
+                <div class="flex space-x-4">
+                    <div class="triangle-icon"></div>
+                    <div class="triangle-icon" style="animation-delay: 0.5s"></div>
+                    <div class="triangle-icon" style="animation-delay: 1s"></div>
+                </div>
+            </div>
+            <h1 class="text-6xl font-bold mb-4 triangle-text">三角议会</h1>
+            <p class="text-2xl text-red-200">力量与效率的化身</p>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-3xl"></i>
+        </div>
+    </section>
+
+    <!-- Race Overview -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 triangle-text">种族概述</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-700 rounded-lg p-6 border border-red-500/30">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-400">种族特色</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-sword text-red-400 mt-1 mr-3"></i>
+                                <span>强大的攻击力，建造速度极快</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-project-diagram text-red-400 mt-1 mr-3"></i>
+                                <span>建筑必须形成三角结构才能获得最大效益</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-fire text-red-400 mt-1 mr-3"></i>
+                                <span>单位可以牺牲自己增强友军</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-bolt text-red-400 mt-1 mr-3"></i>
+                                <span>特殊能力：三角攻击、力量聚焦、牺牲增强</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-6 border border-red-500/30">
+                        <h3 class="text-2xl font-semibold mb-4 text-red-400">哲学理念</h3>
+                        <p class="text-gray-300 leading-relaxed mb-4">
+                            三角议会崇尚力量与效率至上。他们认为三角形是最稳定的结构，
+                            三个顶点代表着力量、智慧和速度的完美平衡。在他们的社会中，
+                            一切都以三角结构为基础，追求极致的效率。
+                        </p>
+                        <p class="text-gray-300 leading-relaxed">
+                            "三个点确定一个平面，三支部队决定一场战争。"
+                            —— 三角大将军格言
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Buildings -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 triangle-text">核心建筑</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-red-500/30 hover:border-red-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative flex items-end justify-center">
+                        <div class="triangle-icon transform scale-75"></div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">三角要塞</h3>
+                    <p class="text-gray-400 text-sm">主基地，连接3个建筑获得加成</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-red-500/30 hover:border-red-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative flex items-end justify-center">
+                        <div class="triangle-icon transform scale-75 border-b-red-400"></div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">棱镜炮塔</h3>
+                    <p class="text-gray-400 text-sm">高攻击力，需要三角能量供应</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-red-500/30 hover:border-red-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative flex items-end justify-center">
+                        <div class="triangle-icon transform scale-75 border-b-yellow-400"></div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">力量节点</h3>
+                    <p class="text-gray-400 text-sm">为三角结构提供额外攻击力</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-red-500/30 hover:border-red-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative flex items-end justify-center">
+                        <div class="triangle-icon transform scale-75 border-b-orange-400"></div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">战争工坊</h3>
+                    <p class="text-gray-400 text-sm">生产军事单位和升级武器</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Tree -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 triangle-text">科技树</h2>
+            <div class="max-w-6xl mx-auto">
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-red-400">第一层科技</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-semibold mb-2">结构优化</h4>
+                                <p class="text-gray-400 text-sm">建筑生命值+25%</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-semibold mb-2">锐角理论</h4>
+                                <p class="text-gray-400 text-sm">攻击力+15%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-red-400">第二层科技</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-semibold mb-2">三角锁定</h4>
+                                <p class="text-gray-400 text-sm">目标无法逃脱</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-semibold mb-2">力量传导</h4>
+                                <p class="text-gray-400 text-sm">攻击传递效果</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-semibold mb-2">坚固基础</h4>
+                                <p class="text-gray-400 text-sm">建筑修建速度加快</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-red-400">终极科技</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30 bg-gradient-to-r from-red-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">绝对三角形</h4>
+                                <p class="text-gray-400 text-sm">范围毁灭技能</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30 bg-gradient-to-r from-red-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">无限三角分形</h4>
+                                <p class="text-gray-400 text-sm">单位数量激增</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-red-500/30 bg-gradient-to-r from-red-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">顶点冲击</h4>
+                                <p class="text-gray-400 text-sm">终极攻击技能</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Units -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 triangle-text">单位设计</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-red-500/30 hover:border-red-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                        <div class="triangle-icon scale-50"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">三角战士</h3>
+                        <p class="text-gray-400 text-sm mb-2">基础单位</p>
+                        <p class="text-gray-300 text-sm">三角形护盾，组成三角阵型时防御翻倍</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-red-500/30 hover:border-red-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                        <div class="triangle-icon scale-50 border-b-yellow-400"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">棱镜射手</h3>
+                        <p class="text-gray-400 text-sm mb-2">远程单位</p>
+                        <p class="text-gray-300 text-sm">三棱镜射手，攻击可弹跳</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-red-500/30 hover:border-red-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                        <div class="triangle-icon scale-50 border-b-orange-400"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">三角战机</h3>
+                        <p class="text-gray-400 text-sm mb-2">空中单位</p>
+                        <p class="text-gray-300 text-sm">高速机动，可瞬间改变方向</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-red-500/30 hover:border-red-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                        <div class="w-24 h-24 border-b-8 border-red-400 border-l-8 border-r-8 border-l-transparent border-r-transparent"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">金字塔</h3>
+                        <p class="text-gray-400 text-sm mb-2">攻城单位</p>
+                        <p class="text-gray-300 text-sm">发射毁灭性能量束</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heroes -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 triangle-text">英雄单位</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-red-500/30">
+                    <div class="h-64 bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="triangle-icon scale-150 border-b-red-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-red-400">战争统帅</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-chess-knight text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">三角冲锋</p>
+                                    <p class="text-gray-400 text-sm">线性攻击，穿透敌人阵线</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-plus-circle text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">力量叠加</p>
+                                    <p class="text-gray-400 text-sm">提升友军攻击力</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-bomb text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">三角毁灭（终极）</p>
+                                    <p class="text-gray-400 text-sm">发射三角形毁灭波</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-red-500/30">
+                    <div class="h-64 bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="flex space-x-2 justify-center">
+                                    <div class="triangle-icon scale-75 border-b-yellow-300"></div>
+                                    <div class="triangle-icon scale-75 border-b-yellow-300"></div>
+                                    <div class="triangle-icon scale-75 border-b-yellow-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-red-400">结构大师</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-hammer text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">瞬间建造</p>
+                                    <p class="text-gray-400 text-sm">快速建造建筑</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-shield-alt text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">三角加固</p>
+                                    <p class="text-gray-400 text-sm">强化建筑防御</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-fort-awesome text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">绝对三角要塞（终极）</p>
+                                    <p class="text-gray-400 text-sm">建造无敌防御堡垒</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-red-500/30">
+                    <div class="h-64 bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="triangle-icon scale-150 border-b-orange-300 transform rotate-180"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-red-400">棱镜战士</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-sun text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">光线折射</p>
+                                    <p class="text-gray-400 text-sm">分裂攻击多个目标</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-crosshairs text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">角度优化</p>
+                                    <p class="text-gray-400 text-sm">攻击必定命中</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-star-of-life text-red-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">万花棱镜（终极）</p>
+                                    <p class="text-gray-400 text-sm">全方位攻击</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategies -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 triangle-text">战术与策略</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 rounded-lg p-6 border border-red-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-red-400">进攻阵型</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 三角形冲锋阵型</li>
+                            <li>• 棱镜炮塔三角支撑</li>
+                            <li>• 力量节点中心布置</li>
+                            <li>• 高速单位侧翼包抄</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-red-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-red-400">三角结构</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 保持建筑三角连接</li>
+                            <li>• 优化资源分配路径</li>
+                            <li>• 快速扩张三角网络</li>
+                            <li>• 利用牺牲机制强化</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-red-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-red-400">快速扩张</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 优先建造三角要塞</li>
+                            <li>• 快速建立三角网络</li>
+                            <li>• 利用高攻击力压制</li>
+                            <li>• 早期发动进攻</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 triangle-text">几何境域</h3>
+                    <p class="text-gray-400">探索形态的无限可能</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-gray-400 hover:text-white transition">首页</a></li>
+                        <li><a href="../story/index.html" class="text-gray-400 hover:text-white transition">世界观</a></li>
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">种族阵营</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">连接我们</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://github.com/VibeInAction/vibe-coding-project-shape" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

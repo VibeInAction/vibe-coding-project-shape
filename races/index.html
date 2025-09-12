@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>种族阵营 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .race-card {
+            transition: all 0.3s ease;
+        }
+        .race-card:hover {
+            transform: translateY(-5px);
+        }
+        .circle-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        }
+        .triangle-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);
+        }
+        .square-gradient {
+            background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
+        }
+        .spiral-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #064e3b 100%);
+        }
+        .faction-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            margin: 0 auto;
+        }
+        .circle-icon {
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            border: 4px solid #3b82f6;
+        }
+        .triangle-icon {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 70px solid #dc2626;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .square-icon {
+            background: rgba(124, 58, 237, 0.2);
+            border: 4px solid #7c3aed;
+        }
+        .spiral-icon {
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.2);
+            border: 4px solid #10b981;
+            position: relative;
+            overflow: hidden;
+        }
+        .spiral-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: #10b981;
+            border-radius: 50%;
+            animation: rotate 3s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .vs-section {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(220, 38, 38, 0.1) 25%, rgba(124, 58, 237, 0.1) 50%, rgba(16, 185, 129, 0.1) 75%, rgba(59, 130, 246, 0.1) 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 bg-clip-text text-transparent">几何境域</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="../index.html" class="hover:text-gray-300 transition">首页</a>
+                    <a href="../story/index.html" class="hover:text-gray-300 transition">世界观</a>
+                    <a href="../game-modes.html" class="hover:text-gray-300 transition">游戏模式</a>
+                    <a href="../terrain/index.html" class="hover:text-gray-300 transition">地形系统</a>
+                    <a href="index.html" class="text-gray-300 font-semibold">种族阵营</a>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative h-96 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative z-10 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4">种族阵营</h1>
+            <p class="text-xl md:text-2xl text-gray-300">选择你的形态，定义你的战场</p>
+        </div>
+    </section>
+
+    <!-- Race Selection -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">四大几何种族</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Circle Clan -->
+                <a href="circle-clan.html" class="race-card group">
+                    <div class="bg-gray-700 rounded-lg overflow-hidden border border-blue-500/30 hover:border-blue-400 transition">
+                        <div class="h-48 circle-gradient flex items-center justify-center">
+                            <div class="faction-icon">
+                                <div class="circle-icon w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-circle text-4xl text-blue-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold mb-2 text-blue-400 group-hover:text-blue-300 transition">圆环族</h3>
+                            <p class="text-gray-300 mb-4">和谐与循环</p>
+                            <ul class="space-y-2 text-sm text-gray-400">
+                                <li class="flex items-center">
+                                    <i class="fas fa-shield-alt mr-2 text-blue-400"></i>
+                                    <span>强大防御</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-heart mr-2 text-blue-400"></i>
+                                    <span>恢复能力</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-sync-alt mr-2 text-blue-400"></i>
+                                    <span>能量操控</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Triangle Council -->
+                <a href="triangle-council.html" class="race-card group">
+                    <div class="bg-gray-700 rounded-lg overflow-hidden border border-red-500/30 hover:border-red-400 transition">
+                        <div class="h-48 triangle-gradient flex items-center justify-center">
+                            <div class="faction-icon h-20">
+                                <div class="triangle-icon"></div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold mb-2 text-red-400 group-hover:text-red-300 transition">三角议会</h3>
+                            <p class="text-gray-300 mb-4">力量与效率</p>
+                            <ul class="space-y-2 text-sm text-gray-400">
+                                <li class="flex items-center">
+                                    <i class="fas fa-sword mr-2 text-red-400"></i>
+                                    <span>高攻击力</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-tachometer-alt mr-2 text-red-400"></i>
+                                    <span>快速建造</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-project-diagram mr-2 text-red-400"></i>
+                                    <span>三角结构</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Square Obelisk -->
+                <a href="square-obelisk.html" class="race-card group">
+                    <div class="bg-gray-700 rounded-lg overflow-hidden border border-purple-500/30 hover:border-purple-400 transition">
+                        <div class="h-48 square-gradient flex items-center justify-center">
+                            <div class="faction-icon">
+                                <div class="square-icon w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-cube text-4xl text-purple-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold mb-2 text-purple-400 group-hover:text-purple-300 transition">方碑盟约</h3>
+                            <p class="text-gray-300 mb-4">秩序与规则</p>
+                            <ul class="space-y-2 text-sm text-gray-400">
+                                <li class="flex items-center">
+                                    <i class="fas fa-cubes mr-2 text-purple-400"></i>
+                                    <span>模块化</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-coins mr-2 text-purple-400"></i>
+                                    <span>经济强大</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-flask mr-2 text-purple-400"></i>
+                                    <span>科技优势</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Spiral Offspring -->
+                <a href="spiral-offspring.html" class="race-card group">
+                    <div class="bg-gray-700 rounded-lg overflow-hidden border border-green-500/30 hover:border-green-400 transition">
+                        <div class="h-48 spiral-gradient flex items-center justify-center">
+                            <div class="faction-icon">
+                                <div class="spiral-icon w-full h-full"></div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold mb-2 text-green-400 group-hover:text-green-300 transition">螺旋之子</h3>
+                            <p class="text-gray-300 mb-4">变化与成长</p>
+                            <ul class="space-y-2 text-sm text-gray-400">
+                                <li class="flex items-center">
+                                    <i class="fas fa-seedling mr-2 text-green-400"></i>
+                                    <span>单位成长</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-arrows-alt mr-2 text-green-400"></i>
+                                    <span>建筑移动</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-user-ninja mr-2 text-green-400"></i>
+                                    <span>机动战</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Race Comparison -->
+    <section class="py-20 bg-gray-900 vs-section">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">种族对比</h2>
+            <div class="max-w-6xl mx-auto">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="px-6 py-4 text-left">特性</th>
+                                <th class="px-6 py-4 text-center text-blue-400">圆环族</th>
+                                <th class="px-6 py-4 text-center text-red-400">三角议会</th>
+                                <th class="px-6 py-4 text-center text-purple-400">方碑盟约</th>
+                                <th class="px-6 py-4 text-center text-green-400">螺旋之子</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-700">
+                                <td class="px-6 py-4 font-semibold">攻击力</td>
+                                <td class="px-6 py-4 text-center">⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="px-6 py-4 font-semibold">防御力</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="px-6 py-4 font-semibold">机动性</td>
+                                <td class="px-6 py-4 text-center">⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐⭐</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="px-6 py-4 font-semibold">经济</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="px-6 py-4 font-semibold">科技</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐⭐</td>
+                                <td class="px-6 py-4 text-center">⭐⭐⭐⭐</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold">上手难度</td>
+                                <td class="px-6 py-4 text-center">中等</td>
+                                <td class="px-6 py-4 text-center">简单</td>
+                                <td class="px-6 py-4 text-center">困难</td>
+                                <td class="px-6 py-4 text-center">困难</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Counter Relationships -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">克制关系</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-blue-400">优势对抗</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-400">圆环族</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span>克制</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span class="text-red-400">三角议会</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-red-400">三角议会</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span>克制</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span class="text-green-400">螺旋之子</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-green-400">螺旋之子</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span>克制</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span class="text-purple-400">方碑盟约</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-purple-400">方碑盟约</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span>克制</span>
+                                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                                <span class="text-blue-400">圆环族</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-4">策略建议</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 了解克制关系，制定针对性战术</li>
+                            <li>• 利用种族特色弥补劣势</li>
+                            <li>• 灵活调整战术应对不同对手</li>
+                            <li>• 掌握多种种族以适应各种局面</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Race Selection Quiz -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">找到适合你的种族</h2>
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-gray-800 rounded-lg p-8">
+                    <h3 class="text-2xl font-semibold mb-6 text-center">你的游戏风格是？</h3>
+                    <div class="space-y-4">
+                        <button onclick="selectRace('circle')" class="w-full bg-gray-700 hover:bg-blue-600 transition p-4 rounded-lg text-left group">
+                            <span class="group-hover:text-white">🛡️ 喜欢稳扎稳打，依靠防御反击</span>
+                        </button>
+                        <button onclick="selectRace('triangle')" class="w-full bg-gray-700 hover:bg-red-600 transition p-4 rounded-lg text-left group">
+                            <span class="group-hover:text-white">⚔️ 喜欢主动进攻，快速解决战斗</span>
+                        </button>
+                        <button onclick="selectRace('square')" class="w-full bg-gray-700 hover:bg-purple-600 transition p-4 rounded-lg text-left group">
+                            <span class="group-hover:text-white">🏗️ 喜欢发展经济，科技制胜</span>
+                        </button>
+                        <button onclick="selectRace('spiral')" class="w-full bg-gray-700 hover:bg-green-600 transition p-4 rounded-lg text-left group">
+                            <span class="group-hover:text-white">🌿 喜欢灵活机动，出其不意</span>
+                        </button>
+                    </div>
+                    <div id="quiz-result" class="mt-6 p-4 bg-gray-700 rounded-lg hidden">
+                        <p class="text-lg"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 bg-clip-text text-transparent">几何境域</h3>
+                    <p class="text-gray-400">探索形态的无限可能</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-gray-400 hover:text-white transition">首页</a></li>
+                        <li><a href="../story/index.html" class="text-gray-400 hover:text-white transition">世界观</a></li>
+                        <li><a href="../game-modes.html" class="text-gray-400 hover:text-white transition">游戏模式</a></li>
+                        <li><a href="../terrain/index.html" class="text-gray-400 hover:text-white transition">地形系统</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">连接我们</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://github.com/VibeInAction/vibe-coding-project-shape" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        function selectRace(race) {
+            const resultDiv = document.getElementById('quiz-result');
+            const resultText = resultDiv.querySelector('p');
+            
+            const races = {
+                circle: {
+                    name: '圆环族',
+                    desc: '你适合圆环族！你喜欢稳健的防御策略，依靠强大的护盾和治疗能力来消耗对手。',
+                    color: 'text-blue-400'
+                },
+                triangle: {
+                    name: '三角议会',
+                    desc: '你适合三角议会！你崇尚力量和效率，喜欢用强大的攻击力快速击败对手。',
+                    color: 'text-red-400'
+                },
+                square: {
+                    name: '方碑盟约',
+                    desc: '你适合方碑盟约！你擅长经济管理和科技发展，通过优势积累获得胜利。',
+                    color: 'text-purple-400'
+                },
+                spiral: {
+                    name: '螺旋之子',
+                    desc: '你适合螺旋之子！你喜欢灵活多变的战术，善于利用机动性和成长性取得优势。',
+                    color: 'text-green-400'
+                }
+            };
+            
+            const selected = races[race];
+            resultText.innerHTML = `<span class="${selected.color} font-bold">${selected.name}</span> - ${selected.desc}`;
+            resultDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

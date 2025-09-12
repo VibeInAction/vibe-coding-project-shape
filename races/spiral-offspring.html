@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螺旋之子 - 变化与成长 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes spiral-rotate {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes grow {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        @keyframes float-spiral {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(360deg); }
+        }
+        .spiral-theme {
+            background: linear-gradient(135deg, #10b981 0%, #064e3b 100%);
+        }
+        .spiral-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+        }
+        .spiral-text {
+            background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .spiral-path {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .spiral-path::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: #34d399;
+            border-radius: 50%;
+            animation: spiral-rotate 3s linear infinite;
+        }
+        .spiral-path::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 80px;
+            height: 80px;
+            border: 3px solid transparent;
+            border-top-color: #6ee7b7;
+            border-radius: 50%;
+            animation: spiral-rotate 2s linear infinite reverse;
+        }
+        .growing-spiral {
+            animation: grow 4s ease-in-out infinite;
+        }
+        .floating-spirals {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .floating-spiral {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(52, 211, 153, 0.3);
+            border-radius: 50%;
+            border-top-color: rgba(52, 211, 153, 0.8);
+            animation: float-spiral 15s infinite ease-in-out;
+        }
+        .vine {
+            position: absolute;
+            background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.3));
+            width: 4px;
+            transform-origin: bottom;
+            animation: grow 3s ease-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-green-500/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold spiral-text">几何境域</a>
+                <div class="hidden md:flex space-x-6">
+                    <a href="../index.html" class="hover:text-green-400 transition">首页</a>
+                    <a href="../story/index.html" class="hover:text-green-400 transition">世界观</a>
+                    <a href="../game-modes.html" class="hover:text-green-400 transition">游戏模式</a>
+                    <a href="../terrain/index.html" class="hover:text-green-400 transition">地形系统</a>
+                    <a href="index.html" class="text-green-400 font-semibold">种族阵营</a>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen spiral-theme spiral-pattern flex items-center justify-center overflow-hidden">
+        <div class="floating-spirals">
+            <div class="floating-spiral top-20 left-10" style="animation-delay: 0s"></div>
+            <div class="floating-spiral top-1/3 right-20" style="animation-delay: 2s"></div>
+            <div class="floating-spiral bottom-1/4 left-1/4" style="animation-delay: 4s"></div>
+            <div class="floating-spiral bottom-32 right-1/3" style="animation-delay: 6s"></div>
+        </div>
+        <div class="vines-container absolute inset-0">
+            <div class="vine bottom-0 left-1/4 h-1/3" style="transform: rotate(-15deg); animation-delay: 0.5s"></div>
+            <div class="vine bottom-0 right-1/3 h-1/2" style="transform: rotate(10deg); animation-delay: 1s"></div>
+            <div class="vine bottom-0 left-1/2 h-2/5" style="transform: rotate(5deg); animation-delay: 1.5s"></div>
+        </div>
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 text-center">
+            <div class="relative inline-block mb-8">
+                <div class="spiral-path growing-spiral"></div>
+            </div>
+            <h1 class="text-6xl font-bold mb-4 spiral-text">螺旋之子</h1>
+            <p class="text-2xl text-green-200">变化与成长的化身</p>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-3xl"></i>
+        </div>
+    </section>
+
+    <!-- Race Overview -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 spiral-text">种族概述</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-700 rounded-lg p-6 border border-green-500/30">
+                        <h3 class="text-2xl font-semibold mb-4 text-green-400">种族特色</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-seedling text-green-400 mt-1 mr-3"></i>
+                                <span>单位会随时间成长进化，越来越强</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-arrows-alt text-green-400 mt-1 mr-3"></i>
+                                <span>建筑可以移动和重组，适应战场变化</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-user-ninja text-green-400 mt-1 mr-3"></i>
+                                <span>擅长伏击和机动战，出其不意</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-dna text-green-400 mt-1 mr-3"></i>
+                                <span>特殊能力：生命绽放、形态进化、适应性变异</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-6 border border-green-500/30">
+                        <h3 class="text-2xl font-semibold mb-4 text-green-400">哲学理念</h3>
+                        <p class="text-gray-300 leading-relaxed mb-4">
+                            螺旋之子相信变化是生命的本质。他们认为螺旋代表着成长、进化
+                            和无限的可能性。在这个种族眼中，没有永恒不变的形态，
+                            只有不断适应和进化的生命。
+                        </p>
+                        <p class="text-gray-300 leading-relaxed">
+                            "今天的弱小，是明天强大的开始。"
+                            —— 进化之母的箴言
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Buildings -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 spiral-text">核心建筑</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-green-500/30 hover:border-green-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative">
+                        <div class="spiral-path scale-75"></div>
+                        <i class="fas fa-heart absolute inset-0 flex items-center justify-center text-2xl text-green-300"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">生命核心</h3>
+                    <p class="text-gray-400 text-sm">主基地，会缓慢生长扩张</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-green-500/30 hover:border-green-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative">
+                        <div class="spiral-path scale-75"></div>
+                        <i class="fas fa-leaf absolute inset-0 flex items-center justify-center text-2xl text-green-300"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">螺旋花园</h3>
+                    <p class="text-gray-400 text-sm">产生和培育单位</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-green-500/30 hover:border-green-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative">
+                        <div class="spiral-path scale-75"></div>
+                        <i class="fas fa-dna absolute inset-0 flex items-center justify-center text-2xl text-green-300"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">进化腔室</h3>
+                    <p class="text-gray-400 text-sm">单位进化设施</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-6 text-center border border-green-500/30 hover:border-green-400 transition">
+                    <div class="w-24 h-24 mx-auto mb-4 relative">
+                        <div class="spiral-path scale-75"></div>
+                        <i class="fas fa-network-wired absolute inset-0 flex items-center justify-center text-2xl text-green-300"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">藤蔓网络</h3>
+                    <p class="text-gray-400 text-sm">提供视野和移动通道</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Tree -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 spiral-text">科技树</h2>
+            <div class="max-w-6xl mx-auto">
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-green-400">第一层科技</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30">
+                                <h4 class="font-semibold mb-2">快速生长</h4>
+                                <p class="text-gray-400 text-sm">单位训练速度+30%</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30">
+                                <h4 class="font-semibold mb-2">适应性</h4>
+                                <p class="text-gray-400 text-sm">单位根据环境获得增益</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-green-400">第二层科技</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30">
+                                <h4 class="font-semibold mb-2">生命绽放</h4>
+                                <p class="text-gray-400 text-sm">单位可以分裂繁殖</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30">
+                                <h4 class="font-semibold mb-2">形态记忆</h4>
+                                <p class="text-gray-400 text-sm">保留进化经验</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30">
+                                <h4 class="font-semibold mb-2">螺旋冲刺</h4>
+                                <p class="text-gray-400 text-sm">移动速度大幅提升</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-green-400">终极科技</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30 bg-gradient-to-r from-green-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">黄金螺旋</h4>
+                                <p class="text-gray-400 text-sm">终极进化形态</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30 bg-gradient-to-r from-green-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">无限分形</h4>
+                                <p class="text-gray-400 text-sm">召唤分身部队</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-4 border border-green-500/30 bg-gradient-to-r from-green-900/50 to-transparent">
+                                <h4 class="font-semibold mb-2">生命之树</h4>
+                                <p class="text-gray-400 text-sm">全局治疗与复活</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Units -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 spiral-text">单位设计</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-green-500/30 hover:border-green-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <div class="spiral-path scale-50"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">螺旋幼体</h3>
+                        <p class="text-gray-400 text-sm mb-2">基础单位</p>
+                        <p class="text-gray-300 text-sm">小型螺旋生物，随时间成长变强</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-green-500/30 hover:border-green-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <div class="relative">
+                            <div class="spiral-path scale-50"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-tree text-green-300 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">藤蔓爬行者</h3>
+                        <p class="text-gray-400 text-sm mb-2">地面单位</p>
+                        <p class="text-gray-300 text-sm">螺旋植物，可攀爬地形</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-green-500/30 hover:border-green-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <div class="spiral-path scale-50 growing-spiral"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">螺旋飞龙</h3>
+                        <p class="text-gray-400 text-sm mb-2">空中单位</p>
+                        <p class="text-gray-300 text-sm">双螺旋结构，可繁殖</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden border border-green-500/30 hover:border-green-400 transition">
+                    <div class="h-48 bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <div class="spiral-path scale-75"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">进化巨兽</h3>
+                        <p class="text-gray-400 text-sm mb-2">终极单位</p>
+                        <p class="text-gray-300 text-sm">从幼体进化，持续适应</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heroes -->
+    <section class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 spiral-text">英雄单位</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-green-500/30">
+                    <div class="h-64 bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="spiral-path scale-150"></div>
+                                <i class="fas fa-hand-holding-heart absolute inset-0 flex items-center justify-center text-4xl text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-green-400">生命编织者</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-heartbeat text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">生命绽放</p>
+                                    <p class="text-gray-400 text-sm">治疗友军单位</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-dna text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">进化引导</p>
+                                    <p class="text-gray-400 text-sm">加速单位进化</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-tree text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">生命之树（终极）</p>
+                                    <p class="text-gray-400 text-sm">范围持续治疗</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-green-500/30">
+                    <div class="h-64 bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="spiral-path scale-150"></div>
+                                <i class="fas fa-user-secret absolute inset-0 flex items-center justify-center text-4xl text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-green-400">形态猎手</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-wind text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">螺旋突袭</p>
+                                    <p class="text-gray-400 text-sm">快速突进攻击</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-clone text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">形态模仿</p>
+                                    <p class="text-gray-400 text-sm">复制敌人技能</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-tornado text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">混沌螺旋（终极）</p>
+                                    <p class="text-gray-400 text-sm">造成混乱效果</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700 rounded-lg overflow-hidden border border-green-500/30">
+                    <div class="h-64 bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-4 relative">
+                                <div class="spiral-path scale-150"></div>
+                                <i class="fas fa-eye absolute inset-0 flex items-center justify-center text-4xl text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-green-400">螺旋先知</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <i class="fas fa-brain text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">预见成长</p>
+                                    <p class="text-gray-400 text-sm">提前触发进化</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-users text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold">分形身躯</p>
+                                    <p class="text-gray-400 text-sm">创造分身协助</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-infinity text-green-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-yellow-400">无限螺旋（终极）</p>
+                                    <p class="text-gray-400 text-sm">召唤援军部队</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategies -->
+    <section class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 spiral-text">战术与策略</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 rounded-lg p-6 border border-green-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-green-400">成长培养</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 早期培养核心单位</li>
+                            <li>• 利用进化腔室升级</li>
+                            <li>• 保护成长的单位</li>
+                            <li>• 研究生命绽放科技</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-green-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-green-400">机动战术</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 利用建筑移动能力</li>
+                            <li>• 藤蔓网络快速机动</li>
+                            <li>• 伏击敌人薄弱点</li>
+                            <li>• 避免正面决战</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-6 border border-green-500/30">
+                        <h3 class="text-xl font-semibold mb-4 text-green-400">进化时机</h3>
+                        <ul class="space-y-2 text-gray-300">
+                            <li>• 把握关键进化节点</li>
+                            <li>• 适应敌人战术</li>
+                            <li>• 利用形态记忆优势</li>
+                            <li>• 发挥终极进化威力</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 spiral-text">几何境域</h3>
+                    <p class="text-gray-400">探索形态的无限可能</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-gray-400 hover:text-white transition">首页</a></li>
+                        <li><a href="../story/index.html" class="text-gray-400 hover:text-white transition">世界观</a></li>
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">种族阵营</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">连接我们</h3>
+                    <div class="flex space-x-4">
+                        <a href="https://github.com/VibeInAction/vibe-coding-project-shape" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
