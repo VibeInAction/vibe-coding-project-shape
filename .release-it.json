@@ -1,0 +1,5 @@
+{
+    "hooks": {
+        "after:bump": "git cliff --bump -o --tag=${version}"
+    }
+}
