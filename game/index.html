@@ -300,7 +300,17 @@
     <!-- 游戏模式选择界面 -->
     <div id="modeSelection" class="mode-selection">
         <div class="container mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center mb-12 text-white">选择游戏模式</h2>
+            <!-- Navigation -->
+            <div class="absolute top-4 left-4 right-4 flex justify-between items-center">
+                <a href="../index.html" class="text-gray-400 hover:text-white transition text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>返回首页
+                </a>
+                <a href="../terrain/index.html" class="text-yellow-400 hover:text-yellow-300 transition text-sm">
+                    <i class="fas fa-map mr-2"></i>查看地形图
+                </a>
+            </div>
+            
+            <h2 class="text-4xl font-bold text-center mb-12 text-white mt-16">选择游戏模式</h2>
             <div class="flex flex-wrap justify-center">
                 <!-- 征服模式 -->
                 <div class="mode-card" onclick="startGameMode('conquest')">

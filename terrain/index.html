@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地形图索引 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .terrain-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .terrain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .terrain-preview {
+            transition: all 0.3s ease;
+        }
+        
+        .terrain-card:hover .terrain-preview {
+            transform: scale(1.05);
+        }
+        
+        .category-badge {
+            transition: all 0.2s ease;
+        }
+        
+        .category-badge:hover {
+            transform: scale(1.1);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-900/90 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🗺️</span>
+                    <h1 class="text-xl font-bold text-gray-100">几何境域地形图索引</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-300 hover:text-gray-100 transition">返回首页</a>
+                    <a href="../game/index.html" class="text-gray-300 hover:text-gray-100 transition">游戏体验</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4">世界地形图集</h1>
+            <p class="text-xl text-gray-600 mb-6">探索几何境域的壮丽地形，了解各区域的战略价值</p>
+            
+            <!-- Statistics -->
+            <div class="flex justify-center items-center space-x-8">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-green-600 mb-1">5</div>
+                    <div class="text-sm text-gray-600">主要城市</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-blue-600 mb-1">100%</div>
+                    <div class="text-sm text-gray-600">完成度</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-purple-600 mb-1">4</div>
+                    <div class="text-sm text-gray-600">种族领地</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Categories -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-white rounded-full shadow-lg p-2 flex space-x-2">
+                <button onclick="filterCategory('all')" class="category-badge px-6 py-2 rounded-full bg-gray-900 text-white font-medium">
+                    全部地形
+                </button>
+                <button onclick="filterCategory('capital')" class="category-badge px-6 py-2 rounded-full hover:bg-gray-100 text-gray-700 font-medium">
+                    主要城市
+                </button>
+                <button onclick="filterCategory('terrain')" class="category-badge px-6 py-2 rounded-full hover:bg-gray-100 text-gray-700 font-medium">
+                    地形特点
+                </button>
+                <button onclick="filterCategory('race')" class="category-badge px-6 py-2 rounded-full hover:bg-gray-100 text-gray-700 font-medium">
+                    种族优势
+                </button>
+                <button onclick="filterCategory('battle')" class="category-badge px-6 py-2 rounded-full hover:bg-gray-100 text-gray-700 font-medium">
+                    战斗地图
+                </button>
+            </div>
+        </div>
+
+        <!-- Terrain Maps Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Central Ring City -->
+            <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="capital race">
+                <div class="relative h-48 bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="rotate-slow">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="20" fill="rgba(255,255,255,0.5)"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                            🟢 圆形优势
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">中央圆环城</h3>
+                    <p class="text-gray-600 mb-4">同心圆环设计，静默圆湖为中心，能量回廊连接各区</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">地形复杂度</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">战略价值</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">水域地形</span>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">能量节点</span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">回廊系统</span>
+                    </div>
+                    
+                    <a href="central-ring-city.html" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-medium transition">
+                        查看详情
+                    </a>
+                </div>
+            </div>
+
+            <!-- Triangle Spires -->
+            <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="capital terrain">
+                <div class="relative h-48 bg-gradient-to-br from-red-400 to-orange-600 overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="float-animation">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <polygon points="100,50 150,150 50,150" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                                <polygon points="100,70 130,130 70,130" fill="rgba(255,255,255,0.2)"/>
+                                <line x1="100" y1="150" x2="100" y2="180" stroke="rgba(255,255,255,0.5)" stroke-width="3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                            🔺 三角优势
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">三角尖塔</h3>
+                    <p class="text-gray-600 mb-4">晶格山脉地形，三角形尖塔林立，能量桥梁纵横交错</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">地形复杂度</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">防御能力</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs">山地地形</span>
+                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">军事设施</span>
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">能量桥梁</span>
+                    </div>
+                    
+                    <a href="triangle-spires.html" class="block w-full bg-red-600 hover:bg-red-700 text-white text-center py-3 rounded-lg font-medium transition">
+                        查看详情
+                    </a>
+                </div>
+            </div>
+
+            <!-- Matrix City -->
+            <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="capital terrain">
+                <div class="relative h-48 bg-gradient-to-br from-indigo-400 to-purple-600 overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <svg width="200" height="200" viewBox="0 0 200 200">
+                            <defs>
+                                <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <rect x="0" y="0" width="40" height="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                                </pattern>
+                            </defs>
+                            <rect width="200" height="200" fill="url(#grid)"/>
+                            <rect x="60" y="60" width="80" height="80" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                            🟦 方形优势
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">矩阵之都</h3>
+                    <p class="text-gray-600 mb-4">平原网格地形，立方体模块化建筑，浮空平台遍布</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">科技水平</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">扩展能力</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs">平原地形</span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">科技设施</span>
+                        <span class="bg-cyan-100 text-cyan-700 px-3 py-1 rounded-full text-xs">浮空平台</span>
+                    </div>
+                    
+                    <a href="matrix-city.html" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-3 rounded-lg font-medium transition">
+                        查看详情
+                    </a>
+                </div>
+            </div>
+
+            <!-- Life Spiral City -->
+            <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="capital race">
+                <div class="relative h-48 bg-gradient-to-br from-green-400 to-emerald-600 overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <svg width="200" height="200" viewBox="0 0 200 200">
+                            <path d="M 100 100 m -80 0 a 80 80 0 1 1 160 0 a 70 70 0 1 1 -140 0 a 60 60 0 1 1 120 0 a 50 50 0 1 1 -100 0 a 40 40 0 1 1 80 0" 
+                                  fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3"/>
+                            <circle cx="100" cy="100" r="20" fill="rgba(255,255,255,0.6)"/>
+                        </svg>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                            🟢 圆形优势
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">生命螺旋城</h3>
+                    <p class="text-gray-600 mb-4">螺旋林海地形，生命花园散布，藤蔓网络连接各地</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">生命能量</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">恢复能力</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">森林地形</span>
+                        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs">生命花园</span>
+                        <span class="bg-lime-100 text-lime-700 px-3 py-1 rounded-full text-xs">藤蔓网络</span>
+                    </div>
+                    
+                    <a href="life-spiral-city.html" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 rounded-lg font-medium transition">
+                        查看详情
+                    </a>
+                </div>
+            </div>
+
+            <!-- Source Core -->
+            <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="capital terrain race">
+                <div class="relative h-48 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="pulse-glow">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <defs>
+                                    <radialGradient id="coreGrad">
+                                        <stop offset="0%" style="stop-color:rgba(255,255,255,0.8)"/>
+                                        <stop offset="100%" style="stop-color:rgba(255,255,255,0.2)"/>
+                                    </radialGradient>
+                                </defs>
+                                <circle cx="100" cy="100" r="60" fill="url(#coreGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="3"/>
+                                <circle cx="100" cy="100" r="40" fill="rgba(255,255,255,0.6)"/>
+                                <circle cx="100" cy="100" r="20" fill="rgba(255,255,255,0.8)"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                            🌟 争夺中
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">源初形核</h3>
+                    <p class="text-gray-600 mb-4">世界起源之地，混沌裂隙环绕，四族势力交界</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">能量强度</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">危险程度</span>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">混沌裂隙</span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">形态涡流</span>
+                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">能量核心</span>
+                    </div>
+                    
+                    <a href="source-core.html" class="block w-full bg-gradient-to-r from-yellow-600 to-red-600 hover:from-yellow-700 hover:to-red-700 text-white text-center py-3 rounded-lg font-medium transition">
+                        查看详情
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Battle Maps Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">战斗地图</h2>
+            <p class="text-center text-gray-600 mb-8">专为对战略战的战斗地图，包含出生点、资源分布和战略要素</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Central Ring City Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-blue-400 to-green-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="20" fill="rgba(255,255,255,0.2)"/>
+                                <rect x="90" y="20" width="20" height="20" fill="rgba(239,68,68,0.8)" rx="2"/>
+                                <rect x="90" y="160" width="20" height="20" fill="rgba(59,130,246,0.8)" rx="2"/>
+                                <rect x="20" y="90" width="20" height="20" fill="rgba(16,185,129,0.8)" rx="2"/>
+                                <rect x="160" y="90" width="20" height="20" fill="rgba(245,158,11,0.8)" rx="2"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">中央圆环城战场</h3>
+                        <p class="text-gray-600 mb-4">环形水域地形，同心圆结构，能量回廊连接</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">中型 (1000x800)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">水域地形</span>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">环形结构</span>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">能量回廊</span>
+                        </div>
+                        
+                        <a href="central-ring-city-battle.html" class="block w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Triangle Spires Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-red-400 to-yellow-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <polygon points="100,40 60,120 140,120" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                                <polygon points="100,60 80,100 120,100" fill="rgba(255,255,255,0.2)"/>
+                                <rect x="90" y="120" width="20" height="40" fill="rgba(96,165,250,0.6)"/>
+                                <rect x="40" y="140" width="20" height="30" fill="rgba(96,165,250,0.6)"/>
+                                <rect x="140" y="140" width="20" height="30" fill="rgba(96,165,250,0.6)"/>
+                                <path d="M 60,140 Q 100,120 140,140" stroke="rgba(139,92,246,0.8)" stroke-width="3" fill="none" stroke-dasharray="5,3"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">三角尖塔战场</h3>
+                        <p class="text-gray-600 mb-4">多级山地地形，晶格山脉阻隔，能量桥梁连接</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">中型 (1000x800)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs">山地地形</span>
+                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">制高点</span>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">晶格障碍</span>
+                        </div>
+                        
+                        <a href="triangle-spires-battle.html" class="block w-full bg-gradient-to-r from-red-600 to-yellow-600 hover:from-red-700 hover:to-yellow-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Matrix City Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-indigo-400 to-purple-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <rect x="20" y="20" width="160" height="160" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" rx="10"/>
+                                <rect x="40" y="40" width="40" height="40" fill="rgba(99,102,241,0.6)" rx="5"/>
+                                <rect x="90" y="40" width="40" height="40" fill="rgba(99,102,241,0.6)" rx="5"/>
+                                <rect x="140" y="40" width="40" height="40" fill="rgba(99,102,241,0.6)" rx="5"/>
+                                <rect x="40" y="90" width="40" height="40" fill="rgba(139,92,246,0.6)" rx="5"/>
+                                <rect x="90" y="90" width="40" height="40" fill="rgba(236,72,153,0.6)" rx="5"/>
+                                <rect x="140" y="90" width="40" height="40" fill="rgba(139,92,246,0.6)" rx="5"/>
+                                <rect x="40" y="140" width="40" height="40" fill="rgba(34,197,94,0.6)" rx="5"/>
+                                <rect x="90" y="140" width="40" height="40" fill="rgba(34,197,94,0.6)" rx="5"/>
+                                <rect x="140" y="140" width="40" height="40" fill="rgba(34,197,94,0.6)" rx="5"/>
+                                <rect x="85" y="85" width="30" height="30" fill="rgba(167,139,250,0.8)" rx="5"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">矩阵之都战场</h3>
+                        <p class="text-gray-600 mb-4">规则网格布局，模块化建筑，浮空平台系统</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">大型 (1200x900)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs">网格地形</span>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">浮空平台</span>
+                            <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs">空间桥</span>
+                        </div>
+                        
+                        <a href="matrix-city-battle.html" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Life Spiral City Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-green-400 to-emerald-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <path d="M 100,50 Q 150,100 100,150 T 50,100 Q 100,50 150,100" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="30" stroke-linecap="round"/>
+                                <circle cx="100" cy="100" r="25" fill="rgba(16,185,129,0.6)"/>
+                                <circle cx="70" cy="70" r="15" fill="rgba(34,197,94,0.6)"/>
+                                <circle cx="130" cy="70" r="15" fill="rgba(34,197,94,0.6)"/>
+                                <circle cx="70" cy="130" r="15" fill="rgba(34,197,94,0.6)"/>
+                                <circle cx="130" cy="130" r="15" fill="rgba(34,197,94,0.6)"/>
+                                <path d="M 70,70 L 130,130" stroke="rgba(16,185,129,0.6)" stroke-width="3"/>
+                                <path d="M 130,70 L 70,130" stroke="rgba(16,185,129,0.6)" stroke-width="3"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">生命螺旋城战场</h3>
+                        <p class="text-gray-600 mb-4">螺旋林海地形，生命花园治疗区，藤蔓网络通道</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">中型 (1000x800)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">螺旋森林</span>
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs">生命花园</span>
+                            <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs">藤蔓网络</span>
+                        </div>
+                        
+                        <a href="life-spiral-city-battle.html" class="block w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Source Core Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-yellow-400 to-red-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                                <circle cx="100" cy="100" r="50" fill="rgba(251,191,36,0.6)"/>
+                                <circle cx="100" cy="100" r="30" fill="rgba(254,243,199,0.8)"/>
+                                <circle cx="70" cy="70" r="15" fill="rgba(124,58,237,0.6)"/>
+                                <circle cx="130" cy="70" r="15" fill="rgba(124,58,237,0.6)"/>
+                                <circle cx="70" cy="130" r="15" fill="rgba(124,58,237,0.6)"/>
+                                <circle cx="130" cy="130" r="15" fill="rgba(124,58,237,0.6)"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">源初形核战场</h3>
+                        <p class="text-gray-600 mb-4">混沌裂隙环绕，源初核心居中，危险与机遇并存</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">大型 (1200x900)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">源初核心</span>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">混沌裂隙</span>
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">危险区域</span>
+                        </div>
+                        
+                        <a href="source-core-battle.html" class="block w-full bg-gradient-to-r from-yellow-600 to-red-600 hover:from-yellow-700 hover:to-red-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Special Terrain Battle -->
+                <div class="terrain-card bg-white rounded-2xl shadow-xl overflow-hidden" data-category="battle">
+                    <div class="relative h-48 bg-gradient-to-br from-purple-400 to-pink-600 overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <rect x="50" y="50" width="100" height="40" fill="rgba(147,51,234,0.6)" rx="20"/>
+                                <rect x="50" y="110" width="40" height="40" fill="rgba(34,197,94,0.6)" rx="10"/>
+                                <rect x="110" y="110" width="40" height="40" fill="rgba(99,102,241,0.6)" rx="10"/>
+                                <circle cx="100" cy="70" r="15" fill="rgba(168,85,247,0.8)"/>
+                                <circle cx="70" cy="130" r="12" fill="rgba(139,92,246,0.8)"/>
+                                <circle cx="130" cy="130" r="12" fill="rgba(139,92,246,0.8)"/>
+                            </svg>
+                        </div>
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                ⚔️ 战斗地图
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">特殊地形战场</h3>
+                        <p class="text-gray-600 mb-4">几何风暴峡谷，形态试验场，时间裂隙，动态变化地形</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">地图大小</span>
+                                <span class="text-gray-700">动态变化</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">最大玩家</span>
+                                <span class="text-gray-700">2-4人</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs">动态地形</span>
+                            <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs">随机传送</span>
+                            <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs">时间效应</span>
+                        </div>
+                        
+                        <a href="special-terrain-battle.html" class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-center py-3 rounded-lg font-medium transition">
+                            查看战场
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Race Advantage Overview -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">种族地形优势总览</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">
+                        🟢
+                    </div>
+                    <h3 class="font-bold text-green-700 mb-2">圆形种族</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 水域地形机动性 +40%</li>
+                        <li>• 生命花园效果 +50%</li>
+                        <li>• 中央圆环城主场优势</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-red-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">
+                        🔺
+                    </div>
+                    <h3 class="font-bold text-red-700 mb-2">三角种族</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 山地防御 +30%</li>
+                        <li>• 高地攻击 +25%</li>
+                        <li>• 三角尖塔主场优势</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">
+                        🟦
+                    </div>
+                    <h3 class="font-bold text-blue-700 mb-2">方形种族</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 平原建造速度 +50%</li>
+                        <li>• 科技设施效率 +40%</li>
+                        <li>• 矩阵之都主场优势</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl">
+                        💎
+                    </div>
+                    <h3 class="font-bold text-purple-700 mb-2">菱形种族</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 混沌地形适应 +60%</li>
+                        <li>• 能量节点控制 +40%</li>
+                        <li>• 生命螺旋城加成</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
+            <h2 class="text-3xl font-bold mb-4">开始探索</h2>
+            <p class="text-lg mb-6">选择一个城市深入了解其地形特点，或进入游戏体验地形对战</p>
+            <div class="flex justify-center space-x-4">
+                <a href="../game/index.html" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
+                    🎮 开始游戏
+                </a>
+                <a href="../story/world-building.html" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition">
+                    📖 世界观
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2024 几何境域：形态之战 - 地形图系统</p>
+            <p class="text-sm mt-2">基于几何世界观构建的战略地形系统</p>
+        </div>
+    </footer>
+
+    <script>
+        // Filter functionality
+        function filterCategory(category) {
+            const cards = document.querySelectorAll('.terrain-card');
+            const buttons = document.querySelectorAll('.category-badge');
+            
+            // Update button states
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(getCategoryName(category))) {
+                    btn.classList.add('bg-gray-900', 'text-white');
+                    btn.classList.remove('hover:bg-gray-100', 'text-gray-700');
+                } else {
+                    btn.classList.remove('bg-gray-900', 'text-white');
+                    btn.classList.add('hover:bg-gray-100', 'text-gray-700');
+                }
+            });
+            
+            // Filter cards
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category').includes(category)) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+        
+        function getCategoryName(category) {
+            const names = {
+                'all': '全部地形',
+                'capital': '主要城市',
+                'terrain': '特殊地形',
+                'race': '种族优势',
+                'battle': '战斗地图'
+            };
+            return names[category] || '全部地形';
+        }
+        
+        // Add entrance animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.terrain-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

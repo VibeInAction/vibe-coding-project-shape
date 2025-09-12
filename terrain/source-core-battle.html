@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>源初形核战场 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes core-pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: brightness(1) blur(0px);
+            }
+            50% { 
+                transform: scale(1.1); 
+                filter: brightness(1.5) blur(2px);
+            }
+        }
+        
+        @keyframes chaos-flow {
+            0% { stroke-dashoffset: 0; opacity: 0.8; }
+            50% { stroke-dashoffset: -50; opacity: 1; }
+            100% { stroke-dashoffset: -100; opacity: 0.8; }
+        }
+        
+        @keyforms morph-vortex {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        @keyforms energy-surge {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyforms rift-appear {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+        
+        .core-pulse { animation: core-pulse 3s ease-in-out infinite; }
+        .chaos-flow { animation: chaos-flow 4s linear infinite; }
+        .morph-vortex { animation: morph-vortex 20s linear infinite; }
+        .energy-surge { animation: energy-surge 2s ease-in-out infinite; }
+        .rift-appear { animation: rift-appear 8s ease-in-out infinite; }
+        
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip-trigger:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .danger-zone {
+            transition: all 0.3s ease;
+        }
+        
+        .danger-zone:hover {
+            fill-opacity: 0.8;
+        }
+        
+        .territory-area {
+            transition: all 0.3s ease;
+        }
+        
+        .territory-area:hover {
+            stroke-width: 3;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-yellow-900 via-orange-900 to-red-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题区域 -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-red-400 bg-clip-text text-transparent">
+                源初形核战场
+            </h1>
+            <p class="text-xl text-gray-300">混沌裂隙 · 形态涡流 · 终极核心</p>
+            <div class="mt-4 flex justify-center gap-4 text-sm">
+                <span class="bg-yellow-600 px-3 py-1 rounded-full">2-4 玩家</span>
+                <span class="bg-orange-600 px-3 py-1 rounded-full">大型地图</span>
+                <span class="bg-red-600 px-3 py-1 rounded-full">危险地形</span>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- 主地图区域 -->
+            <div class="lg:col-span-3">
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+                    <div class="relative">
+                        <svg viewBox="0 0 1200 900" class="w-full h-auto">
+                            <!-- 定义 -->
+                            <defs>
+                                <radialGradient id="coreGrad">
+                                    <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.6" />
+                                </radialGradient>
+                                <radialGradient id="chaosGrad">
+                                    <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#5b21b6;stop-opacity:0.3" />
+                                </radialGradient>
+                                <radialGradient id="safeGrad">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:0.1" />
+                                </radialGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                                <pattern id="chaosPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                                            <circle cx="20" cy="20" r="2" fill="#7c3aed" opacity="0.5"/>
+                                        </pattern>
+                            </defs>
+
+                            <!-- 背景 -->
+                            <rect width="1200" height="900" fill="#78350f" opacity="0.8"/>
+                            
+                            <!-- 四大种族领土 -->
+                            <g class="race-territories">
+                                <!-- 圆环族领土（左上） -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <path d="M 0,0 L 600,0 L 300,450 Z" fill="safeGrad" 
+                                          stroke="#10b981" stroke-width="2" class="territory-area"/>
+                                            <text x="200" y="150" text-anchor="middle" fill="#86efac" font-size="16" font-weight="bold">圆环族领地</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="220" y="130" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="230" y="150" fill="#f3f4f6">圆环族安全区</text>
+                                                <text x="230" y="165" fill="#10b981">保护效果 +30%</text>
+                                                <text x="230" y="180" fill="#3b82f6">靠近核心有加成</text>
+                                            </g>
+                                        </g>
+                                
+                                <!-- 三角议会领土（右上） -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <path d="M 600,0 L 1200,0 L 900,450 Z" fill="safeGrad" 
+                                          stroke="#ef4444" stroke-width="2" class="territory-area"/>
+                                            <text x="900" y="150" text-anchor="middle" fill="#fecaca" font-size="16" font-weight="bold">三角议会领地</text>
+                                        </g>
+                                
+                                <!-- 方碑盟约领土（左下） -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <path d="M 0,900 L 600,900 L 300,450 Z" fill="safeGrad" 
+                                          stroke="#3b82f6" stroke-width="2" class="territory-area"/>
+                                            <text x="200" y="750" text-anchor="middle" fill="#dbeafe" font-size="16" font-weight="bold">方碑盟约领地</text>
+                                        </g>
+                                
+                                <!-- 螺旋之子领土（右下） -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <path d="M 600,900 L 1200,900 L 900,450 Z" fill="safeGrad" 
+                                          stroke="#8b5cf6" stroke-width="2" class="territory-area"/>
+                                            <text x="900" y="750" text-anchor="middle" fill="#e9d5ff" font-size="16" font-weight="bold">螺旋之子领地</text>
+                                        </g>
+                            </g>
+
+                            <!-- 混沌裂隙区域 -->
+                            <g class="chaos-rifts">
+                                <!-- 主裂隙环 -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <circle cx="600" cy="450" r="250" fill="none" stroke="url(#chaosGrad)" 
+                                                  stroke-width="60" stroke-dasharray="50,30" class="chaos-flow"/>
+                                            <text x="600" y="200" text-anchor="middle" fill="#c4b5fd" font-size="14" font-weight="bold">混沌裂隙带</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="620" y="180" width="140" height="80" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="630" y="200" fill="#f3f4f6">混沌裂隙</text>
+                                                <text x="630" y="215" fill="#ef4444">持续伤害区域</text>
+                                                <text x="630" y="230" fill="#fbbf24">高风险高回报</text>
+                                                <text x="630" y="245" fill="#9ca3af">随机出现</text>
+                                            </g>
+                                        </g>
+                                
+                                <!-- 次要裂隙 -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="300" cy="300" rx="80" ry="60" fill="#7c3aed" opacity="0.4" 
+                                                  class="rift-appear danger-zone"/>
+                                            <text x="300" y="305" text-anchor="middle" fill="#ddd6fe" font-size="10">次裂隙</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="900" cy="300" rx="80" ry="60" fill="#7c3aed" opacity="0.4" 
+                                                  class="rift-appear danger-zone"/>
+                                            <text x="900" y="305" text-anchor="middle" fill="#ddd6fe" font-size="10">次裂隙</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="300" cy="600" rx="80" ry="60" fill="#7c3aed" opacity="0.4" 
+                                                  class="rift-appear danger-zone"/>
+                                            <text x="300" y="605" text-anchor="middle" fill="#ddd6fe" font-size="10">次裂隙</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="900" cy="600" rx="80" ry="60" fill="#7c3aed" opacity="0.4" 
+                                                  class="rift-appear danger-zone"/>
+                                            <text x="900" y="605" text-anchor="middle" fill="#ddd6fe" font-size="10">次裂隙</text>
+                                        </g>
+                            </g>
+
+                            <!-- 源初核心 -->
+                            <g class="source-core">
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(600,450)">
+                                    <!-- 外层能量环 -->
+                                    <circle r="120" fill="none" stroke="#fbbf24" stroke-width="3" 
+                                          stroke-dasharray="10,5" class="energy-surge" filter="url(#glow)"/>
+                                    <!-- 中层核心 -->
+                                    <circle r="80" fill="url(#coreGrad)" filter="url(#glow)" class="core-pulse"/>
+                                    <!-- 内层核心 -->
+                                            <circle r="50" fill="#fef3c7" filter="url(#glow)"/>
+                                            <!-- 能量纹路 -->
+                                            <g class="morph-vortex">
+                                                <path d="M 0,-40 L 30,-20 L 20,20 L -20,20 L -30,-20 Z" 
+                                                      fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.8"/>
+                                                <path d="M 0,-25 L 20,-10 L 10,15 L -10,15 L -20,-10 Z" 
+                                                      fill="none" stroke="#fbbf24" stroke-width="2"/>
+                                            </g>
+                                            <text y="5" text-anchor="middle" fill="#78350f" font-size="14" font-weight="bold">源初核心</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="65" y="-20" width="160" height="100" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="75" y="0" fill="#f3f4f6">源初形核</text>
+                                                <text x="75" y="15" fill="#fbbf24">终极目标</text>
+                                                <text x="75" y="30" fill="#ef4444">控制获胜</text>
+                                                <text x="75" y="45" fill="#10b981">所有资源 +100%</text>
+                                                <text x="75" y="60" fill="#9ca3af">但持续受到伤害</text>
+                                                <text x="75" y="75" fill="#f59e0b">需要强力保护</text>
+                                            </g>
+                                        </g>
+                                    </g>
+
+                            <!-- 形态涡流场 -->
+                            <g class="morph-vortex-fields">
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(450,450)">
+                                            <g class="morph-vortex">
+                                                <circle r="60" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.6"/>
+                                                <circle r="40" fill="none" stroke="#c4b5fd" stroke-width="2" opacity="0.6"/>
+                                                <circle r="20" fill="none" stroke="#ddd6fe" stroke-width="2" opacity="0.6"/>
+                                            </g>
+                                            <text y="80" text-anchor="middle" fill="#e9d5ff" font-size="10">形态涡流</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="70" y="40" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="80" y="60" fill="#f3f4f6">形态涡流场</text>
+                                                <text x="80" y="75" fill="#a78bfa">随机变形效果</text>
+                                                <text x="80" y="90" fill="#9ca3af">单位属性变化</text>
+                                            </g>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(750,450)">
+                                            <g class="morph-vortex">
+                                                <circle r="60" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.6"/>
+                                                <circle r="40" fill="none" stroke="#c4b5fd" stroke-width="2" opacity="0.6"/>
+                                                <circle r="20" fill="none" stroke="#ddd6fe" stroke-width="2" opacity="0.6"/>
+                                            </g>
+                                            <text y="80" text-anchor="middle" fill="#e9d5ff" font-size="10">形态涡流</text>
+                                        </g>
+                            </g>
+
+                            <!-- 能量风暴区域 -->
+                            <g class="energy-storms">
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="150" cy="450" rx="100" ry="80" fill="#f59e0b" opacity="0.3" 
+                                                  class="energy-surge danger-zone"/>
+                                            <text x="150" y="455" text-anchor="middle" fill="#fed7aa" font-size="12" font-weight="bold">能量风暴</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="165" y="435" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="175" y="455" fill="#f3f4f6">能量风暴</text>
+                                                <text x="175" y="470" fill="#ef4444">周期性伤害</text>
+                                                <text x="175" y="485" fill="#fbbf24">移动干扰</text>
+                                            </g>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                            <ellipse cx="1050" cy="450" rx="100" ry="80" fill="#f59e0b" opacity="0.3" 
+                                                  class="energy-surge danger-zone"/>
+                                            <text x="1050" y="455" text-anchor="middle" fill="#fed7aa" font-size="12" font-weight="bold">能量风暴</text>
+                                        </g>
+                            </g>
+
+                            <!-- 资源点 -->
+                            <g class="resources">
+                                <!-- 危险区域高回报资源 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(400,350)">
+                                            <rect x="-20" y="-20" width="40" height="40" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" 
+                                                  rx="5" filter="url(#glow)"/>
+                                            <text y="5" text-anchor="middle" fill="#78350f" font-size="10" font-weight="bold">高收益</text>
+                                            <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                                <rect x="25" y="-20" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                                <text x="35" y="0" fill="#f3f4f6">危险资源点</text>
+                                                <text x="35" y="15" fill="#fbbf24">+5 形魄/秒</text>
+                                                <text x="35" y="30" fill="#10b981">+2 纯净/秒</text>
+                                                <text x="35" y="45" fill="#ef4444">但在伤害区</text>
+                                            </g>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(800,350)">
+                                            <rect x="-20" y="-20" width="40" height="40" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" 
+                                                  rx="5" filter="url(#glow)"/>
+                                            <text y="5" text-anchor="middle" fill="#78350f" font-size="10" font-weight="bold">高收益</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(400,550)">
+                                            <rect x="-20" y="-20" width="40" height="40" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" 
+                                                  rx="5" filter="url(#glow)"/>
+                                            <text y="5" text-anchor="middle" fill="#78350f" font-size="10" font-weight="bold">高收益</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(800,550)">
+                                            <rect x="-20" y="-20" width="40" height="40" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" 
+                                                  rx="5" filter="url(#glow)"/>
+                                            <text y="5" text-anchor="middle" fill="#78350f" font-size="10" font-weight="bold">高收益</text>
+                                        </g>
+                                
+                                <!-- 边缘安全资源 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(150,150)">
+                                            <circle r="15" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">安全</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(1050,150)">
+                                            <circle r="15" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">安全</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(150,750)">
+                                            <circle r="15" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">安全</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(1050,750)">
+                                            <circle r="15" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">安全</text>
+                                        </g>
+                            </g>
+
+                            <!-- 出生点 -->
+                            <g class="spawn-points">
+                                <!-- 玩家1出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(150,300)">
+                                            <rect x="-40" y="-40" width="80" height="80" fill="#10b981" fill-opacity="0.5" 
+                                                  stroke="#10b981" stroke-width="3" rx="10" stroke-dasharray="5,5"/>
+                                            <text y="5" text-anchor="middle" fill="#d1fae5" font-size="16" font-weight="bold">P1</text>
+                                            <text y="-50" text-anchor="middle" fill="#10b981" font-size="12">出生点</text>
+                                        </g>
+                                
+                                <!-- 玩家2出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(1050,300)">
+                                            <rect x="-40" y="-40" width="80" height="80" fill="#ef4444" fill-opacity="0.5" 
+                                                  stroke="#ef4444" stroke-width="3" rx="10" stroke-dasharray="5,5"/>
+                                            <text y="5" text-anchor="middle" fill="#fecaca" font-size="16" font-weight="bold">P2</text>
+                                            <text y="-50" text-anchor="middle" fill="#ef4444" font-size="12">出生点</text>
+                                        </g>
+                                
+                                <!-- 玩家3-4出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(150,600)">
+                                            <rect x="-35" y="-35" width="70" height="70" fill="#3b82f6" fill-opacity="0.5" 
+                                                  stroke="#3b82f6" stroke-width="2" rx="10" stroke-dasharray="5,5"/>
+                                            <text y="5" text-anchor="middle" fill="#dbeafe" font-size="14" font-weight="bold">P3</text>
+                                        </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(1050,600)">
+                                            <rect x="-35" y="-35" width="70" height="70" fill="#8b5cf6" fill-opacity="0.5" 
+                                                  stroke="#8b5cf6" stroke-width="2" rx="10" stroke-dasharray="5,5"/>
+                                            <text y="5" text-anchor="middle" fill="#e9d5ff" font-size="14" font-weight="bold">P4</text>
+                                        </g>
+                            </g>
+
+                            <!-- 中立商店 -->
+                            <g class="tooltip-trigger cursor-pointer" transform="translate(600,300)">
+                                        <polygon points="0,-30 26,15 -26,15" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" filter="url(#glow)"/>
+                                        <text y="35" text-anchor="middle" fill="#fef3c7" font-size="12" font-weight="bold">核心商店</text>
+                                        <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                            <rect x="35" y="-30" width="140" height="80" fill="#1f2937" stroke="#374151" rx="4"/>
+                                            <text x="45" y="-10" fill="#f3f4f6">源初核心商店</text>
+                                            <text x="45" y="5" fill="#9ca3af">特殊商品</text>
+                                            <text x="45" y="20" fill="#fbbf24">核心增强</text>
+                                            <text x="45" y="35" fill="#10b981">混沌防护</text>
+                                        </g>
+                                    </g>
+
+                            <!-- 胜利条件指示器 -->
+                            <g class="victory-indicators" opacity="0.8">
+                                <text x="600" y="50" text-anchor="middle" fill="#fbbf24" font-size="18" font-weight="bold">
+                                    胜利条件：控制源初核心 60 秒
+                                </text>
+                            </g>
+
+                            <!-- 动态危险系统指示 -->
+                            <g class="danger-system-indicators" opacity="0.6">
+                                <g transform="translate(100,50)">
+                                    <rect x="-30" y="-15" width="60" height="30" fill="#ef4444" rx="5"/>
+                                    <text y="5" text-anchor="middle" fill="#fecaca" font-size="10">危险区</text>
+                                </g>
+                                <g transform="translate(1100,50)">
+                                    <rect x="-30" y="-15" width="60" height="30" fill="#f59e0b" rx="5"/>
+                                    <text y="5" text-anchor="middle" fill="#fed7aa" font-size="10">风暴区</text>
+                                </g>
+                            </g>
+                        </svg>
+
+                        <!-- 地图图例 -->
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                <span>源初核心（胜利条件）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-purple-600 rounded opacity-60"></div>
+                                <span>混沌裂隙（伤害区）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-orange-500 rounded opacity-50"></div>
+                                <span>能量风暴（周期伤害）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-violet-500 rounded-full opacity-60"></div>
+                                <span>形态涡流（随机效果）</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="space-y-6">
+                <!-- 小地图 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">小地图</h3>
+                    <div class="relative bg-gray-900 rounded-lg" style="padding-bottom: 75%;">
+                        <svg class="absolute inset-0 w-full h-full rounded-lg" viewBox="0 0 1200 900">
+                            <!-- 领土划分 -->
+                            <path d="M 0,0 L 600,0 L 300,450 Z" fill="#10b981" opacity="0.3"/>
+                            <path d="M 600,0 L 1200,0 L 900,450 Z" fill="#ef4444" opacity="0.3"/>
+                            <path d="M 0,900 L 600,900 L 300,450 Z" fill="#3b82f6" opacity="0.3"/>
+                            <path d="M 600,900 L 1200,900 L 900,450 Z" fill="#8b5cf6" opacity="0.3"/>
+                            
+                            <!-- 混沌裂隙 -->
+                            <circle cx="600" cy="450" r="200" fill="none" stroke="#7c3aed" stroke-width="20" opacity="0.6"/>
+                            
+                            <!-- 源初核心 -->
+                            <circle cx="600" cy="450" r="60" fill="#fbbf24" class="minimap-point"/>
+                            
+                            <!-- 高收益资源 -->
+                            <rect x="380" y="330" width="40" height="40" fill="#fbbf24" class="minimap-point"/>
+                            <rect x="780" y="330" width="40" height="40" fill="#fbbf24" class="minimap-point"/>
+                            <rect x="380" y="530" width="40" height="40" fill="#fbbf24" class="minimap-point"/>
+                            <rect x="780" y="530" width="40" height="40" fill="#fbbf24" class="minimap-point"/>
+                            
+                            <!-- 安全资源 -->
+                            <circle cx="150" cy="150" r="10" fill="#10b981" class="minimap-point"/>
+                            <circle cx="1050" cy="150" r="10" fill="#10b981" class="minimap-point"/>
+                            <circle cx="150" cy="750" r="10" fill="#10b981" class="minimap-point"/>
+                            <circle cx="1050" cy="750" r="10" fill="#10b981" class="minimap-point"/>
+                            
+                            <!-- 出生点 -->
+                            <rect x="110" y="260" width="80" height="80" fill="#10b981" class="minimap-point"/>
+                            <rect x="1010" y="260" width="80" height="80" fill="#ef4444" class="minimap-point"/>
+                            <rect x="115" y="565" width="70" height="70" fill="#3b82f6" class="minimap-point"/>
+                            <rect x="1015" y="565" width="70" height="70" fill="#8b5cf6" class="minimap-point"/>
+                            
+                            <!-- 当前视图框 -->
+                            <rect x="100" y="50" width="1000" height="800" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 地图信息 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">地图信息</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">地图大小</span>
+                            <span>1200x900</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">最大玩家</span>
+                            <span>4人</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">地形类型</span>
+                            <span>混沌核心</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">资源点</span>
+                            <span>8个</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">危险区域</span>
+                            <span>60%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 胜利条件 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">胜利条件</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-2 bg-yellow-900/30 rounded">
+                            <span class="text-yellow-400 font-semibold">控制源初核心</span>
+                            <p class="text-gray-300 text-xs mt-1">持续控制60秒获胜</p>
+                        </div>
+                        <div class="p-2 bg-red-900/30 rounded">
+                            <span class="text-red-400 font-semibold">消灭所有敌人</span>
+                            <p class="text-gray-300 text-xs mt-1">传统胜利方式</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 种族优势 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">种族优势</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-2 bg-gray-700/30 rounded">
+                            <span class="text-gray-300 font-semibold">平衡设计</span>
+                            <p class="text-gray-400 text-xs mt-1">无主场优势</p>
+                        </div>
+                        <div class="p-2 bg-yellow-900/30 rounded">
+                            <span class="text-yellow-400 font-semibold">核心加成</span>
+                            <p class="text-gray-300 text-xs mt-1">控制核心获得巨量加成</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="space-y-3">
+                    <button class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        开始战斗
+                    </button>
+                    <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        编辑地图
+                    </button>
+                    <a href="index.html" class="block w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 text-center">
+                        返回地图列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 地图交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 源初核心脉动效果
+            const core = document.querySelector('.source-core circle:nth-of-type(2)');
+            if (core) {
+                core.style.animationDuration = '2s';
+            }
+
+            // 混沌裂隙流动效果
+            const rifts = document.querySelectorAll('.chaos-flow');
+            rifts.forEach((rift, index) => {
+                rift.style.animationDelay = `${index * 0.5}s`;
+            });
+
+            // 次要裂隙出现效果
+            const minorRifts = document.querySelectorAll('.rift-appear');
+            minorRifts.forEach((rift, index) => {
+                rift.style.animationDelay = `${index * 2}s`;
+            });
+
+            // 能量风暴效果
+            const storms = document.querySelectorAll('.energy-surge');
+            storms.forEach((storm, index) => {
+                storm.style.animationDelay = `${index * 1}s`;
+            });
+
+            // 形态涡流旋转
+            const vortexes = document.querySelectorAll('.morph-vortex');
+            vortexes.forEach((vortex, index) => {
+                vortex.style.animationDelay = `${index * 3}s`;
+                vortex.style.animationDuration = `${15 + index * 5}s`;
+            });
+
+            // 危险区域交互
+            const dangerZones = document.querySelectorAll('.danger-zone');
+            dangerZones.forEach(zone => {
+                zone.addEventListener('mouseenter', function() {
+                    this.style.filter = 'brightness(1.2)';
+                });
+                zone.addEventListener('mouseleave', function() {
+                    this.style.filter = 'brightness(1)';
+                });
+            });
+
+            // 出生点选择
+            const spawnPoints = document.querySelectorAll('.spawn-points > g');
+            spawnPoints.forEach(point => {
+                point.addEventListener('click', function() {
+                    // 移除其他选中状态
+                    spawnPoints.forEach(p => {
+                        const rect = p.querySelector('rect');
+                        if (rect) rect.style.strokeWidth = rect.getAttribute('stroke-width');
+                    });
+                    // 高亮当前选择
+                    const rect = this.querySelector('rect');
+                    if (rect) rect.style.strokeWidth = '5';
+                });
+            });
+
+            // 模拟裂隙随机出现
+            setInterval(() => {
+                const randomX = 300 + Math.random() * 600;
+                const randomY = 200 + Math.random() * 500;
+                // 这里可以添加临时裂隙出现的逻辑
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

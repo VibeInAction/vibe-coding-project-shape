@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中央圆环城战场 - 几何境域战斗地图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-energy {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes flow-water {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -50; }
+        }
+        
+        @keyframes rotate-corridor {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .pulse-energy {
+            animation: pulse-energy 3s ease-in-out infinite;
+        }
+        
+        .flow-water {
+            animation: flow-water 10s linear infinite;
+        }
+        
+        .rotate-corridor {
+            animation: rotate-corridor 30s linear infinite;
+            transform-origin: center;
+        }
+        
+        .map-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 250px;
+        }
+        
+        .map-element {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .map-element:hover {
+            filter: brightness(1.3);
+            stroke-width: 3;
+        }
+        
+        .spawn-point {
+            fill: #3b82f6;
+            stroke: #1e40af;
+            stroke-width: 3;
+        }
+        
+        .spawn-point:hover {
+            fill: #60a5fa;
+        }
+        
+        .resource-node {
+            fill: #fbbf24;
+            stroke: #f59e0b;
+            stroke-width: 2;
+        }
+        
+        .resource-node.pure {
+            fill: #a78bfa;
+            stroke: #8b5cf6;
+            stroke-width: 2;
+        }
+        
+        .obstacle {
+            fill: #6b7280;
+            stroke: #4b5563;
+            stroke-width: 2;
+        }
+        
+        .energy-barrier {
+            fill: none;
+            stroke: #ef4444;
+            stroke-width: 4;
+            stroke-dasharray: 20, 10;
+            opacity: 0.8;
+        }
+        
+        .control-tower {
+            fill: #10b981;
+            stroke: #059669;
+            stroke-width: 3;
+        }
+        
+        .grid-overlay {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1;
+            fill: none;
+        }
+        
+        .minimap {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .minimap canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-blue-900/90 backdrop-blur-sm border-b border-blue-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">⚔️</span>
+                    <h1 class="text-xl font-bold text-blue-100">几何境域战斗地图</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="../index.html" class="text-blue-200 hover:text-blue-100 transition">返回首页</a>
+                    <a href="index.html" class="text-blue-200 hover:text-blue-100 transition">地形图</a>
+                    <a href="battle-map-todolist.html" class="text-blue-200 hover:text-blue-100 transition">开发进度</a>
+                    <select onchange="window.location.href=this.value" class="bg-blue-800 text-blue-100 px-3 py-1 rounded">
+                        <option value="#">选择战场</option>
+                        <option value="central-ring-city-battle.html" selected>中央圆环城</option>
+                        <option value="triangle-spires-battle.html">三角尖塔</option>
+                        <option value="matrix-city-battle.html">矩阵之都</option>
+                        <option value="life-spiral-city-battle.html">生命螺旋城</option>
+                        <option value="source-core-battle.html">源初形核</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">中央圆环城战场</h1>
+            <p class="text-lg text-blue-300 mb-4">同心圆环战场 • 能量回廊战略要地</p>
+            <div class="flex justify-center items-center space-x-8 text-sm text-gray-300">
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                    <span>1v1/2v2/FFA</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <span>8资源点</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                    <span>平衡地图</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battle Map -->
+        <div class="bg-slate-800 rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="relative" id="battleMap">
+                <svg viewBox="0 0 1200 800" class="w-full h-auto">
+                    <!-- Grid Background -->
+                    <defs>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <rect width="50" height="50" class="grid-overlay"/>
+                        </pattern>
+                        
+                        <radialGradient id="waterGradient">
+                            <stop offset="0%" style="stop-color:#1e40af;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:0.6" />
+                        </radialGradient>
+                        
+                        <radialGradient id="energyGradient">
+                            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.6" />
+                        </radialGradient>
+                    </defs>
+                    
+                    <rect width="1200" height="800" fill="url(#grid)" opacity="0.3"/>
+                    
+                    <!-- Outer Ring -->
+                    <circle cx="600" cy="400" r="350" fill="none" stroke="#4b5563" stroke-width="3"/>
+                    <circle cx="600" cy="400" r="320" fill="#374151" opacity="0.5"/>
+                    
+                    <!-- Middle Ring -->
+                    <circle cx="600" cy="400" r="250" fill="none" stroke="#4b5563" stroke-width="3"/>
+                    <circle cx="600" cy="400" r="220" fill="#4b5563" opacity="0.5"/>
+                    
+                    <!-- Inner Ring -->
+                    <circle cx="600" cy="400" r="150" fill="none" stroke="#4b5563" stroke-width="3"/>
+                    <circle cx="600" cy="400" r="120" fill="#374151" opacity="0.5"/>
+                    
+                    <!-- Silent Round Lake -->
+                    <circle cx="600" cy="400" r="80" fill="url(#waterGradient)"/>
+                    <circle cx="600" cy="400" r="75" fill="none" stroke="#60a5fa" stroke-width="2" class="flow-water"/>
+                    
+                    <!-- Energy Corridors -->
+                    <g class="rotate-corridor" opacity="0.6">
+                        <line x1="600" y1="80" x2="600" y2="320" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="600" y1="480" x2="600" y2="720" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="280" y1="400" x2="520" y2="400" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="680" y1="400" x2="920" y2="400" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="358" y1="158" x2="508" y2="308" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="692" y1="492" x2="842" y2="642" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="842" y1="158" x2="692" y2="308" stroke="#3b82f6" stroke-width="30"/>
+                        <line x1="508" y1="492" x2="358" y2="642" stroke="#3b82f6" stroke-width="30"/>
+                    </g>
+                    
+                    <!-- Spawn Points -->
+                    <g class="map-element" data-type="spawn" data-info="玩家1出生点">
+                        <circle cx="200" cy="200" r="40" class="spawn-point"/>
+                        <text x="200" y="205" text-anchor="middle" fill="white" font-bold">P1</text>
+                    </g>
+                    
+                    <g class="map-element" data-type="spawn" data-info="玩家2出生点">
+                        <circle cx="1000" cy="200" r="40" class="spawn-point"/>
+                        <text x="1000" y="205" text-anchor="middle" fill="white" font-bold">P2</text>
+                    </g>
+                    
+                    <g class="map-element" data-type="spawn" data-info="玩家3出生点">
+                        <circle cx="200" cy="600" r="40" class="spawn-point"/>
+                        <text x="200" y="605" text-anchor="middle" fill="white" font-bold">P3</text>
+                    </g>
+                    
+                    <g class="map-element" data-type="spawn" data-info="玩家4出生点">
+                        <circle cx="1000" cy="600" r="40" class="spawn-point"/>
+                        <text x="1000" y="605" text-anchor="middle" fill="white" font-bold">P4</text>
+                    </g>
+                    
+                    <!-- Resource Nodes - Morph Energy -->
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="150" cy="400" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="1050" cy="400" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="400" cy="150" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="800" cy="150" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="400" cy="650" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource" data-info="形魄泉眼 - 每秒+5能量">
+                        <circle cx="800" cy="650" r="25" class="resource-node pulse-energy"/>
+                    </g>
+                    
+                    <!-- Resource Nodes - Pure Crystal -->
+                    <g class="map-element" data-type="resource-pure" data-info="纯净水晶簇 - 每秒+1纯净形魄">
+                        <circle cx="350" cy="400" r="20" class="resource-node pure pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource-pure" data-info="纯净水晶簇 - 每秒+1纯净形魄">
+                        <circle cx="850" cy="400" r="20" class="resource-node pure pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource-pure" data-info="纯净水晶簇 - 每秒+1纯净形魄">
+                        <circle cx="600" cy="250" r="20" class="resource-node pure pulse-energy"/>
+                    </g>
+                    
+                    <g class="map-element" data-type="resource-pure" data-info="纯净水晶簇 - 每秒+1纯净形魄">
+                        <circle cx="600" cy="550" r="20" class="resource-node pure pulse-energy"/>
+                    </g>
+                    
+                    <!-- Central Morph Crystal -->
+                    <g class="map-element" data-type="resource-special" data-info="形态水晶 - 战略资源点">
+                        <circle cx="600" cy="400" r="30" fill="#ec4899" stroke="#db2777" stroke-width="3" class="pulse-energy"/>
+                        <text x="600" y="405" text-anchor="middle" fill="white" font-bold">★</text>
+                    </g>
+                    
+                    <!-- Energy Barriers -->
+                    <g class="map-element" data-type="barrier" data-info="能量屏障 - 可开关">
+                        <path d="M 520 280 Q 600 250 680 280" class="energy-barrier"/>
+                        <path d="M 520 520 Q 600 550 680 520" class="energy-barrier"/>
+                        <path d="M 280 520 Q 250 400 280 280" class="energy-barrier"/>
+                        <path d="M 920 280 Q 950 400 920 520" class="energy-barrier"/>
+                    </g>
+                    
+                    <!-- Control Towers -->
+                    <g class="map-element" data-type="tower" data-info="控制塔 - 可占领，提供视野">
+                        <rect x="470" y="320" width="30" height="30" class="control-tower" transform="rotate(45 485 335)"/>
+                        <rect x="700" y="320" width="30" height="30" class="control-tower" transform="rotate(45 715 335)"/>
+                        <rect x="470" y="450" width="30" height="30" class="control-tower" transform="rotate(45 485 465)"/>
+                        <rect x="700" y="450" width="30" height="30" class="control-tower" transform="rotate(45 715 465)"/>
+                    </g>
+                    
+                    <!-- Neutral Shop -->
+                    <g class="map-element" data-type="shop" data-info="中立商店 - 雇佣佣兵，购买道具">
+                        <rect x="570" y="370" width="60" height="60" fill="#8b5cf6" stroke="#7c3aed" stroke-width="2" rx="10"/>
+                        <text x="600" y="405" text-anchor="middle" fill="white" font-bold">商店</text>
+                    </g>
+                    
+                    <!-- Obstacles -->
+                    <g class="map-element" data-type="obstacle" data-info="几何巨石 - 不可通行">
+                        <ellipse cx="300" cy="300" rx="40" ry="30" class="obstacle"/>
+                        <ellipse cx="900" cy="300" rx="40" ry="30" class="obstacle"/>
+                        <ellipse cx="300" cy="500" rx="40" ry="30" class="obstacle"/>
+                        <ellipse cx="900" cy="500" rx="40" ry="30" class="obstacle"/>
+                    </g>
+                    
+                    <!-- Map Labels -->
+                    <text x="600" y="30" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">北</text>
+                    <text x="600" y="780" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">南</text>
+                    <text x="50" y="405" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">西</text>
+                    <text x="1150" y="405" text-anchor="middle" fill="#9ca3af" font-size="20" font-weight="bold">东</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Map Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Map Info -->
+            <div class="bg-slate-800 rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-4">地图信息</h3>
+                <div class="space-y-3 text-gray-300">
+                    <div class="flex justify-between">
+                        <span>地图大小</span>
+                        <span>1200x800</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>最大玩家数</span>
+                        <span>4人</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>推荐模式</span>
+                        <span>征服/形态争夺</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>地形复杂度</span>
+                        <div class="flex space-x-1">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resources -->
+            <div class="bg-slate-800 rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-4">资源分布</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">形魄泉眼</span>
+                        </div>
+                        <span class="text-gray-300">6个</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">纯净水晶</span>
+                        </div>
+                        <span class="text-gray-300">4个</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-pink-500 rounded-full"></div>
+                            <span class="text-gray-300">形态水晶</span>
+                        </div>
+                        <span class="text-gray-300">1个</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Strategic Points -->
+            <div class="bg-slate-800 rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-4">战略要点</h3>
+                <div class="space-y-3 text-sm text-gray-300">
+                    <div>• 控制能量回廊获得机动优势</div>
+                    <div>• 中央湖泊提供水域加成</div>
+                    <div>• 控制塔提供关键视野</div>
+                    <div>• 形态水晶决定战局走向</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Race Advantages -->
+        <div class="bg-gradient-to-r from-blue-900/50 to-slate-900/50 rounded-xl p-6">
+            <h3 class="text-xl font-bold text-white mb-4">种族地形优势</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-blue-800/30 rounded-lg">
+                    <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🟢
+                    </div>
+                    <h4 class="font-semibold text-blue-300 mb-2">圆环族</h4>
+                    <p class="text-xs text-gray-300">水域移动速度 +40%</p>
+                    <p class="text-xs text-gray-300">能量回廊效果 +30%</p>
+                </div>
+                <div class="text-center p-4 bg-slate-800/30 rounded-lg">
+                    <div class="w-16 h-16 bg-red-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🔺
+                    </div>
+                    <h4 class="font-semibold text-red-300 mb-2">三角议会</h4>
+                    <p class="text-xs text-gray-300">控制塔攻击范围 +20%</p>
+                    <p class="text-xs text-gray-300">障碍物无视 +10%</p>
+                </div>
+                <div class="text-center p-4 bg-slate-800/30 rounded-lg">
+                    <div class="w-16 h-16 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🟦
+                    </div>
+                    <h4 class="font-semibold text-green-300 mb-2">方碑盟约</h4>
+                    <p class="text-xs text-gray-300">商店购买成本 -20%</p>
+                    <p class="text-xs text-gray-300">资源采集效率 +15%</p>
+                </div>
+                <div class="text-center p-4 bg-slate-800/30 rounded-lg">
+                    <div class="w-16 h-16 bg-purple-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        💎
+                    </div>
+                    <h4 class="font-semibold text-purple-300 mb-2">螺旋之子</h4>
+                    <p class="text-xs text-gray-300">形态水晶效果 +50%</p>
+                    <p class="text-xs text-gray-300">能量恢复速度 +20%</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Minimap -->
+    <div class="minimap">
+        <canvas id="minimapCanvas" width="230" height="180"></canvas>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="map-tooltip"></div>
+
+    <script>
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const mapElements = document.querySelectorAll('.map-element');
+        
+        mapElements.forEach(element => {
+            element.addEventListener('mouseenter', (e) => {
+                const info = element.getAttribute('data-info');
+                if (info) {
+                    tooltip.innerHTML = info;
+                    tooltip.style.opacity = '1';
+                }
+            });
+            
+            element.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 10 + 'px';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+        
+        // Draw minimap
+        function drawMinimap() {
+            const canvas = document.getElementById('minimapCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, 230, 180);
+            
+            // Scale factors
+            const scaleX = 230 / 1200;
+            const scaleY = 180 / 800;
+            
+            // Draw rings
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(115, 90, 67, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(115, 90, 47, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(115, 90, 28, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Draw lake
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.arc(115, 90, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw spawn points
+            ctx.fillStyle = '#3b82f6';
+            [[38, 45], [192, 45], [38, 135], [192, 135]].forEach(pos => {
+                ctx.beginPath();
+                ctx.arc(pos[0], pos[1], 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw resources
+            ctx.fillStyle = '#fbbf24';
+            [[28, 90], [202, 90], [77, 34], [153, 34], [77, 146], [153, 146]].forEach(pos => {
+                ctx.beginPath();
+                ctx.arc(pos[0], pos[1], 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw central crystal
+            ctx.fillStyle = '#ec4899';
+            ctx.beginPath();
+            ctx.arc(115, 90, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Initialize minimap
+        drawMinimap();
+        
+        // Add interactive features
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add click handlers for strategic points
+            const strategicPoints = document.querySelectorAll('[data-type="tower"], [data-type="shop"], [data-type="resource-special"]');
+            strategicPoints.forEach(point => {
+                point.style.cursor = 'pointer';
+                point.addEventListener('click', () => {
+                    const type = point.getAttribute('data-type');
+                    showMessage(`点击了${point.getAttribute('data-info')}`);
+                });
+            });
+        });
+        
+        function showMessage(msg) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg z-50';
+            msgDiv.textContent = msg;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => msgDiv.remove(), 2000);
+        }
+    </script>
+</body>
+</html>

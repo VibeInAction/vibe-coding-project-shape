@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命螺旋城战场 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spiral-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes life-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        @keyframes vine-grow {
+            0% { stroke-dasharray: 0 100; }
+            50% { stroke-dasharray: 50 50; }
+            100% { stroke-dasharray: 100 0; }
+        }
+        
+        @keyframes leaf-float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(5deg); }
+            75% { transform: translateY(5px) rotate(-5deg); }
+        }
+        
+        .spiral-rotate { animation: spiral-rotate 60s linear infinite; }
+        .life-pulse { animation: life-pulse 3s ease-in-out infinite; }
+        .vine-grow { animation: vine-grow 4s ease-in-out infinite; }
+        .leaf-float { animation: leaf-float 6s ease-in-out infinite; }
+        
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip-trigger:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .forest-area {
+            transition: all 0.3s ease;
+        }
+        
+        .forest-area:hover {
+            fill-opacity: 0.7;
+        }
+        
+        .healing-area {
+            animation: life-pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-900 via-emerald-900 to-teal-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题区域 -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                生命螺旋城战场
+            </h1>
+            <p class="text-xl text-gray-300">螺旋林海 · 生命花园 · 藤蔓网络</p>
+            <div class="mt-4 flex justify-center gap-4 text-sm">
+                <span class="bg-green-600 px-3 py-1 rounded-full">2-4 玩家</span>
+                <span class="bg-emerald-600 px-3 py-1 rounded-full">中型地图</span>
+                <span class="bg-teal-600 px-3 py-1 rounded-full">生命地形</span>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- 主地图区域 -->
+            <div class="lg:col-span-3">
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
+                    <div class="relative">
+                        <svg viewBox="0 0 1000 800" class="w-full h-auto">
+                            <!-- 定义 -->
+                            <defs>
+                                <radialGradient id="forestGrad">
+                                    <stop offset="0%" style="stop-color:#065f46;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#064e3b;stop-opacity:1" />
+                                </radialGradient>
+                                <radialGradient id="gardenGrad">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.6" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:0.8" />
+                                </radialGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                                <pattern id="leafPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <circle cx="10" cy="10" r="3" fill="#10b981" opacity="0.3"/>
+                                </pattern>
+                            </defs>
+
+                            <!-- 背景 -->
+                            <rect width="1000" height="800" fill="url(#forestGrad)"/>
+                            
+                            <!-- 螺旋林海地形 -->
+                            <g class="spiral-forest">
+                                <!-- 主螺旋路径 -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <path d="M 500,400 Q 600,300 700,400 T 900,400 Q 800,500 700,400 T 500,400 Q 400,500 300,400 T 100,400 Q 200,300 300,400 T 500,400" 
+                                          fill="none" stroke="#047857" stroke-width="80" stroke-linecap="round" opacity="0.4"/>
+                                    <text x="500" y="400" text-anchor="middle" fill="#86efac" font-size="16" font-weight="bold">螺旋林海</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="520" y="380" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="530" y="400" fill="#f3f4f6">螺旋林海</text>
+                                        <text x="530" y="415" fill="#10b981">视野阻挡 -30%</text>
+                                        <text x="530" y="430" fill="#3b82f6">螺旋之子主场</text>
+                                    </g>
+                                </g>
+                                
+                                <!-- 森林区域 -->
+                                <g class="forest-areas">
+                                    <circle cx="200" cy="200" r="80" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                    <circle cx="800" cy="200" r="80" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                    <circle cx="150" cy="600" r="70" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                    <circle cx="850" cy="600" r="70" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                    <circle cx="500" cy="150" r="60" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                    <circle cx="500" cy="650" r="60" fill="#065f46" opacity="0.6" class="forest-area"/>
+                                </g>
+                                
+                                <!-- 树木装饰 -->
+                                <g class="trees">
+                                    <g transform="translate(180,180)">
+                                        <circle r="15" fill="#064e3b"/>
+                                        <rect x="-3" y="0" width="6" height="20" fill="#92400e"/>
+                                        <ellipse cx="0" cy="-5" rx="20" ry="25" fill="#10b981" class="leaf-float"/>
+                                    </g>
+                                    <g transform="translate(820,180)">
+                                        <circle r="15" fill="#064e3b"/>
+                                        <rect x="-3" y="0" width="6" height="20" fill="#92400e"/>
+                                        <ellipse cx="0" cy="-5" rx="20" ry="25" fill="#10b981" class="leaf-float"/>
+                                    </g>
+                                    <g transform="translate(130,580)">
+                                        <circle r="12" fill="#064e3b"/>
+                                        <rect x="-2" y="0" width="4" height="15" fill="#92400e"/>
+                                        <ellipse cx="0" cy="-4" rx="15" ry="20" fill="#10b981" class="leaf-float"/>
+                                    </g>
+                                    <g transform="translate(870,580)">
+                                        <circle r="12" fill="#064e3b"/>
+                                        <rect x="-2" y="0" width="4" height="15" fill="#92400e"/>
+                                        <ellipse cx="0" cy="-4" rx="15" ry="20" fill="#10b981" class="leaf-float"/>
+                                    </g>
+                                </g>
+                            </g>
+
+                            <!-- 生命花园 -->
+                            <g class="life-gardens">
+                                <!-- 中央生命花园 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(500,400)">
+                                    <circle r="60" fill="url(#gardenGrad)" stroke="#10b981" stroke-width="3" filter="url(#glow)" class="healing-area"/>
+                                    <circle r="40" fill="#34d399" opacity="0.5"/>
+                                    <g class="spiral-rotate">
+                                        <path d="M 0,-30 Q 20,-20 30,0 T 0,30 Q -20,20 -30,0 T 0,-30" 
+                                              fill="none" stroke="#6ee7b7" stroke-width="2"/>
+                                    </g>
+                                    <text y="5" text-anchor="middle" fill="#d1fae5" font-size="12" font-weight="bold">生命花园</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="65" y="-20" width="140" height="80" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="75" y="0" fill="#f3f4f6">中央生命花园</text>
+                                        <text x="75" y="15" fill="#10b981">治疗 +5/秒</text>
+                                        <text x="75" y="30" fill="#34d399">生命恢复 +50%</text>
+                                        <text x="75" y="45" fill="#fbbf24">战略控制点</text>
+                                    </g>
+                                </g>
+                                
+                                <!-- 小型生命花园 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(200,400)">
+                                    <circle r="35" fill="#10b981" stroke="#059669" stroke-width="2" opacity="0.7"/>
+                                    <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">小花园</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(800,400)">
+                                    <circle r="35" fill="#10b981" stroke="#059669" stroke-width="2" opacity="0.7"/>
+                                    <text y="5" text-anchor="middle" fill="#d1fae5" font-size="10">小花园</text>
+                                </g>
+                            </g>
+
+                            <!-- 藤蔓网络 -->
+                            <g class="vine-networks">
+                                <!-- 主藤蔓路径 -->
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <path d="M 200,400 Q 350,300 500,400" stroke="#22c55e" stroke-width="8" 
+                                          fill="none" stroke-linecap="round" opacity="0.6" class="vine-grow"/>
+                                    <text x="350" y="340" text-anchor="middle" fill="#86efac" font-size="10">藤蔓</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="360" y="320" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="370" y="340" fill="#f3f4f6">藤蔓网络</text>
+                                        <text x="370" y="355" fill="#10b981">快速移动通道</text>
+                                        <text x="370" y="370" fill="#3b82f6">螺旋之子专属</text>
+                                    </g>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <path d="M 500,400 Q 650,300 800,400" stroke="#22c55e" stroke-width="8" 
+                                          fill="none" stroke-linecap="round" opacity="0.6" class="vine-grow"/>
+                                    <text x="650" y="340" text-anchor="middle" fill="#86efac" font-size="10">藤蔓</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <path d="M 200,400 Q 350,500 500,400" stroke="#22c55e" stroke-width="8" 
+                                          fill="none" stroke-linecap="round" opacity="0.6" class="vine-grow"/>
+                                    <text x="350" y="470" text-anchor="middle" fill="#86efac" font-size="10">藤蔓</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <path d="M 500,400 Q 650,500 800,400" stroke="#22c55e" stroke-width="8" 
+                                          fill="none" stroke-linecap="round" opacity="0.6" class="vine-grow"/>
+                                    <text x="650" y="470" text-anchor="middle" fill="#86efac" font-size="10">藤蔓</text>
+                                </g>
+                            </g>
+
+                            <!-- 生命之泉 -->
+                            <g class="life-springs">
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(300,250)">
+                                    <circle r="20" fill="#06b6d4" stroke="#0891b2" stroke-width="2" filter="url(#glow)" class="life-pulse"/>
+                                    <circle r="12" fill="#67e8f9"/>
+                                    <text y="35" text-anchor="middle" fill="#cffafe" font-size="10" font-weight="bold">生命之泉</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="25" y="-20" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="35" y="0" fill="#f3f4f6">生命之泉</text>
+                                        <text x="35" y="15" fill="#06b6d4">大范围治疗</text>
+                                        <text x="35" y="30" fill="#10b981">持续恢复效果</text>
+                                    </g>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(700,250)">
+                                    <circle r="20" fill="#06b6d4" stroke="#0891b2" stroke-width="2" filter="url(#glow)" class="life-pulse"/>
+                                    <circle r="12" fill="#67e8f9"/>
+                                    <text y="35" text-anchor="middle" fill="#cffafe" font-size="10" font-weight="bold">生命之泉</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(300,550)">
+                                    <circle r="20" fill="#06b6d4" stroke="#0891b2" stroke-width="2" filter="url(#glow)" class="life-pulse"/>
+                                    <circle r="12" fill="#67e8f9"/>
+                                    <text y="35" text-anchor="middle" fill="#cffafe" font-size="10" font-weight="bold">生命之泉</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(700,550)">
+                                    <circle r="20" fill="#06b6d4" stroke="#0891b2" stroke-width="2" filter="url(#glow)" class="life-pulse"/>
+                                    <circle r="12" fill="#67e8f9"/>
+                                    <text y="35" text-anchor="middle" fill="#cffafe" font-size="10" font-weight="bold">生命之泉</text>
+                                </g>
+                            </g>
+
+                            <!-- 古树资源点 -->
+                            <g class="ancient-trees">
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(150,300)">
+                                    <rect x="-25" y="-40" width="50" height="80" fill="#92400e" rx="5"/>
+                                    <ellipse cx="0" cy="-40" rx="35" ry="45" fill="#059669" class="leaf-float"/>
+                                    <ellipse cx="0" cy="-40" rx="25" ry="35" fill="#10b981"/>
+                                    <text y="50" text-anchor="middle" fill="#86efac" font-size="10" font-weight="bold">古树</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="30" y="-40" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="40" y="-20" fill="#f3f4f6">古树资源点</text>
+                                        <text x="40" y="-5" fill="#fbbf24">+3 形魄/秒</text>
+                                        <text x="40" y="10" fill="#10b981">生命能量加成</text>
+                                    </g>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(850,300)">
+                                    <rect x="-25" y="-40" width="50" height="80" fill="#92400e" rx="5"/>
+                                    <ellipse cx="0" cy="-40" rx="35" ry="45" fill="#059669" class="leaf-float"/>
+                                    <ellipse cx="0" cy="-40" rx="25" ry="35" fill="#10b981"/>
+                                    <text y="50" text-anchor="middle" fill="#86efac" font-size="10" font-weight="bold">古树</text>
+                                </g>
+                            </g>
+
+                            <!-- 水晶簇 -->
+                            <g class="crystal-clusters">
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(400,150)">
+                                    <g>
+                                        <polygon points="0,-15 10,5 -10,5" fill="#a78bfa" stroke="#8b5cf6" stroke-width="1"/>
+                                        <polygon points="8,-10 15,0 5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                        <polygon points="-8,-10 -15,0 -5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                    </g>
+                                    <text y="25" text-anchor="middle" fill="#e9d5ff" font-size="9">水晶簇</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(600,150)">
+                                    <g>
+                                        <polygon points="0,-15 10,5 -10,5" fill="#a78bfa" stroke="#8b5cf6" stroke-width="1"/>
+                                        <polygon points="8,-10 15,0 5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                        <polygon points="-8,-10 -15,0 -5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                    </g>
+                                    <text y="25" text-anchor="middle" fill="#e9d5ff" font-size="9">水晶簇</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(400,650)">
+                                    <g>
+                                        <polygon points="0,-15 10,5 -10,5" fill="#a78bfa" stroke="#8b5cf6" stroke-width="1"/>
+                                        <polygon points="8,-10 15,0 5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                        <polygon points="-8,-10 -15,0 -5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                    </g>
+                                    <text y="25" text-anchor="middle" fill="#e9d5ff" font-size="9">水晶簇</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(600,650)">
+                                    <g>
+                                        <polygon points="0,-15 10,5 -10,5" fill="#a78bfa" stroke="#8b5cf6" stroke-width="1"/>
+                                        <polygon points="8,-10 15,0 5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                        <polygon points="-8,-10 -15,0 -5,5" fill="#c4b5fd" stroke="#a78bfa" stroke-width="1"/>
+                                    </g>
+                                    <text y="25" text-anchor="middle" fill="#e9d5ff" font-size="9">水晶簇</text>
+                                </g>
+                            </g>
+
+                            <!-- 毒沼泽区域 -->
+                            <g class="poison-swamps">
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <ellipse cx="350" cy="350" rx="40" ry="30" fill="#7c3aed" opacity="0.5"/>
+                                    <text x="350" y="355" text-anchor="middle" fill="#ddd6fe" font-size="10">毒沼</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="395" y="335" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="405" y="355" fill="#f3f4f6">毒沼泽</text>
+                                        <text x="405" y="370" fill="#ef4444">持续伤害</text>
+                                        <text x="405" y="385" fill="#9ca3af">移动速度 -50%</text>
+                                    </g>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <ellipse cx="650" cy="450" rx="40" ry="30" fill="#7c3aed" opacity="0.5"/>
+                                    <text x="650" y="455" text-anchor="middle" fill="#ddd6fe" font-size="10">毒沼</text>
+                                </g>
+                            </g>
+
+                            <!-- 可清理的藤蔓 -->
+                            <g class="clearable-vines">
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <rect x="480" y="250" width="40" height="100" fill="#16a34a" opacity="0.7" rx="5"/>
+                                    <text x="500" y="300" text-anchor="middle" fill="#86efac" font-size="9">藤蔓</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="525" y="280" width="120" height="60" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="535" y="300" fill="#f3f4f6">可清理藤蔓</text>
+                                        <text x="535" y="315" fill="#9ca3af">生命值: 200</text>
+                                        <text x="535" y="330" fill="#10b981">清理后变平原</text>
+                                    </g>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer">
+                                    <rect x="480" y="450" width="40" height="100" fill="#16a34a" opacity="0.7" rx="5"/>
+                                    <text x="500" y="500" text-anchor="middle" fill="#86efac" font-size="9">藤蔓</text>
+                                </g>
+                            </g>
+
+                            <!-- 出生点 -->
+                            <g class="spawn-points">
+                                <!-- 玩家1出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(100,100)">
+                                    <ellipse rx="40" ry="30" fill="#ef4444" fill-opacity="0.5" 
+                                             stroke="#ef4444" stroke-width="3" stroke-dasharray="5,5"/>
+                                    <text y="5" text-anchor="middle" fill="#fecaca" font-size="16" font-weight="bold">P1</text>
+                                    <text y="-35" text-anchor="middle" fill="#ef4444" font-size="12">出生点</text>
+                                </g>
+                                
+                                <!-- 玩家2出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(900,100)">
+                                    <ellipse rx="40" ry="30" fill="#3b82f6" fill-opacity="0.5" 
+                                             stroke="#3b82f6" stroke-width="3" stroke-dasharray="5,5"/>
+                                    <text y="5" text-anchor="middle" fill="#dbeafe" font-size="16" font-weight="bold">P2</text>
+                                    <text y="-35" text-anchor="middle" fill="#3b82f6" font-size="12">出生点</text>
+                                </g>
+                                
+                                <!-- 玩家3-4出生点 -->
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(100,700)">
+                                    <ellipse rx="35" ry="25" fill="#10b981" fill-opacity="0.5" 
+                                             stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>
+                                    <text y="5" text-anchor="middle" fill="#d1fae5" font-size="14" font-weight="bold">P3</text>
+                                </g>
+                                <g class="tooltip-trigger cursor-pointer" transform="translate(900,700)">
+                                    <ellipse rx="35" ry="25" fill="#f59e0b" fill-opacity="0.5" 
+                                             stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,5"/>
+                                    <text y="5" text-anchor="middle" fill="#fed7aa" font-size="14" font-weight="bold">P4</text>
+                                </g>
+                            </g>
+
+                            <!-- 中立商店 -->
+                            <g class="tooltip-trigger cursor-pointer" transform="translate(500,300)">
+                                <g>
+                                        <ellipse cx="0" cy="-20" rx="30" ry="25" fill="#10b981"/>
+                                        <rect x="-20" y="-20" width="40" height="40" fill="#92400e" rx="5"/>
+                                        <circle cx="0" cy="-5" r="8" fill="#fbbf24"/>
+                                    </g>
+                                    <text y="30" text-anchor="middle" fill="#d1fae5" font-size="12" font-weight="bold">树屋商店</text>
+                                    <g class="tooltip absolute bg-gray-900 p-2 rounded">
+                                        <rect x="35" y="-20" width="140" height="80" fill="#1f2937" stroke="#374151" rx="4"/>
+                                        <text x="45" y="0" fill="#f3f4f6">生命树屋商店</text>
+                                        <text x="45" y="15" fill="#9ca3af">雇佣自然单位</text>
+                                        <text x="45" y="30" fill="#fbbf24">购买治疗药水</text>
+                                        <text x="45" y="45" fill="#10b981">生命加成物品</text>
+                                    </g>
+                                </g>
+
+                            <!-- 装饰性元素 -->
+                            <g class="decorations" opacity="0.3">
+                                <g class="spiral-rotate">
+                                    <path d="M 100,100 Q 150,50 200,100 T 300,100" fill="none" stroke="#86efac" stroke-width="1"/>
+                                    <path d="M 700,100 Q 750,50 800,100 T 900,100" fill="none" stroke="#86efac" stroke-width="1"/>
+                                    <path d="M 100,700 Q 150,650 200,700 T 300,700" fill="none" stroke="#86efac" stroke-width="1"/>
+                                    <path d="M 700,700 Q 750,650 800,700 T 900,700" fill="none" stroke="#86efac" stroke-width="1"/>
+                                </g>
+                                
+                                <!-- 飘落的叶子 -->
+                                <g class="leaf-float">
+                                    <ellipse cx="150" cy="150" rx="4" ry="6" fill="#22c55e" transform="rotate(45 150 150)"/>
+                                    <ellipse cx="850" cy="250" rx="4" ry="6" fill="#10b981" transform="rotate(-30 850 250)"/>
+                                    <ellipse cx="250" cy="650" rx="4" ry="6" fill="#34d399" transform="rotate(60 250 650)"/>
+                                    <ellipse cx="750" cy="550" rx="4" ry="6" fill="#059669" transform="rotate(-45 750 550)"/>
+                                </g>
+                            </g>
+                        </svg>
+
+                        <!-- 地图图例 -->
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-green-600 rounded-full"></div>
+                                <span>生命花园（治疗区）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-emerald-600 rounded"></div>
+                                <span>藤蔓网络（快速通道）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-cyan-500 rounded-full"></div>
+                                <span>生命之泉（大范围治疗）</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-purple-600 rounded opacity-50"></div>
+                                <span>毒沼泽（危险区域）</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="space-y-6">
+                <!-- 小地图 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">小地图</h3>
+                    <div class="relative bg-gray-900 rounded-lg" style="padding-bottom: 80%;">
+                        <svg class="absolute inset-0 w-full h-full rounded-lg" viewBox="0 0 1000 800">
+                            <!-- 简化的地形 -->
+                            <ellipse cx="500" cy="400" rx="350" ry="300" fill="#065f46" opacity="0.6"/>
+                            
+                            <!-- 花园 -->
+                            <circle cx="500" cy="400" r="40" fill="#10b981" class="minimap-point"/>
+                            <circle cx="200" cy="400" r="25" fill="#10b981" class="minimap-point"/>
+                            <circle cx="800" cy="400" r="25" fill="#10b981" class="minimap-point"/>
+                            
+                            <!-- 生命之泉 -->
+                            <circle cx="300" cy="250" r="15" fill="#06b6d4" class="minimap-point"/>
+                            <circle cx="700" cy="250" r="15" fill="#06b6d4" class="minimap-point"/>
+                            <circle cx="300" cy="550" r="15" fill="#06b6d4" class="minimap-point"/>
+                            <circle cx="700" cy="550" r="15" fill="#06b6d4" class="minimap-point"/>
+                            
+                            <!-- 毒沼 -->
+                            <ellipse cx="350" cy="350" rx="25" ry="20" fill="#7c3aed" opacity="0.6"/>
+                            <ellipse cx="650" cy="450" rx="25" ry="20" fill="#7c3aed" opacity="0.6"/>
+                            
+                            <!-- 出生点 -->
+                            <ellipse cx="100" cy="100" rx="25" ry="20" fill="#ef4444" class="minimap-point"/>
+                            <ellipse cx="900" cy="100" rx="25" ry="20" fill="#3b82f6" class="minimap-point"/>
+                            <ellipse cx="100" cy="700" rx="22" ry="18" fill="#10b981" class="minimap-point"/>
+                            <ellipse cx="900" cy="700" rx="22" ry="18" fill="#f59e0b" class="minimap-point"/>
+                            
+                            <!-- 当前视图框 -->
+                            <rect x="150" y="50" width="700" height="700" fill="none" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 地图信息 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">地图信息</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">地图大小</span>
+                            <span>1000x800</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">最大玩家</span>
+                            <span>4人</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">地形类型</span>
+                            <span>森林螺旋</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">资源点</span>
+                            <span>8个</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">战略点</span>
+                            <span>5个</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 种族优势 -->
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700">
+                    <h3 class="text-lg font-semibold mb-3">种族优势</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-2 bg-green-900/30 rounded">
+                            <span class="text-green-400 font-semibold">螺旋之子</span>
+                            <p class="text-gray-300 text-xs mt-1">森林移动 +40%</p>
+                        </div>
+                        <div class="p-2 bg-emerald-900/30 rounded">
+                            <span class="text-emerald-400 font-semibold">治疗加成</span>
+                            <p class="text-gray-300 text-xs mt-1">生命效果 +50%</p>
+                        </div>
+                        <div class="p-2 bg-teal-900/30 rounded">
+                            <span class="text-teal-400 font-semibold">藤蔓网络</span>
+                            <p class="text-gray-300 text-xs mt-1">专属快速通道</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="space-y-3">
+                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        开始战斗
+                    </button>
+                    <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        编辑地图
+                    </button>
+                    <a href="index.html" class="block w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 text-center">
+                        返回地图列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 地图交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 生命花园脉动效果
+            const gardens = document.querySelectorAll('.life-gardens circle');
+            gardens.forEach((garden, index) => {
+                garden.style.animationDelay = `${index * 0.5}s`;
+            });
+
+            // 藤蔓生长动画
+            const vines = document.querySelectorAll('.vine-networks path');
+            vines.forEach((vine, index) => {
+                vine.style.animationDelay = `${index * 0.3}s`;
+            });
+
+            // 森林区域交互
+            const forestAreas = document.querySelectorAll('.forest-area');
+            forestAreas.forEach(area => {
+                area.addEventListener('click', function() {
+                    this.style.fill = '#10b981';
+                    setTimeout(() => {
+                        this.style.fill = '#065f46';
+                    }, 300);
+                });
+            });
+
+            // 可清理藤蔓交互
+            const clearableVines = document.querySelectorAll('.clearable-vines rect');
+            clearableVines.forEach(vine => {
+                vine.addEventListener('click', function() {
+                    if (confirm('清理这片藤蔓吗？')) {
+                        this.style.opacity = '0.3';
+                        this.style.fill = '#6b7280';
+                    }
+                });
+            });
+
+            // 出生点选择
+            const spawnPoints = document.querySelectorAll('.spawn-points > g');
+            spawnPoints.forEach(point => {
+                point.addEventListener('click', function() {
+                    // 移除其他选中状态
+                    spawnPoints.forEach(p => {
+                        p.querySelector('ellipse').style.strokeWidth = p.querySelector('ellipse').getAttribute('stroke-width');
+                    });
+                    // 高亮当前选择
+                    const ellipse = this.querySelector('ellipse');
+                    ellipse.style.strokeWidth = '5';
+                });
+            });
+
+            // 动态叶子效果
+            const leaves = document.querySelectorAll('.leaf-float ellipse');
+            leaves.forEach((leaf, index) => {
+                leaf.style.animationDelay = `${Math.random() * 2}s`;
+                leaf.style.animationDuration = `${4 + Math.random() * 4}s`;
+            });
+        });
+    </script>
+</body>
+</html>
