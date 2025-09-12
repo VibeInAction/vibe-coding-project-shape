@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js特效展示中心 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .effect-card {
+            transition: all 0.3s ease;
+        }
+        
+        .effect-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .bg-pattern {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen text-white">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left text-gray-400"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-magic text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        Three.js特效展示中心
+                    </span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span class="text-white">游戏主页</span>
+                    </a>
+                    <a href="prototype-showcase.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-gamepad text-yellow-400"></i>
+                        <span class="text-white">原型展示</span>
+                    </a>
+                    <a href="index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-cube text-purple-400"></i>
+                        <span class="text-white">游戏引擎</span>
+                    </a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+            <div class="px-4 py-2 space-y-1">
+                <a href="../index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏主页</a>
+                <a href="prototype-showcase.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">原型展示</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏引擎</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-24 pb-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                特效展示中心
+            </h1>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                探索几何境域的视觉特效系统，体验四大种族的独特视觉效果和交互式特效演示
+            </p>
+        </div>
+
+        <!-- Effect Categories Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Combat Effects -->
+            <a href="threejs-effects-combat.html" class="effect-card group">
+                <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 h-full hover:border-red-500 transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-sword text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">战斗特效</h3>
+                    <p class="text-gray-400 text-sm">
+                        攻击、技能、防御特效展示
+                    </p>
+                    <div class="mt-4 flex items-center text-red-400 group-hover:text-red-300">
+                        <span class="text-sm">查看演示</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Resource Effects -->
+            <a href="threejs-effects-resource.html" class="effect-card group">
+                <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 h-full hover:border-green-500 transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-gem text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">资源特效</h3>
+                    <p class="text-gray-400 text-sm">
+                        采集、建造、升级特效
+                    </p>
+                    <div class="mt-4 flex items-center text-green-400 group-hover:text-green-300">
+                        <span class="text-sm">查看演示</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Environment Effects -->
+            <a href="threejs-effects-environment.html" class="effect-card group">
+                <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 h-full hover:border-blue-500 transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-cloud text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">环境特效</h3>
+                    <p class="text-gray-400 text-sm">
+                        地形、天气、动态效果
+                    </p>
+                    <div class="mt-4 flex items-center text-blue-400 group-hover:text-blue-300">
+                        <span class="text-sm">查看演示</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- UI Effects -->
+            <a href="threejs-effects-ui.html" class="effect-card group">
+                <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 h-full hover:border-purple-500 transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-hand-pointer text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">UI特效</h3>
+                    <p class="text-gray-400 text-sm">
+                        按钮交互、状态指示
+                    </p>
+                    <div class="mt-4 flex items-center text-purple-400 group-hover:text-purple-300">
+                        <span class="text-sm">查看演示</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Featured Effects -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">精选特效预览</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Circle Race Effect -->
+                <div class="text-center">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <div class="absolute inset-0 bg-blue-500/20 rounded-full animate-ping"></div>
+                        <div class="relative w-full h-full bg-blue-500/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-circle text-4xl text-blue-400"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-white mb-1">圆环族共鸣</h3>
+                    <p class="text-sm text-gray-400">多层波纹扩散效果</p>
+                </div>
+
+                <!-- Triangle Race Effect -->
+                <div class="text-center">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <i class="fas fa-play text-4xl text-red-400 transform rotate-90"></i>
+                            <div class="absolute inset-0 border-4 border-red-500/30 rounded-lg animate-pulse"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-white mb-1">三角议会能量</h3>
+                    <p class="text-sm text-gray-400">锐利能量束效果</p>
+                </div>
+
+                <!-- Square Race Effect -->
+                <div class="text-center">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <i class="fas fa-square text-4xl text-green-400"></i>
+                            <div class="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1">
+                                <div class="border border-green-500/30 rounded"></div>
+                                <div class="border border-green-500/30 rounded"></div>
+                                <div class="border border-green-500/30 rounded"></div>
+                                <div class="border border-green-500/30 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-white mb-1">方碑盟约网格</h3>
+                    <p class="text-sm text-gray-400">数字化网格投影</p>
+                </div>
+
+                <!-- Spiral Race Effect -->
+                <div class="text-center">
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <i class="fas fa-hurricane text-4xl text-purple-400 rotate-slow"></i>
+                            <div class="absolute inset-0 bg-purple-500/10 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-white mb-1">螺旋之子藤蔓</h3>
+                    <p class="text-sm text-gray-400">有机生长螺旋效果</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Info -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gray-800 rounded-xl p-6 text-center">
+                <i class="fas fa-cube text-3xl text-indigo-400 mb-3"></i>
+                <h3 class="font-bold text-white mb-2">Three.js r128</h3>
+                <p class="text-sm text-gray-400">强大的WebGL 3D渲染引擎</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 text-center">
+                <i class="fas fa-rocket text-3xl text-yellow-400 mb-3"></i>
+                <h3 class="font-bold text-white mb-2">高性能优化</h3>
+                <p class="text-sm text-gray-400">支持2000+粒子流畅运行</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 text-center">
+                <i class="fas fa-palette text-3xl text-pink-400 mb-3"></i>
+                <h3 class="font-bold text-white mb-2">后处理效果</h3>
+                <p class="text-sm text-gray-400">辉光、色调映射等视觉效果</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2024 几何境域：形态之战 - Three.js特效展示中心</p>
+            <p class="text-sm mt-2">探索几何世界的视觉魅力</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Add entrance animations
+            const cards = document.querySelectorAll('.effect-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>战斗特效演示 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0f172a;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 10;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .effect-button {
+            @apply w-full p-3 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all duration-200 text-white font-medium;
+        }
+        
+        .effect-button.active {
+            @apply bg-red-600 hover:bg-red-500;
+        }
+        
+        .effect-button.circle-active {
+            @apply bg-blue-600 hover:bg-blue-500;
+        }
+        
+        .effect-button.square-active {
+            @apply bg-green-600 hover:bg-green-500;
+        }
+        
+        .effect-button.spiral-active {
+            @apply bg-purple-600 hover:bg-purple-500;
+        }
+        
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 10;
+            max-width: 300px;
+        }
+        
+        .control-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .control-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        
+        .control-panel::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: 3px;
+        }
+        
+        .control-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.7);
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <!-- 返回链接 -->
+    <a href="threejs-effects-hub.html" class="back-link bg-gray-800/90 backdrop-blur-md text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition flex items-center space-x-2">
+        <i class="fas fa-arrow-left"></i>
+        <span>返回特效中心</span>
+    </a>
+    
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <h2 class="text-xl font-bold mb-4 text-white">战斗特效控制</h2>
+        
+        <!-- 特效选择 -->
+        <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">基础攻击特效</h3>
+            <button class="effect-button circle-active" data-effect="circle-attack">圆环族攻击</button>
+            <button class="effect-button" data-effect="triangle-attack">三角议会攻击</button>
+            <button class="effect-button" data-effect="square-attack">方碑盟约攻击</button>
+            <button class="effect-button" data-effect="spiral-attack">螺旋之子攻击</button>
+        </div>
+        
+        <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">英雄技能特效</h3>
+            <button class="effect-button" data-effect="circle-shield">共鸣护盾</button>
+            <button class="effect-button" data-effect="triangle-destruct">三角毁灭</button>
+            <button class="effect-button" data-effect="square-fold">空间折叠</button>
+            <button class="effect-button" data-effect="spiral-tree">生命之树</button>
+        </div>
+        
+        <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">防御特效</h3>
+            <button class="effect-button" data-effect="dodge">闪避特效</button>
+        </div>
+        
+        <!-- 参数控制 -->
+        <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">特效参数</h3>
+            
+            <div class="mb-3">
+                <label class="text-xs text-gray-400">强度</label>
+                <input type="range" id="intensity" min="0" max="100" value="50" 
+                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <span id="intensityValue" class="text-xs text-gray-400">50</span>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-xs text-gray-400">速度</label>
+                <input type="range" id="speed" min="0.1" max="5" step="0.1" value="1" 
+                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <span id="speedValue" class="text-xs text-gray-400">1.0</span>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-xs text-gray-400">规模</label>
+                <input type="range" id="scale" min="0.5" max="3" step="0.1" value="1" 
+                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <span id="scaleValue" class="text-xs text-gray-400">1.0</span>
+            </div>
+        </div>
+        
+        <!-- 后处理效果 -->
+        <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-2">后处理效果</h3>
+            <label class="flex items-center text-sm text-gray-300 mb-2">
+                <input type="checkbox" id="bloom" checked class="mr-2">
+                辉光效果
+            </label>
+            <div class="mb-3">
+                <label class="text-xs text-gray-400">辉光强度</label>
+                <input type="range" id="bloomIntensity" min="0" max="3" step="0.1" value="1" 
+                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+        
+        <!-- 相机控制 -->
+        <div>
+            <button id="resetCamera" class="effect-button">重置视角</button>
+        </div>
+    </div>
+    
+    <!-- 信息面板 -->
+    <div class="info-panel">
+        <h3 class="text-lg font-bold text-white mb-2">当前特效</h3>
+        <p id="effectDescription" class="text-sm text-gray-300">
+            圆环族攻击 - 蓝色能量圆环扩散，带有粒子尾迹
+        </p>
+        <div class="mt-3 text-xs text-gray-400">
+            <p>• 鼠标左键：旋转视角</p>
+            <p>• 鼠标右键：平移视角</p>
+            <p>• 滚轮：缩放</p>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let scene, camera, renderer, composer;
+        let controls;
+        let currentEffect = null;
+        let effectObjects = [];
+        let animationId = null;
+        
+        // 特效参数
+        const params = {
+            intensity: 0.5,
+            speed: 1.0,
+            scale: 1.0,
+            bloom: true,
+            bloomIntensity: 1.0
+        };
+        
+        // 初始化Three.js场景
+        function init() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 100);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 10, 30);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 1.5;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // 创建控制器
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 100;
+            controls.minDistance = 5;
+            
+            // 添加环境光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            // 添加点光源
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(10, 10, 10);
+            scene.add(pointLight);
+            
+            // 创建后处理
+            setupPostProcessing();
+            
+            // 添加网格地板
+            const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x222222);
+            scene.add(gridHelper);
+            
+            // 初始化特效
+            createCircleAttackEffect();
+            
+            // 设置事件监听
+            setupEventListeners();
+            
+            // 开始动画循环
+            animate();
+        }
+        
+        // 设置后处理
+        function setupPostProcessing() {
+            composer = new THREE.EffectComposer(renderer);
+            
+            const renderPass = new THREE.RenderPass(scene, camera);
+            composer.addPass(renderPass);
+            
+            const bloomPass = new THREE.UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5, // strength
+                0.4, // radius
+                0.85 // threshold
+            );
+            composer.addPass(bloomPass);
+            
+            // 保存引用以便调整
+            window.bloomPass = bloomPass;
+        }
+        
+        // 清理当前特效
+        function clearCurrentEffect() {
+            effectObjects.forEach(obj => {
+                scene.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+                if (obj.children) {
+                    obj.children.forEach(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) child.material.dispose();
+                    });
+                }
+            });
+            effectObjects = [];
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+        
+        // 创建圆环族攻击效果
+        function createCircleAttackEffect() {
+            clearCurrentEffect();
+            
+            // 创建主圆环
+            const ringGeometry = new THREE.RingGeometry(3, 4, 64);
+            const ringMaterial = new THREE.MeshBasicMaterial({
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            });
+            
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 5;
+            ring.userData = {
+                type: 'attack-ring',
+                phase: 0,
+                scale: 0.1
+            };
+            
+            scene.add(ring);
+            effectObjects.push(ring);
+            
+            // 创建粒子尾迹
+            const particleCount = 100;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 3 + Math.random() * 2;
+                
+                positions[i * 3] = Math.cos(angle) * radius;
+                positions[i * 3 + 1] = 5 + Math.random() * 2;
+                positions[i * 3 + 2] = Math.sin(angle) * radius;
+                
+                velocities[i * 3] = Math.cos(angle) * 0.2;
+                velocities[i * 3 + 1] = 0.1;
+                velocities[i * 3 + 2] = Math.sin(angle) * 0.2;
+                
+                colors[i * 3] = 0.2 + Math.random() * 0.3;
+                colors[i * 3 + 1] = 0.5 + Math.random() * 0.3;
+                colors[i * 3 + 2] = 1.0;
+            }
+            
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 0.3,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            particles.userData = {
+                type: 'attack-particles',
+                velocities: velocities,
+                life: new Float32Array(particleCount).fill(1.0)
+            };
+            
+            scene.add(particles);
+            effectObjects.push(particles);
+            
+            // 创建冲击波
+            const shockwaveGeometry = new THREE.RingGeometry(0.1, 1, 64);
+            const shockwaveMaterial = new THREE.MeshBasicMaterial({
+                color: 0x60a5fa,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide
+            });
+            
+            const shockwave = new THREE.Mesh(shockwaveGeometry, shockwaveMaterial);
+            shockwave.rotation.x = Math.PI / 2;
+            shockwave.position.y = 0.1;
+            shockwave.userData = {
+                type: 'shockwave',
+                phase: 0
+            };
+            
+            scene.add(shockwave);
+            effectObjects.push(shockwave);
+            
+            updateEffectDescription('圆环族攻击', '蓝色能量圆环扩散，带有粒子尾迹');
+            
+            // 开始攻击动画
+            animateAttack();
+        }
+        
+        // 攻击动画
+        function animateAttack() {
+            const ring = effectObjects.find(obj => obj.userData.type === 'attack-ring');
+            const particles = effectObjects.find(obj => obj.userData.type === 'attack-particles');
+            const shockwave = effectObjects.find(obj => obj.userData.type === 'shockwave');
+            
+            if (!ring || !particles || !shockwave) return;
+            
+            ring.userData.phase += 0.02 * params.speed;
+            
+            // 圆环扩散动画
+            if (ring.userData.phase < 1) {
+                ring.userData.scale = 0.1 + ring.userData.phase * 2;
+                ring.scale.set(ring.userData.scale * params.scale, ring.userData.scale * params.scale, ring.userData.scale * params.scale);
+                ring.material.opacity = 0.8 * (1 - ring.userData.phase) * params.intensity;
+            }
+            
+            // 粒子动画
+            const positions = particles.geometry.attributes.position.array;
+            const velocities = particles.userData.velocities;
+            const life = particles.userData.life;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] += velocities[i * 3] * params.speed;
+                positions[i + 1] += velocities[i * 3 + 1] * params.speed;
+                positions[i + 2] += velocities[i * 3 + 2] * params.speed;
+                
+                life[i / 3] -= 0.01 * params.speed;
+                
+                if (life[i / 3] <= 0) {
+                    life[i / 3] = 1.0;
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = 3 + Math.random() * 2;
+                    positions[i] = Math.cos(angle) * radius;
+                    positions[i + 1] = 5 + Math.random() * 2;
+                    positions[i + 2] = Math.sin(angle) * radius;
+                }
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // 冲击波动画
+            if (ring.userData.phase > 0.8) {
+                shockwave.userData.phase += 0.05 * params.speed;
+                shockwave.scale.set(shockwave.userData.phase * 10 * params.scale, 1, shockwave.userData.phase * 10 * params.scale);
+                shockwave.material.opacity = (1 - shockwave.userData.phase) * 0.5 * params.intensity;
+            }
+            
+            // 循环动画
+            if (ring.userData.phase >= 1.2) {
+                ring.userData.phase = 0;
+                shockwave.userData.phase = 0;
+            }
+            
+            animationId = requestAnimationFrame(animateAttack);
+        }
+        
+        // 创建三角议会攻击效果
+        function createTriangleAttackEffect() {
+            clearCurrentEffect();
+            
+            // 创建三角形能量束
+            const triangleGroup = new THREE.Group();
+            
+            // 三个顶点
+            const vertices = [];
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2 - Math.PI / 2;
+                const x = Math.cos(angle) * 8;
+                const z = Math.sin(angle) * 8;
+                
+                const sphereGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                const sphereMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xef4444,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.8
+                });
+                
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(x, 2, z);
+                triangleGroup.add(sphere);
+                vertices.push(new THREE.Vector3(x, 2, z));
+                effectObjects.push(sphere);
+            }
+            
+            // 创建能量束
+            for (let i = 0; i < 3; i++) {
+                const next = (i + 1) % 3;
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                    vertices[i],
+                    vertices[next]
+                ]);
+                
+                const lineMaterial = new THREE.LineBasicMaterial({
+                    color: 0xff6b6b,
+                    transparent: true,
+                    opacity: 0.8,
+                    linewidth: 3
+                });
+                
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                triangleGroup.add(line);
+                effectObjects.push(line);
+            }
+            
+            triangleGroup.userData = {
+                type: 'triangle-attack',
+                rotation: 0
+            };
+            
+            scene.add(triangleGroup);
+            effectObjects.push(triangleGroup);
+            
+            // 创建中心爆炸
+            const explosionParticles = createExplosion(0xff6b6b, 200);
+            explosionParticles.position.y = 2;
+            scene.add(explosionParticles);
+            effectObjects.push(explosionParticles);
+            
+            updateEffectDescription('三角议会攻击', '红色三角形能量束，尖锐穿透感');
+            
+            animateTriangleAttack();
+        }
+        
+        // 三角攻击动画
+        function animateTriangleAttack() {
+            const triangleGroup = effectObjects.find(obj => obj.userData.type === 'triangle-attack');
+            const explosion = effectObjects.find(obj => obj.userData.type === 'explosion');
+            
+            if (!triangleGroup || !explosion) return;
+            
+            triangleGroup.userData.rotation += 0.01 * params.speed;
+            triangleGroup.rotation.y = triangleGroup.userData.rotation;
+            
+            // 爆炸粒子动画
+            const positions = explosion.geometry.attributes.position.array;
+            const velocities = explosion.userData.velocities;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] += velocities[i] * params.speed;
+                positions[i + 1] += velocities[i + 1] * params.speed;
+                positions[i + 2] += velocities[i + 2] * params.speed;
+                
+                // 重力
+                velocities[i + 1] -= 0.01 * params.speed;
+            }
+            
+            explosion.geometry.attributes.position.needsUpdate = true;
+            
+            animationId = requestAnimationFrame(animateTriangleAttack);
+        }
+        
+        // 创建爆炸效果
+        function createExplosion(color, count) {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const velocities = new Float32Array(count * 3);
+            
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = 0;
+                positions[i * 3 + 1] = 0;
+                positions[i * 3 + 2] = 0;
+                
+                const speed = 0.1 + Math.random() * 0.2;
+                const angle = Math.random() * Math.PI * 2;
+                const elevation = Math.random() * Math.PI - Math.PI / 2;
+                
+                velocities[i * 3] = Math.cos(angle) * Math.cos(elevation) * speed;
+                velocities[i * 3 + 1] = Math.sin(elevation) * speed;
+                velocities[i * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * speed;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: color,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particles = new THREE.Points(geometry, material);
+            particles.userData = {
+                type: 'explosion',
+                velocities: velocities
+            };
+            
+            return particles;
+        }
+        
+        // 创建方碑盟约攻击效果
+        function createSquareAttackEffect() {
+            clearCurrentEffect();
+            
+            // 创建方块能量体
+            const cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+            const cubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x10b981,
+                transparent: true,
+                opacity: 0.8,
+                wireframe: true
+            });
+            
+            const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            cube.position.y = 10;
+            cube.userData = {
+                type: 'square-projectile',
+                velocity: new THREE.Vector3(0, -0.3, 0),
+                rotation: { x: 0, y: 0, z: 0 }
+            };
+            
+            scene.add(cube);
+            effectObjects.push(cube);
+            
+            // 创建网格投影
+            const gridGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
+            const gridMaterial = new THREE.MeshBasicMaterial({
+                color: 0x10b981,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            const grid = new THREE.Mesh(gridGeometry, gridMaterial);
+            grid.rotation.x = -Math.PI / 2;
+            grid.position.y = 0.1;
+            grid.userData = {
+                type: 'square-grid-projection',
+                scale: 0.1
+            };
+            
+            scene.add(grid);
+            effectObjects.push(grid);
+            
+            updateEffectDescription('方碑盟约攻击', '绿色方形能量块，规整稳定');
+            
+            animateSquareAttack();
+        }
+        
+        // 方块攻击动画
+        function animateSquareAttack() {
+            const cube = effectObjects.find(obj => obj.userData.type === 'square-projectile');
+            const grid = effectObjects.find(obj => obj.userData.type === 'square-grid-projection');
+            
+            if (!cube || !grid) return;
+            
+            // 方块下落
+            cube.position.add(cube.userData.velocity.clone().multiplyScalar(params.speed));
+            cube.userData.rotation.x += 0.02 * params.speed;
+            cube.userData.rotation.y += 0.03 * params.speed;
+            cube.rotation.set(cube.userData.rotation.x, cube.userData.rotation.y, cube.userData.rotation.z);
+            
+            // 网格投影
+            const distance = cube.position.y;
+            if (distance < 10 && distance > 0) {
+                grid.userData.scale = (10 - distance) / 10;
+                grid.scale.set(grid.userData.scale * params.scale, 1, grid.userData.scale * params.scale);
+                grid.material.opacity = grid.userData.scale * 0.5 * params.intensity;
+            }
+            
+            // 碰撞检测
+            if (cube.position.y <= 2) {
+                // 创建方块化爆炸
+                const explosion = createCubeExplosion(cube.position);
+                scene.add(explosion);
+                effectObjects.push(explosion);
+                
+                // 重置方块
+                cube.position.y = 10;
+                cube.userData.rotation = { x: 0, y: 0, z: 0 };
+            }
+            
+            animationId = requestAnimationFrame(animateSquareAttack);
+        }
+        
+        // 创建方块化爆炸
+        function createCubeExplosion(position) {
+            const group = new THREE.Group();
+            const cubeCount = 50;
+            
+            for (let i = 0; i < cubeCount; i++) {
+                const size = 0.2 + Math.random() * 0.3;
+                const geometry = new THREE.BoxGeometry(size, size, size);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x10b981,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.copy(position);
+                
+                const velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.3,
+                    Math.random() * 0.3,
+                    (Math.random() - 0.5) * 0.3
+                );
+                
+                cube.userData = {
+                    velocity: velocity,
+                    rotation: {
+                        x: Math.random() * 0.1,
+                        y: Math.random() * 0.1,
+                        z: Math.random() * 0.1
+                    }
+                };
+                
+                group.add(cube);
+            }
+            
+            group.userData = {
+                type: 'cube-explosion'
+            };
+            
+            // 动画
+            const animateExplosion = () => {
+                let allDead = true;
+                
+                group.children.forEach(cube => {
+                    cube.position.add(cube.userData.velocity.clone().multiplyScalar(params.speed));
+                    cube.userData.velocity.y -= 0.01 * params.speed; // 重力
+                    cube.rotation.x += cube.userData.rotation.x * params.speed;
+                    cube.rotation.y += cube.userData.rotation.y * params.speed;
+                    cube.rotation.z += cube.userData.rotation.z * params.speed;
+                    
+                    cube.material.opacity *= 0.98;
+                    
+                    if (cube.material.opacity > 0.01) {
+                        allDead = false;
+                    }
+                });
+                
+                if (!allDead) {
+                    requestAnimationFrame(animateExplosion);
+                } else {
+                    scene.remove(group);
+                }
+            };
+            
+            animateExplosion();
+            return group;
+        }
+        
+        // 创建螺旋之子攻击效果
+        function createSpiralAttackEffect() {
+            clearCurrentEffect();
+            
+            // 创建螺旋能量流
+            const spiralGroup = new THREE.Group();
+            
+            // 螺旋路径
+            const curve = new THREE.CatmullRomCurve3([]);
+            const points = [];
+            
+            for (let i = 0; i <= 50; i++) {
+                const t = i / 50;
+                const angle = t * Math.PI * 6;
+                const radius = t * 5;
+                const height = t * 15;
+                
+                points.push(new THREE.Vector3(
+                    Math.cos(angle) * radius,
+                    height,
+                    Math.sin(angle) * radius
+                ));
+            }
+            
+            curve.points = points;
+            
+            // 螺旋管道
+            const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.5, 8, false);
+            const tubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x8b5cf6,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            spiralGroup.add(tube);
+            effectObjects.push(tube);
+            
+            // 沿螺旋的能量球
+            for (let i = 0; i < 10; i++) {
+                const sphereGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                const sphereMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xa78bfa,
+                    emissive: 0x8b5cf6,
+                    emissiveIntensity: 0.5
+                });
+                
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.userData = {
+                    type: 'spiral-energy',
+                    t: i / 10,
+                    speed: 0.02 + Math.random() * 0.02
+                };
+                
+                spiralGroup.add(sphere);
+                effectObjects.push(sphere);
+            }
+            
+            spiralGroup.userData = {
+                type: 'spiral-attack',
+                rotation: 0
+            };
+            
+            scene.add(spiralGroup);
+            effectObjects.push(spiralGroup);
+            
+            updateEffectDescription('螺旋之子攻击', '紫色螺旋能量流，有机生长感');
+            
+            animateSpiralAttack();
+        }
+        
+        // 螺旋攻击动画
+        function animateSpiralAttack() {
+            const spiralGroup = effectObjects.find(obj => obj.userData.type === 'spiral-attack');
+            
+            if (!spiralGroup) return;
+            
+            spiralGroup.userData.rotation += 0.005 * params.speed;
+            spiralGroup.rotation.y = spiralGroup.userData.rotation;
+            
+            // 更新能量球位置
+            spiralGroup.children.forEach(child => {
+                if (child.userData.type === 'spiral-energy') {
+                    child.userData.t += child.userData.speed * params.speed;
+                    if (child.userData.t > 1) child.userData.t = 0;
+                    
+                    const t = child.userData.t;
+                    const angle = t * Math.PI * 6;
+                    const radius = t * 5;
+                    const height = t * 15;
+                    
+                    child.position.set(
+                        Math.cos(angle) * radius,
+                        height,
+                        Math.sin(angle) * radius
+                    );
+                }
+            });
+            
+            animationId = requestAnimationFrame(animateSpiralAttack);
+        }
+        
+        // 创建共鸣护盾效果
+        function createCircleShieldEffect() {
+            clearCurrentEffect();
+            
+            // 创建多层护盾
+            for (let i = 0; i < 5; i++) {
+                const radius = 3 + i * 0.5;
+                const geometry = new THREE.SphereGeometry(radius, 32, 32);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x3b82f6,
+                    transparent: true,
+                    opacity: 0.2,
+                    wireframe: true
+                });
+                
+                const shield = new THREE.Mesh(geometry, material);
+                shield.userData = {
+                    type: 'shield-layer',
+                    index: i,
+                    phase: Math.random() * Math.PI * 2,
+                    baseRadius: radius
+                };
+                
+                scene.add(shield);
+                effectObjects.push(shield);
+            }
+            
+            // 创建护盾粒子
+            const shieldParticles = createShieldParticles();
+            scene.add(shieldParticles);
+            effectObjects.push(shieldParticles);
+            
+            updateEffectDescription('共鸣护盾', '多层圆环护盾，共振波纹');
+            
+            animateShield();
+        }
+        
+        // 创建护盾粒子
+        function createShieldParticles() {
+            const particleCount = 300;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const angles = new Float32Array(particleCount);
+            const radii = new Float32Array(particleCount);
+            const heights = new Float32Array(particleCount);
+            
+            for (let i = 0; i < particleCount; i++) {
+                angles[i] = Math.random() * Math.PI * 2;
+                radii[i] = 3 + Math.random() * 2;
+                heights[i] = Math.random() * 6 - 3;
+                
+                positions[i * 3] = Math.cos(angles[i]) * radii[i];
+                positions[i * 3 + 1] = heights[i];
+                positions[i * 3 + 2] = Math.sin(angles[i]) * radii[i];
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0x60a5fa,
+                size: 0.2,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particles = new THREE.Points(geometry, material);
+            particles.userData = {
+                type: 'shield-particles',
+                angles: angles,
+                radii: radii,
+                heights: heights
+            };
+            
+            return particles;
+        }
+        
+        // 护盾动画
+        function animateShield() {
+            const shields = effectObjects.filter(obj => obj.userData.type === 'shield-layer');
+            const particles = effectObjects.find(obj => obj.userData.type === 'shield-particles');
+            
+            if (!shields.length || !particles) return;
+            
+            shields.forEach(shield => {
+                shield.userData.phase += 0.01 * params.speed;
+                const scale = 1 + Math.sin(shield.userData.phase) * 0.1 * params.intensity;
+                shield.scale.set(scale * params.scale, scale * params.scale, scale * params.scale);
+            });
+            
+            // 粒子旋转
+            const positions = particles.geometry.attributes.position.array;
+            const angles = particles.userData.angles;
+            const radii = particles.userData.radii;
+            const heights = particles.userData.heights;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                angles[i / 3] += 0.01 * params.speed;
+                positions[i] = Math.cos(angles[i / 3]) * radii[i / 3];
+                positions[i + 2] = Math.sin(angles[i / 3]) * radii[i / 3];
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            animationId = requestAnimationFrame(animateShield);
+        }
+        
+        // 创建三角毁灭效果
+        function createTriangleDestructEffect() {
+            clearCurrentEffect();
+            
+            // 创建巨型三角形能量场
+            const triangleSize = 15;
+            const triangleGeometry = new THREE.CircleGeometry(triangleSize, 3);
+            const triangleMaterial = new THREE.MeshBasicMaterial({
+                color: 0xef4444,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            
+            const triangle = new THREE.Mesh(triangleGeometry, triangleMaterial);
+            triangle.rotation.x = -Math.PI / 2;
+            triangle.position.y = 0.1;
+            triangle.userData = {
+                type: 'destruction-field',
+                phase: 0
+            };
+            
+            scene.add(triangle);
+            effectObjects.push(triangle);
+            
+            // 创建能量汇聚效果
+            const convergenceGroup = new THREE.Group();
+            
+            for (let i = 0; i < 20; i++) {
+                const angle = (i / 20) * Math.PI * 2;
+                const radius = 10 + Math.random() * 5;
+                
+                const beamGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1);
+                const beamMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xff6b6b,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                
+                const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+                beam.position.set(
+                    Math.cos(angle) * radius,
+                    5,
+                    Math.sin(angle) * radius
+                );
+                beam.lookAt(0, 0, 0);
+                beam.userData = {
+                    type: 'convergence-beam',
+                    angle: angle,
+                    radius: radius,
+                    height: 5
+                };
+                
+                convergenceGroup.add(beam);
+            }
+            
+            scene.add(convergenceGroup);
+            effectObjects.push(convergenceGroup);
+            
+            updateEffectDescription('三角毁灭', '巨型三角形能量场，毁灭性打击');
+            
+            animateTriangleDestruction();
+        }
+        
+        // 三角毁灭动画
+        function animateTriangleDestruction() {
+            const field = effectObjects.find(obj => obj.userData.type === 'destruction-field');
+            const convergence = effectObjects.find(obj => obj.children && obj.children[0]?.userData.type === 'convergence-beam');
+            
+            if (!field || !convergence) return;
+            
+            field.userData.phase += 0.005 * params.speed;
+            
+            // 能量场脉动
+            const scale = 1 + Math.sin(field.userData.phase * 2) * 0.2 * params.intensity;
+            field.scale.set(scale * params.scale, 1, scale * params.scale);
+            field.material.opacity = 0.3 + Math.sin(field.userData.phase * 3) * 0.2 * params.intensity;
+            
+            // 能量汇聚
+            convergence.children.forEach(beam => {
+                beam.userData.height -= 0.05 * params.speed;
+                if (beam.userData.height < 0) beam.userData.height = 5;
+                
+                beam.position.y = beam.userData.height;
+                beam.scale.y = beam.userData.height;
+            });
+            
+            animationId = requestAnimationFrame(animateTriangleDestruction);
+        }
+        
+        // 创建空间折叠效果
+        function createSquareFoldEffect() {
+            clearCurrentEffect();
+            
+            // 创建多个折叠方块
+            const foldGroup = new THREE.Group();
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const geometry = new THREE.BoxGeometry(2, 0.1, 2);
+                    const material = new THREE.MeshBasicMaterial({
+                        color: 0x10b981,
+                        transparent: true,
+                        opacity: 0.6,
+                        wireframe: true
+                    });
+                    
+                    const tile = new THREE.Mesh(geometry, material);
+                    tile.position.set(
+                        (i - 2) * 2.5,
+                        0,
+                        (j - 2) * 2.5
+                    );
+                    tile.userData = {
+                        type: 'fold-tile',
+                        baseY: 0,
+                        phase: Math.random() * Math.PI * 2,
+                        offset: i + j
+                    };
+                    
+                    foldGroup.add(tile);
+                    effectObjects.push(tile);
+                }
+            }
+            
+            foldGroup.userData = {
+                type: 'fold-field',
+                rotation: 0
+            };
+            
+            scene.add(foldGroup);
+            effectObjects.push(foldGroup);
+            
+            updateEffectDescription('空间折叠', '方形区域扭曲效果，空间重组');
+            
+            animateSpaceFold();
+        }
+        
+        // 空间折叠动画
+        function animateSpaceFold() {
+            const foldGroup = effectObjects.find(obj => obj.userData.type === 'fold-field');
+            
+            if (!foldGroup) return;
+            
+            foldGroup.userData.rotation += 0.005 * params.speed;
+            foldGroup.rotation.y = foldGroup.userData.rotation;
+            
+            foldGroup.children.forEach(tile => {
+                tile.userData.phase += 0.02 * params.speed;
+                tile.position.y = tile.userData.baseY + Math.sin(tile.userData.phase + tile.userData.offset) * 2 * params.intensity;
+                tile.rotation.z = Math.sin(tile.userData.phase + tile.userData.offset) * 0.5 * params.intensity;
+            });
+            
+            animationId = requestAnimationFrame(animateSpaceFold);
+        }
+        
+        // 创建生命之树效果
+        function createSpiralTreeEffect() {
+            clearCurrentEffect();
+            
+            // 创建树干
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 1, 8);
+            const trunkMaterial = new THREE.MeshBasicMaterial({
+                color: 0x8b4513,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = 4;
+            scene.add(trunk);
+            effectObjects.push(trunk);
+            
+            // 创建螺旋树枝
+            const branchGroup = new THREE.Group();
+            
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const height = 2 + i * 0.8;
+                
+                const branchCurve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(0, height, 0),
+                    new THREE.Vector3(Math.cos(angle) * 2, height + 1, Math.sin(angle) * 2),
+                    new THREE.Vector3(Math.cos(angle) * 4, height + 2, Math.sin(angle) * 4)
+                ]);
+                
+                const tubeGeometry = new THREE.TubeGeometry(branchCurve, 20, 0.2, 4, false);
+                const tubeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x228b22,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                
+                const branch = new THREE.Mesh(tubeGeometry, tubeMaterial);
+                branch.userData = {
+                    type: 'tree-branch',
+                    growthPhase: 0
+                };
+                
+                branchGroup.add(branch);
+                effectObjects.push(branch);
+                
+                // 叶子
+                for (let j = 0; j < 5; j++) {
+                    const leafGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+                    const leafMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x32cd32,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    const leaf = new THREE.Mesh(leafGeometry, leafMaterial);
+                    const t = 0.5 + j * 0.1;
+                    const pos = branchCurve.getPoint(t);
+                    leaf.position.copy(pos);
+                    
+                    leaf.userData = {
+                        type: 'tree-leaf',
+                        growthPhase: j * 0.2
+                    };
+                    
+                    branchGroup.add(leaf);
+                    effectObjects.push(leaf);
+                }
+            }
+            
+            branchGroup.userData = {
+                type: 'life-tree',
+                growthPhase: 0
+            };
+            
+            scene.add(branchGroup);
+            effectObjects.push(branchGroup);
+            
+            // 创建治疗光点
+            const healParticles = createHealParticles();
+            scene.add(healParticles);
+            effectObjects.push(healParticles);
+            
+            updateEffectDescription('生命之树', '螺旋生长的能量树，治疗光点');
+            
+            animateLifeTree();
+        }
+        
+        // 创建治疗粒子
+        function createHealParticles() {
+            const particleCount = 100;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 6;
+                
+                positions[i * 3] = Math.cos(angle) * radius;
+                positions[i * 3 + 1] = Math.random() * 10;
+                positions[i * 3 + 2] = Math.sin(angle) * radius;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0x00ff00,
+                size: 0.3,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particles = new THREE.Points(geometry, material);
+            particles.userData = {
+                type: 'heal-particles',
+                velocities: new Float32Array(particleCount * 3)
+            };
+            
+            // 初始化速度
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                particles.userData.velocities[i] = (Math.random() - 0.5) * 0.02;
+                particles.userData.velocities[i + 1] = -0.02 - Math.random() * 0.02;
+                particles.userData.velocities[i + 2] = (Math.random() - 0.5) * 0.02;
+            }
+            
+            return particles;
+        }
+        
+        // 生命之树动画
+        function animateLifeTree() {
+            const tree = effectObjects.find(obj => obj.userData.type === 'life-tree');
+            const healParticles = effectObjects.find(obj => obj.userData.type === 'heal-particles');
+            
+            if (!tree || !healParticles) return;
+            
+            tree.userData.growthPhase += 0.01 * params.speed;
+            
+            // 树枝生长动画
+            tree.children.forEach(child => {
+                if (child.userData.type === 'tree-branch') {
+                    child.userData.growthPhase = Math.min(child.userData.growthPhase + 0.01 * params.speed, 1);
+                    child.scale.set(child.userData.growthPhase, child.userData.growthPhase, child.userData.growthPhase);
+                } else if (child.userData.type === 'tree-leaf') {
+                    child.userData.growthPhase = Math.min(child.userData.growthPhase + 0.01 * params.speed, 1);
+                    child.scale.set(child.userData.growthPhase, child.userData.growthPhase, child.userData.growthPhase);
+                }
+            });
+            
+            // 治疗粒子
+            const positions = healParticles.geometry.attributes.position.array;
+            const velocities = healParticles.userData.velocities;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] += velocities[i] * params.speed;
+                positions[i + 1] += velocities[i + 1] * params.speed;
+                positions[i + 2] += velocities[i + 2] * params.speed;
+                
+                // 重置粒子
+                if (positions[i + 1] < 0) {
+                    positions[i] = (Math.random() - 0.5) * 12;
+                    positions[i + 1] = 10 + Math.random() * 2;
+                    positions[i + 2] = (Math.random() - 0.5) * 12;
+                }
+            }
+            
+            healParticles.geometry.attributes.position.needsUpdate = true;
+            
+            animationId = requestAnimationFrame(animateLifeTree);
+        }
+        
+        // 创建闪避特效
+        function createDodgeEffect() {
+            clearCurrentEffect();
+            
+            // 创建角色残影
+            const ghostGroup = new THREE.Group();
+            
+            for (let i = 0; i < 5; i++) {
+                const geometry = new THREE.CapsuleGeometry(0.5, 2, 4, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x60a5fa,
+                    transparent: true,
+                    opacity: 0.3 - i * 0.05
+                });
+                
+                const ghost = new THREE.Mesh(geometry, material);
+                ghost.position.x = i * 2;
+                ghost.userData = {
+                    type: 'dodge-ghost',
+                    index: i
+                };
+                
+                ghostGroup.add(ghost);
+                effectObjects.push(ghost);
+            }
+            
+            ghostGroup.userData = {
+                type: 'dodge-effect',
+                phase: 0
+            };
+            
+            scene.add(ghostGroup);
+            effectObjects.push(ghostGroup);
+            
+            // 创建位移轨迹
+            const trailGeometry = new THREE.BufferGeometry();
+            const trailPositions = new Float32Array(50 * 3);
+            
+            for (let i = 0; i < 50; i++) {
+                trailPositions[i * 3] = i * 0.2;
+                trailPositions[i * 3 + 1] = 1;
+                trailPositions[i * 3 + 2] = 0;
+            }
+            
+            trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+            
+            const trailMaterial = new THREE.LineBasicMaterial({
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            trail.userData = {
+                type: 'dodge-trail',
+                phase: 0
+            };
+            
+            scene.add(trail);
+            effectObjects.push(trail);
+            
+            updateEffectDescription('闪避特效', '几何形状的残影，快速移动轨迹');
+            
+            animateDodge();
+        }
+        
+        // 闪避动画
+        function animateDodge() {
+            const dodgeGroup = effectObjects.find(obj => obj.userData.type === 'dodge-effect');
+            const trail = effectObjects.find(obj => obj.userData.type === 'dodge-trail');
+            
+            if (!dodgeGroup || !trail) return;
+            
+            dodgeGroup.userData.phase += 0.05 * params.speed;
+            
+            // 残影移动
+            dodgeGroup.children.forEach((ghost, index) => {
+                const offset = Math.sin(dodgeGroup.userData.phase + index * 0.5) * 5;
+                ghost.position.x = offset + index * 2;
+                ghost.material.opacity = (0.3 - index * 0.05) * (1 + Math.sin(dodgeGroup.userData.phase * 2) * 0.3) * params.intensity;
+            });
+            
+            // 轨迹动画
+            trail.userData.phase += 0.02 * params.speed;
+            const positions = trail.geometry.attributes.position.array;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] = i * 0.2 + Math.sin(trail.userData.phase + i * 0.1) * 2;
+            }
+            
+            trail.geometry.attributes.position.needsUpdate = true;
+            
+            animationId = requestAnimationFrame(animateDodge);
+        }
+        
+        // 更新效果描述
+        function updateEffectDescription(title, description) {
+            const descElement = document.getElementById('effectDescription');
+            descElement.innerHTML = `<strong>${title}</strong><br>${description}`;
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 特效按钮
+            document.querySelectorAll('.effect-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const effect = e.target.dataset.effect;
+                    
+                    // 更新按钮状态
+                    document.querySelectorAll('.effect-button').forEach(b => {
+                        b.classList.remove('active', 'circle-active', 'square-active', 'spiral-active');
+                    });
+                    
+                    // 根据特效类型设置按钮样式
+                    if (effect.includes('circle')) {
+                        e.target.classList.add('circle-active');
+                    } else if (effect.includes('square')) {
+                        e.target.classList.add('square-active');
+                    } else if (effect.includes('spiral')) {
+                        e.target.classList.add('spiral-active');
+                    } else {
+                        e.target.classList.add('active');
+                    }
+                    
+                    // 切换特效
+                    switch (effect) {
+                        case 'circle-attack':
+                            createCircleAttackEffect();
+                            break;
+                        case 'triangle-attack':
+                            createTriangleAttackEffect();
+                            break;
+                        case 'square-attack':
+                            createSquareAttackEffect();
+                            break;
+                        case 'spiral-attack':
+                            createSpiralAttackEffect();
+                            break;
+                        case 'circle-shield':
+                            createCircleShieldEffect();
+                            break;
+                        case 'triangle-destruct':
+                            createTriangleDestructEffect();
+                            break;
+                        case 'square-fold':
+                            createSquareFoldEffect();
+                            break;
+                        case 'spiral-tree':
+                            createSpiralTreeEffect();
+                            break;
+                        case 'dodge':
+                            createDodgeEffect();
+                            break;
+                    }
+                });
+            });
+            
+            // 参数滑块
+            const intensitySlider = document.getElementById('intensity');
+            intensitySlider.addEventListener('input', (e) => {
+                params.intensity = e.target.value / 100;
+                document.getElementById('intensityValue').textContent = e.target.value;
+            });
+            
+            const speedSlider = document.getElementById('speed');
+            speedSlider.addEventListener('input', (e) => {
+                params.speed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = e.target.value;
+            });
+            
+            const scaleSlider = document.getElementById('scale');
+            scaleSlider.addEventListener('input', (e) => {
+                params.scale = parseFloat(e.target.value);
+                document.getElementById('scaleValue').textContent = e.target.value;
+            });
+            
+            // 后处理控制
+            const bloomCheckbox = document.getElementById('bloom');
+            bloomCheckbox.addEventListener('change', (e) => {
+                params.bloom = e.target.checked;
+                if (window.bloomPass) {
+                    window.bloomPass.enabled = params.bloom;
+                }
+            });
+            
+            const bloomIntensitySlider = document.getElementById('bloomIntensity');
+            bloomIntensitySlider.addEventListener('input', (e) => {
+                params.bloomIntensity = parseFloat(e.target.value);
+                if (window.bloomPass) {
+                    window.bloomPass.strength = params.bloomIntensity;
+                }
+            });
+            
+            // 重置相机按钮
+            document.getElementById('resetCamera').addEventListener('click', () => {
+                camera.position.set(0, 10, 30);
+                camera.lookAt(0, 0, 0);
+                controls.reset();
+            });
+            
+            // 窗口大小调整
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // 窗口大小调整
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // 动画循环
+        let lastTime = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            
+            controls.update();
+            
+            // 使用后处理或普通渲染
+            if (params.bloom && composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
