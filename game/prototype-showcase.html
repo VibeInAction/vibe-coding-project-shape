@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏原型展示 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .prototype-card {
+            transition: all 0.3s ease;
+        }
+        
+        .prototype-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left text-gray-400"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
+                        <i class="fas fa-gamepad text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        游戏原型展示
+                    </span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span class="text-white">游戏主页</span>
+                    </a>
+                    <a href="../world-lore.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-globe text-purple-400"></i>
+                        <span class="text-white">世界观</span>
+                    </a>
+                    <a href="../story/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-book text-green-400"></i>
+                        <span class="text-white">故事剧情</span>
+                    </a>
+                    <a href="index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2 bg-gray-700/30">
+                        <i class="fas fa-gamepad text-yellow-400"></i>
+                        <span class="text-white">游戏原型</span>
+                    </a>
+                    <a href="../terrain/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-map text-orange-400"></i>
+                        <span class="text-white">地形图</span>
+                    </a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+            <div class="px-4 py-2 space-y-1">
+                <a href="../index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏主页</a>
+                <a href="../world-lore.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">世界观</a>
+                <a href="../story/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">故事剧情</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition bg-gray-700 text-white">游戏原型</a>
+                <a href="../terrain/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">地形图</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-24 pb-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">游戏原型展示</h1>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">探索几何境域的游戏原型设计，体验核心玩法和交互概念</p>
+            
+            <!-- Project Overview -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">项目概览</h2>
+                <p class="text-gray-300 mb-6">几何境域：形态之战是一款基于HTML5 Canvas 2D的网页游戏，融合了几何美学与现代游戏设计理念。</p>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-3xl font-bold text-blue-400 mb-1"><i class="fas fa-shapes"></i></div>
+                        <div class="text-sm text-gray-400">几何世界</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-green-400 mb-1"><i class="fas fa-users"></i></div>
+                        <div class="text-sm text-gray-400">多人对战</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-yellow-400 mb-1"><i class="fas fa-mobile-alt"></i></div>
+                        <div class="text-sm text-gray-400">跨平台</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-purple-400 mb-1"><i class="fas fa-puzzle-piece"></i></div>
+                        <div class="text-sm text-gray-400">模块化</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototypes Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Game Engine Prototype -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs">已完成</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-blue-600 to-purple-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-6xl text-white/20">
+                            <i class="fas fa-cogs rotate-slow"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">游戏引擎原型</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">基于Canvas 2D的游戏引擎，包含基础渲染系统、物理引擎和游戏循环</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            实时渲染系统
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            物理碰撞检测
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            游戏状态管理
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            事件系统
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a href="index.html" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition text-center">
+                            <i class="fas fa-play mr-2"></i>体验原型
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UI Concept Design -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-green-600 text-white px-3 py-1 rounded-full text-xs">已完成</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-purple-600 to-pink-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/30 rounded-lg pulse-glow"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                            <div class="w-12 h-12 bg-white/20 rounded-lg"></div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">UI概念设计</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">完整的UI/UX设计系统，包含PC端和移动端界面原型，展示游戏交互设计理念</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            PC端HUD设计
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            移动端适配方案
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            UI组件库
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            交互动效设计
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <a href="ui-concept.html" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition text-center">
+                            <i class="fas fa-eye mr-2"></i>查看设计
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combat System Prototype -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs">开发中</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-red-600 to-orange-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-6xl text-white/20">
+                            <i class="fas fa-sword float-animation"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">战斗系统原型</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">实时战斗系统，包含技能系统、伤害计算、战斗动画和特效系统</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            战斗逻辑框架
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            技能系统设计
+                        </div>
+                        <div class="flex items-center text-sm text-yellow-400">
+                            <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                            动画系统开发
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            特效系统
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-gray-700 text-white py-2 px-4 rounded-lg transition text-center cursor-not-allowed" disabled>
+                            <i class="fas fa-lock mr-2"></i>即将推出
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Multiplayer Prototype -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-gray-600 text-white px-3 py-1 rounded-full text-xs">计划中</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-cyan-600 to-blue-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-6xl text-white/20">
+                            <i class="fas fa-network-wired pulse-glow"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">网络多人原型</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">基于WebSocket的实时多人对战系统，支持房间匹配和同步机制</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            网络架构设计
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            房间管理系统
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            状态同步机制
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            延迟补偿
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-gray-700 text-white py-2 px-4 rounded-lg transition text-center cursor-not-allowed" disabled>
+                            <i class="fas fa-lock mr-2"></i>计划中
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI System Prototype -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-gray-600 text-white px-3 py-1 rounded-full text-xs">计划中</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-green-600 to-teal-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-6xl text-white/20">
+                            <i class="fas fa-brain float-animation"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">AI系统原型</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">智能AI系统，包含行为树、路径规划、决策系统和战术AI</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            行为树系统
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            A*寻路算法
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            状态机设计
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            战术AI
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-gray-700 text-white py-2 px-4 rounded-lg transition text-center cursor-not-allowed" disabled>
+                            <i class="fas fa-lock mr-2"></i>计划中
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resource Management Prototype -->
+            <div class="prototype-card bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-700 relative">
+                <div class="status-badge">
+                    <span class="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs">设计阶段</span>
+                </div>
+                <div class="h-48 bg-gradient-to-br from-yellow-600 to-amber-600 relative overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="relative">
+                            <i class="fas fa-coins text-6xl text-white/20 float-animation"></i>
+                            <i class="fas fa-gem text-4xl text-white/20 absolute -top-2 -right-2"></i>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 class="text-2xl font-bold text-white">资源管理系统</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-300 mb-4">完整的资源管理系统，包含资源采集、存储、交易和升级机制</p>
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            资源类型定义
+                        </div>
+                        <div class="flex items-center text-sm text-yellow-400">
+                            <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                            采集机制设计
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            存储系统
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-circle text-gray-500 mr-2"></i>
+                            交易系统
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-gray-700 text-white py-2 px-4 rounded-lg transition text-center cursor-not-allowed" disabled>
+                            <i class="fas fa-lock mr-2"></i>设计阶段
+                        </button>
+                        <button class="bg-gray-700 text-white py-2 px-4 rounded-lg transition cursor-not-allowed" disabled>
+                            <i class="fas fa-tasks"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">技术栈展示</h2>
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-orange-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fab fa-html5 text-3xl text-orange-500"></i>
+                        </div>
+                        <h3 class="font-bold text-white mb-1">HTML5</h3>
+                        <p class="text-sm text-gray-400">Canvas 2D/WebGL</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-blue-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fab fa-js text-3xl text-blue-500"></i>
+                        </div>
+                        <h3 class="font-bold text-white mb-1">JavaScript</h3>
+                        <p class="text-sm text-gray-400">ES6+ 模块化</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-cyan-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fab fa-css3-alt text-3xl text-cyan-500"></i>
+                        </div>
+                        <h3 class="font-bold text-white mb-1">Tailwind CSS</h3>
+                        <p class="text-sm text-gray-400">响应式设计</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-green-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fab fa-node-js text-3xl text-green-500"></i>
+                        </div>
+                        <h3 class="font-bold text-white mb-1">Node.js</h3>
+                        <p class="text-sm text-gray-400">服务器端</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-8 border-t border-gray-700">
+                    <h3 class="text-xl font-bold text-white mb-4 text-center">核心特性</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <i class="fas fa-bolt text-3xl text-yellow-400 mb-2"></i>
+                            <h4 class="font-bold text-white mb-1">高性能</h4>
+                            <p class="text-sm text-gray-400">优化渲染循环，60FPS流畅体验</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-expand-arrows-alt text-3xl text-blue-400 mb-2"></i>
+                            <h4 class="font-bold text-white mb-1">跨平台</h4>
+                            <p class="text-sm text-gray-400">支持PC、移动端多平台</p>
+                        </div>
+                        <div class="text-center">
+                            <i class="fas fa-puzzle-piece text-3xl text-purple-400 mb-2"></i>
+                            <h4 class="font-bold text-white mb-1">模块化</h4>
+                            <p class="text-sm text-gray-400">插件式架构，易于扩展</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Roadmap -->
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">开发路线图</h2>
+            <div class="relative">
+                <!-- Timeline -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gray-700"></div>
+                
+                <div class="space-y-12">
+                    <!-- Phase 1 -->
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <h3 class="text-xl font-bold text-white mb-2">第一阶段：基础框架</h3>
+                            <p class="text-gray-400">完成游戏引擎基础开发，实现核心渲染和物理系统</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <div class="text-sm text-gray-400">2024年8月 - 9月</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 2 -->
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <div class="text-sm text-gray-400">2024年10月 - 11月</div>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center z-10">
+                            <div class="w-3 h-3 bg-white rounded-full"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <h3 class="text-xl font-bold text-white mb-2">第二阶段：核心玩法</h3>
+                            <p class="text-gray-400">实现战斗系统、AI系统和资源管理</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 3 -->
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <h3 class="text-xl font-bold text-white mb-2">第三阶段：多人功能</h3>
+                            <p class="text-gray-400">开发网络对战、房间匹配和社交功能</p>
+                        </div>
+                        <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-clock text-white"></i>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <div class="text-sm text-gray-400">2024年12月 - 2025年1月</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Phase 4 -->
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <div class="text-sm text-gray-400">2025年2月 - 3月</div>
+                        </div>
+                        <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-flag text-white"></i>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <h3 class="text-xl font-bold text-white mb-2">第四阶段：发布准备</h3>
+                            <p class="text-gray-400">性能优化、测试和完善游戏内容</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <div class="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
+            <h2 class="text-3xl font-bold mb-4">参与开发</h2>
+            <p class="text-lg mb-6">我们正在寻找热爱游戏开发的伙伴，一起打造几何境域的世界</p>
+            <div class="flex justify-center space-x-4">
+                <a href="https://github.com/VibeInAction/vibe-coding-project-shape" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
+                    <i class="fab fa-github mr-2"></i>GitHub
+                </a>
+                <a href="../index.html" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition">
+                    返回主页
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2024 几何境域：形态之战 - 游戏原型展示</p>
+            <p class="text-sm mt-2">探索几何世界的无限可能</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Add entrance animations
+            const cards = document.querySelectorAll('.prototype-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

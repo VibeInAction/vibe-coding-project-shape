@@ -294,6 +294,26 @@
             80% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
+        
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            width: 100%;
+        }
     </style>
 </head>
 <body class="bg-gray-900">
@@ -301,14 +321,69 @@
     <div id="modeSelection" class="mode-selection">
         <div class="container mx-auto px-6">
             <!-- Navigation -->
-            <div class="absolute top-4 left-4 right-4 flex justify-between items-center">
-                <a href="../index.html" class="text-gray-400 hover:text-white transition text-sm">
-                    <i class="fas fa-arrow-left mr-2"></i>返回首页
-                </a>
-                <a href="../terrain/index.html" class="text-yellow-400 hover:text-yellow-300 transition text-sm">
-                    <i class="fas fa-map mr-2"></i>查看地形图
-                </a>
-            </div>
+            <nav class="absolute top-0 left-0 right-0 bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+                <div class="container mx-auto px-4">
+                    <div class="flex items-center justify-between h-16">
+                        <!-- Logo区域 -->
+                        <div class="flex items-center space-x-3">
+                            <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                                <i class="fas fa-arrow-left text-gray-400"></i>
+                            </a>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
+                                <i class="fas fa-gamepad text-white"></i>
+                            </div>
+                            <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                                游戏原型
+                            </span>
+                        </div>
+
+                        <!-- 桌面导航 -->
+                        <div class="hidden md:flex items-center space-x-1">
+                            <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                                <i class="fas fa-home text-blue-400"></i>
+                                <span class="text-white">游戏主页</span>
+                            </a>
+                            <a href="../world-lore.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                                <i class="fas fa-globe text-purple-400"></i>
+                                <span class="text-white">世界观</span>
+                            </a>
+                            <a href="../story/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                                <i class="fas fa-book text-green-400"></i>
+                                <span class="text-white">故事剧情</span>
+                            </a>
+                            <a href="index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2 bg-gray-700/30">
+                                <i class="fas fa-gamepad text-yellow-400"></i>
+                                <span class="text-white">游戏原型</span>
+                            </a>
+                            <a href="../terrain/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                                <i class="fas fa-map text-orange-400"></i>
+                                <span class="text-white">地形图</span>
+                            </a>
+                            <a href="prototype-showcase.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                                <i class="fas fa-th-large text-cyan-400"></i>
+                                <span class="text-white">原型展示</span>
+                            </a>
+                        </div>
+
+                        <!-- 移动端菜单按钮 -->
+                        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
+                            <i class="fas fa-bars text-xl text-white"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 移动端菜单 -->
+                <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+                    <div class="px-4 py-2 space-y-1">
+                        <a href="../index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏主页</a>
+                        <a href="../world-lore.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">世界观</a>
+                        <a href="../story/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">故事剧情</a>
+                        <a href="index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition bg-gray-700 text-white">游戏原型</a>
+                        <a href="../terrain/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">地形图</a>
+                        <a href="prototype-showcase.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">原型展示</a>
+                    </div>
+                </div>
+            </nav>
             
             <h2 class="text-4xl font-bold text-center mb-12 text-white mt-16">选择游戏模式</h2>
             <div class="flex flex-wrap justify-center">
@@ -456,6 +531,11 @@
             </button>
             <button onclick="selectRace('spiral')" class="race-btn px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition">
                 <i class="fas fa-sync mr-1"></i>螺旋之子
+            </button>
+        </div>
+        <div class="border-t border-gray-600 pt-3">
+            <button onclick="window.open('ui-concept.html', '_blank')" class="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition mb-2">
+                <i class="fas fa-palette mr-1"></i>UI概念设计
             </button>
         </div>
         <div id="buildingControls" class="border-t border-gray-600 pt-3">
@@ -1801,6 +1881,16 @@
         // 页面加载时显示模式选择
         window.onload = function() {
             // 游戏初始状态：显示模式选择界面
+            
+            // 移动端菜单切换
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
         };
     </script>
 </body>

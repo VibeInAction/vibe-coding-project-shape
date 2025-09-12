@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI概念设计 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes slide-in {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .slide-in {
+            animation: slide-in 0.5s ease-out;
+        }
+        
+        .fade-in {
+            animation: fade-in 0.8s ease-out;
+        }
+        
+        .ui-mockup {
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ui-mockup:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ui-element {
+            transition: all 0.2s ease;
+        }
+        
+        .ui-element:hover {
+            transform: scale(1.05);
+        }
+        
+        .pc-frame {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .pc-frame::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 5px;
+            background: #333;
+            border-radius: 3px;
+        }
+        
+        .mobile-frame {
+            background: #000;
+            border-radius: 30px;
+            padding: 10px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .mobile-frame::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+        
+        .health-bar {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .energy-bar {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .skill-cooldown {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left text-gray-400"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
+                        <i class="fas fa-gamepad text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        UI概念设计
+                    </span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-400"></i>
+                        <span class="text-white">游戏主页</span>
+                    </a>
+                    <a href="../world-lore.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-globe text-purple-400"></i>
+                        <span class="text-white">世界观</span>
+                    </a>
+                    <a href="../story/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-book text-green-400"></i>
+                        <span class="text-white">故事剧情</span>
+                    </a>
+                    <a href="index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-gamepad text-yellow-400"></i>
+                        <span class="text-white">游戏原型</span>
+                    </a>
+                    <a href="../terrain/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                        <i class="fas fa-map text-orange-400"></i>
+                        <span class="text-white">地形图</span>
+                    </a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800 border-t border-gray-700">
+            <div class="px-4 py-2 space-y-1">
+                <a href="../index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏主页</a>
+                <a href="../world-lore.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">世界观</a>
+                <a href="../story/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">故事剧情</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">游戏原型</a>
+                <a href="../terrain/index.html" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition text-white">地形图</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-24 pb-8">
+        <!-- Header -->
+        <div class="text-center mb-12 fade-in">
+            <h1 class="text-5xl font-bold text-white mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">游戏UI概念设计</h1>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">探索几何境域的用户界面设计，融合几何美学与现代交互理念，打造沉浸式的游戏体验</p>
+            
+            <!-- Design Philosophy -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">设计理念</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-shapes text-2xl text-blue-400"></i>
+                        </div>
+                        <h3 class="font-bold text-blue-400 mb-2">几何美学</h3>
+                        <p class="text-sm text-gray-300">以圆形、三角、方形、菱形为基础元素，构建统一的视觉语言</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-layer-group text-2xl text-purple-400"></i>
+                        </div>
+                        <h3 class="font-bold text-purple-400 mb-2">层次分明</h3>
+                        <p class="text-sm text-gray-300">清晰的信息层级，确保玩家能够快速获取关键信息</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-mobile-alt text-2xl text-green-400"></i>
+                        </div>
+                        <h3 class="font-bold text-green-400 mb-2">响应式设计</h3>
+                        <p class="text-sm text-gray-300">适配PC和移动端，提供一致的用户体验</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PC UI Designs -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">PC端界面设计</h2>
+            
+            <!-- Main Game HUD -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-desktop mr-2 text-blue-400"></i>
+                    主游戏HUD（抬头显示器）
+                </h3>
+                <div class="pc-frame ui-mockup mx-auto" style="max-width: 1200px;">
+                    <div class="bg-gray-900 rounded-lg overflow-hidden" style="height: 600px;">
+                        <!-- Top Bar -->
+                        <div class="bg-gray-800/90 backdrop-blur-sm px-6 py-3 flex justify-between items-center">
+                            <div class="flex items-center space-x-6">
+                                <!-- Health -->
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-heart text-red-500"></i>
+                                    <div class="w-32 h-4 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="health-bar h-full" style="width: 75%;"></div>
+                                    </div>
+                                    <span class="text-white text-sm">75/100</span>
+                                </div>
+                                <!-- Energy -->
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-bolt text-blue-500"></i>
+                                    <div class="w-32 h-4 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="energy-bar h-full" style="width: 60%;"></div>
+                                    </div>
+                                    <span class="text-white text-sm">60/100</span>
+                                </div>
+                            </div>
+                            <!-- Minimap -->
+                            <div class="w-32 h-32 bg-gray-700 rounded-lg border border-gray-600 relative">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-20 h-20 border border-blue-400 rounded-full">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Resources -->
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <i class="fas fa-gem text-purple-400"></i>
+                                    <span class="text-white text-sm ml-1">1,250</span>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fas fa-coins text-yellow-400"></i>
+                                    <span class="text-white text-sm ml-1">850</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Game View Area -->
+                        <div class="relative h-96 bg-gradient-to-br from-gray-800 to-gray-900">
+                            <!-- Center Crosshair -->
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="w-8 h-8 border-2 border-white/50 rounded-full">
+                                    <div class="w-1 h-1 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Ability Notifications -->
+                            <div class="absolute top-4 left-4 space-y-2">
+                                <div class="bg-blue-600/80 backdrop-blur-sm px-3 py-1 rounded-lg text-white text-sm fade-in">
+                                    <i class="fas fa-shield-alt mr-1"></i> 防护力场激活
+                                </div>
+                            </div>
+                            
+                            <!-- Enemy Health Bars -->
+                            <div class="absolute top-20 right-4">
+                                <div class="bg-red-600/90 backdrop-blur-sm px-3 py-1 rounded-lg">
+                                    <div class="text-white text-xs mb-1">三角战士</div>
+                                    <div class="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="bg-red-500 h-full" style="width: 40%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bottom Skill Bar -->
+                        <div class="bg-gray-800/90 backdrop-blur-sm px-6 py-4">
+                            <div class="flex justify-center items-center space-x-2">
+                                <!-- Skills -->
+                                <div class="ui-element w-16 h-16 bg-gray-700 rounded-lg border-2 border-blue-500 flex items-center justify-center relative">
+                                    <i class="fas fa-fist-raised text-2xl text-blue-400"></i>
+                                    <span class="absolute bottom-1 right-1 text-xs text-white">Q</span>
+                                </div>
+                                <div class="ui-element w-16 h-16 bg-gray-700 rounded-lg border-2 border-gray-600 flex items-center justify-center relative">
+                                    <i class="fas fa-shield-alt text-2xl text-gray-400"></i>
+                                    <span class="absolute bottom-1 right-1 text-xs text-white">W</span>
+                                </div>
+                                <div class="ui-element w-16 h-16 bg-gray-700 rounded-lg border-2 border-gray-600 flex items-center justify-center relative skill-cooldown">
+                                    <i class="fas fa-running text-2xl text-gray-400"></i>
+                                    <span class="absolute top-1 right-1 text-xs text-white">3</span>
+                                    <span class="absolute bottom-1 right-1 text-xs text-white">E</span>
+                                </div>
+                                <div class="ui-element w-16 h-16 bg-gray-700 rounded-lg border-2 border-gray-600 flex items-center justify-center relative">
+                                    <i class="fas fa-magic text-2xl text-gray-400"></i>
+                                    <span class="absolute bottom-1 right-1 text-xs text-white">R</span>
+                                </div>
+                                <div class="w-4"></div>
+                                <!-- Items -->
+                                <div class="ui-element w-12 h-12 bg-gray-700 rounded border border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-flask text-red-400"></i>
+                                </div>
+                                <div class="ui-element w-12 h-12 bg-gray-700 rounded border border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-apple-alt text-green-400"></i>
+                                </div>
+                                <div class="ui-element w-12 h-12 bg-gray-700 rounded border border-gray-600 flex items-center justify-center">
+                                    <i class="fas fa-scroll text-purple-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Menu -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-user-circle mr-2 text-green-400"></i>
+                    角色菜单界面
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="pc-frame ui-mockup">
+                        <div class="bg-gray-900 rounded-lg p-6" style="height: 500px;">
+                            <div class="flex space-x-6">
+                                <!-- Character Model Display -->
+                                <div class="w-64 h-80 bg-gray-800 rounded-lg relative overflow-hidden">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-4xl text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Character Stats -->
+                                <div class="flex-1">
+                                    <h4 class="text-xl font-bold text-white mb-4">角色属性</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="text-gray-400">等级</span>
+                                                <span class="text-white">15</span>
+                                            </div>
+                                            <div class="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-full" style="width: 65%;"></div>
+                                            </div>
+                                            <div class="text-xs text-gray-400 mt-1">经验: 3,250 / 5,000</div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-2 gap-4 mt-6">
+                                            <div class="bg-gray-800 rounded-lg p-3">
+                                                <div class="text-gray-400 text-xs">攻击力</div>
+                                                <div class="text-white text-lg font-bold">125</div>
+                                                <div class="text-green-400 text-xs">+15</div>
+                                            </div>
+                                            <div class="bg-gray-800 rounded-lg p-3">
+                                                <div class="text-gray-400 text-xs">防御力</div>
+                                                <div class="text-white text-lg font-bold">98</div>
+                                                <div class="text-green-400 text-xs">+8</div>
+                                            </div>
+                                            <div class="bg-gray-800 rounded-lg p-3">
+                                                <div class="text-gray-400 text-xs">速度</div>
+                                                <div class="text-white text-lg font-bold">85</div>
+                                                <div class="text-blue-400 text-xs">+5%</div>
+                                            </div>
+                                            <div class="bg-gray-800 rounded-lg p-3">
+                                                <div class="text-gray-400 text-xs">能量</div>
+                                                <div class="text-white text-lg font-bold">150</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory -->
+                    <div class="pc-frame ui-mockup">
+                        <div class="bg-gray-900 rounded-lg p-6" style="height: 500px;">
+                            <h4 class="text-xl font-bold text-white mb-4">物品栏</h4>
+                            <div class="grid grid-cols-8 gap-2 mb-4">
+                                <!-- Equipment Slots -->
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-yellow-500 flex items-center justify-center">
+                                    <i class="fas fa-hat-wizard text-yellow-400"></i>
+                                </div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-blue-500 flex items-center justify-center">
+                                    <i class="fas fa-tshirt text-blue-400"></i>
+                                </div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                <div class="aspect-square bg-gray-800 rounded border-2 border-gray-600"></div>
+                                
+                                <!-- Inventory Grid -->
+                                <div class="col-span-8 grid grid-cols-8 gap-2">
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-sword text-red-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-blue-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-ring text-purple-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Details -->
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h5 class="text-white font-bold mb-2">火焰之剑</h5>
+                                <p class="text-gray-400 text-sm mb-2">一把附有火焰魔法的长剑</p>
+                                <div class="space-y-1 text-sm">
+                                    <div class="text-red-400">+45 攻击力</div>
+                                    <div class="text-orange-400">+15 火焰伤害</div>
+                                    <div class="text-gray-400">品质: 稀有</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile UI Designs -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">移动端界面设计</h2>
+            
+            <!-- Mobile Game Screen -->
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-mobile-alt mr-2 text-purple-400"></i>
+                    游戏主界面
+                </h3>
+                <div class="mobile-frame ui-mockup mx-auto" style="width: 360px;">
+                    <div class="bg-black rounded-2xl overflow-hidden" style="height: 640px;">
+                        <!-- Status Bar -->
+                        <div class="bg-gray-900 px-4 py-2 flex justify-between items-center text-xs">
+                            <span class="text-white">9:41</span>
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-signal text-white"></i>
+                                <i class="fas fa-wifi text-white"></i>
+                                <i class="fas fa-battery-three-quarters text-white"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Game View -->
+                        <div class="relative h-full bg-gradient-to-br from-gray-900 to-black">
+                            <!-- Top UI -->
+                            <div class="absolute top-0 left-0 right-0 p-4">
+                                <div class="flex justify-between items-start">
+                                    <!-- Health & Energy -->
+                                    <div class="space-y-2">
+                                        <div class="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+                                            <i class="fas fa-heart text-red-500"></i>
+                                            <div class="w-24 h-3 bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="health-bar h-full" style="width: 75%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+                                            <i class="fas fa-bolt text-blue-500"></i>
+                                            <div class="w-24 h-3 bg-gray-700 rounded-full overflow-hidden">
+                                                <div class="energy-bar h-full" style="width: 60%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Minimap -->
+                                    <div class="w-20 h-20 bg-black/50 backdrop-blur-sm rounded-lg border border-gray-600">
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <div class="w-12 h-12 border border-blue-400 rounded-full">
+                                                <div class="w-1 h-1 bg-red-500 rounded-full absolute"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Center Area -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-6 h-6 border border-white/50 rounded-full">
+                                    <div class="w-1 h-1 bg-white rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Left Virtual Joystick -->
+                            <div class="absolute bottom-32 left-8">
+                                <div class="w-24 h-24 bg-black/30 backdrop-blur-sm rounded-full border-2 border-gray-600 relative">
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-gray-600 rounded-full"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Action Buttons -->
+                            <div class="absolute bottom-32 right-8 space-y-3">
+                                <div class="ui-element w-14 h-14 bg-blue-600/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                    <i class="fas fa-fist-raised text-white"></i>
+                                </div>
+                                <div class="ui-element w-14 h-14 bg-gray-600/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                    <i class="fas fa-shield-alt text-white"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom Skill Bar -->
+                            <div class="absolute bottom-4 left-0 right-0 px-4">
+                                <div class="flex justify-center items-center space-x-2">
+                                    <div class="ui-element w-12 h-12 bg-gray-700/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                        <span class="text-white text-xs">1</span>
+                                    </div>
+                                    <div class="ui-element w-12 h-12 bg-gray-700/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                        <span class="text-white text-xs">2</span>
+                                    </div>
+                                    <div class="ui-element w-12 h-12 bg-gray-700/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                        <span class="text-white text-xs">3</span>
+                                    </div>
+                                    <div class="ui-element w-12 h-12 bg-gray-700/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                        <span class="text-white text-xs">4</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Menu Button -->
+                            <div class="absolute top-16 right-4">
+                                <div class="w-10 h-10 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-bars text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Screens -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Character Screen -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">角色界面</h4>
+                    <div class="mobile-frame ui-mockup mx-auto" style="width: 360px;">
+                        <div class="bg-black rounded-2xl overflow-hidden" style="height: 500px;">
+                            <div class="bg-gray-900 px-4 py-3 flex items-center">
+                                <i class="fas fa-arrow-left text-white mr-4"></i>
+                                <h5 class="text-white font-bold flex-1 text-center">角色</h5>
+                                <div class="w-6"></div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <!-- Character Avatar -->
+                                <div class="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-user text-4xl text-white"></i>
+                                </div>
+                                
+                                <!-- Level & Name -->
+                                <div class="text-center mb-6">
+                                    <h6 class="text-white text-xl font-bold">几何战士</h6>
+                                    <div class="text-gray-400">等级 15</div>
+                                </div>
+                                
+                                <!-- Stats -->
+                                <div class="space-y-3">
+                                    <div class="bg-gray-800 rounded-lg p-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-400">生命值</span>
+                                            <span class="text-white">75/100</span>
+                                        </div>
+                                        <div class="w-full h-2 bg-gray-700 rounded-full mt-1">
+                                            <div class="bg-red-500 h-full rounded-full" style="width: 75%;"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-800 rounded-lg p-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-400">能量值</span>
+                                            <span class="text-white">60/100</span>
+                                        </div>
+                                        <div class="w-full h-2 bg-gray-700 rounded-full mt-1">
+                                            <div class="bg-blue-500 h-full rounded-full" style="width: 60%;"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="bg-gray-800 rounded-lg p-3 text-center">
+                                            <div class="text-gray-400 text-xs">攻击</div>
+                                            <div class="text-white font-bold">125</div>
+                                        </div>
+                                        <div class="bg-gray-800 rounded-lg p-3 text-center">
+                                            <div class="text-gray-400 text-xs">防御</div>
+                                            <div class="text-white font-bold">98</div>
+                                        </div>
+                                        <div class="bg-gray-800 rounded-lg p-3 text-center">
+                                            <div class="text-gray-400 text-xs">速度</div>
+                                            <div class="text-white font-bold">85</div>
+                                        </div>
+                                        <div class="bg-gray-800 rounded-lg p-3 text-center">
+                                            <div class="text-gray-400 text-xs">幸运</div>
+                                            <div class="text-white font-bold">42</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Screen -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">背包界面</h4>
+                    <div class="mobile-frame ui-mockup mx-auto" style="width: 360px;">
+                        <div class="bg-black rounded-2xl overflow-hidden" style="height: 500px;">
+                            <div class="bg-gray-900 px-4 py-3 flex items-center">
+                                <i class="fas fa-arrow-left text-white mr-4"></i>
+                                <h5 class="text-white font-bold flex-1 text-center">背包</h5>
+                                <div class="w-6"></div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <!-- Tabs -->
+                                <div class="flex space-x-2 mb-4">
+                                    <button class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm">全部</button>
+                                    <button class="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg text-sm">武器</button>
+                                    <button class="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg text-sm">防具</button>
+                                    <button class="flex-1 bg-gray-700 text-gray-300 py-2 rounded-lg text-sm">消耗</button>
+                                </div>
+                                
+                                <!-- Item Grid -->
+                                <div class="grid grid-cols-5 gap-2 mb-4">
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-sword text-red-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-blue-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-hat-wizard text-purple-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-ring text-yellow-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600 flex items-center justify-center">
+                                        <i class="fas fa-flask text-green-400"></i>
+                                    </div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                    <div class="aspect-square bg-gray-800 rounded border border-gray-600"></div>
+                                </div>
+                                
+                                <!-- Selected Item -->
+                                <div class="bg-gray-800 rounded-lg p-3">
+                                    <h6 class="text-white font-bold mb-1">火焰之剑</h6>
+                                    <p class="text-gray-400 text-xs mb-2">传奇武器</p>
+                                    <div class="text-xs space-y-1">
+                                        <div class="text-red-400">+45 攻击力</div>
+                                        <div class="text-orange-400">+15-25 火焰伤害</div>
+                                        <div class="text-blue-400">+5% 攻击速度</div>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <span class="text-yellow-400 text-xs">出售价格: 1,250</span>
+                                        <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs">装备</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- UI Components Library -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">UI组件库</h2>
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Buttons -->
+                    <div>
+                        <h3 class="text-white font-bold mb-3">按钮组件</h3>
+                        <div class="space-y-2">
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition">
+                                主要按钮
+                            </button>
+                            <button class="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition">
+                                次要按钮
+                            </button>
+                            <button class="w-full border border-gray-600 hover:border-gray-500 text-white py-2 px-4 rounded-lg transition">
+                                边框按钮
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bars -->
+                    <div>
+                        <h3 class="text-white font-bold mb-3">进度条组件</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-400">生命值</span>
+                                    <span class="text-white">75%</span>
+                                </div>
+                                <div class="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-red-500 to-red-600 h-full" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-400">经验值</span>
+                                    <span class="text-white">65%</span>
+                                </div>
+                                <div class="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-full" style="width: 65%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cards -->
+                    <div>
+                        <h3 class="text-white font-bold mb-3">卡片组件</h3>
+                        <div class="space-y-2">
+                            <div class="bg-gray-700 rounded-lg p-3">
+                                <div class="text-white font-bold mb-1">物品名称</div>
+                                <div class="text-gray-400 text-sm">物品描述</div>
+                            </div>
+                            <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-3">
+                                <div class="text-white font-bold mb-1">稀有物品</div>
+                                <div class="text-purple-200 text-sm">特殊效果描述</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Icons -->
+                    <div>
+                        <h3 class="text-white font-bold mb-3">图标系统</h3>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-heart text-red-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-bolt text-blue-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-green-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-gem text-purple-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-coins text-yellow-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-key text-orange-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-scroll text-indigo-400"></i>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                <i class="fas fa-star text-pink-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Design Guidelines -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">设计规范</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+                    <h3 class="text-xl font-bold text-blue-400 mb-3">色彩系统</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-500 rounded"></div>
+                            <span class="text-white">主要色: #3B82F6</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-purple-500 rounded"></div>
+                            <span class="text-white">次要色: #A855F7</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-green-500 rounded"></div>
+                            <span class="text-white">成功色: #10B981</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-red-500 rounded"></div>
+                            <span class="text-white">警告色: #EF4444</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+                    <h3 class="text-xl font-bold text-purple-400 mb-3">字体规范</h3>
+                    <div class="space-y-2 text-white">
+                        <div class="text-2xl font-bold">标题 24px</div>
+                        <div class="text-xl font-bold">副标题 20px</div>
+                        <div class="text-lg">正文 16px</div>
+                        <div class="text-sm">说明 14px</div>
+                        <div class="text-xs">标注 12px</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+                    <h3 class="text-xl font-bold text-green-400 mb-3">间距系统</h3>
+                    <div class="space-y-2">
+                        <div class="bg-gray-700 h-2 rounded" style="width: 100%;"></div>
+                        <span class="text-gray-400 text-sm">容器间距: 16px</span>
+                        <div class="bg-gray-700 h-2 rounded" style="width: 75%;"></div>
+                        <span class="text-gray-400 text-sm">组件间距: 12px</span>
+                        <div class="bg-gray-700 h-2 rounded" style="width: 50%;"></div>
+                        <span class="text-gray-400 text-sm">内部间距: 8px</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
+            <h2 class="text-3xl font-bold mb-4">联系我们</h2>
+            <p class="text-lg mb-6">如果您对UI设计有任何建议或想法，欢迎与我们交流</p>
+            <div class="flex justify-center space-x-4">
+                <a href="https://github.com/VibeInAction/vibe-coding-project-shape" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition inline-block">
+                    <i class="fab fa-github mr-2"></i>GitHub
+                </a>
+                <a href="../index.html" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-bold hover:bg-white hover:text-blue-600 transition inline-block">
+                    返回主页
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2024 几何境域：形态之战 - UI概念设计</p>
+            <p class="text-sm mt-2">融合几何美学与现代交互的游戏界面设计</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Add entrance animations
+            const elements = document.querySelectorAll('.fade-in, .ui-mockup');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
