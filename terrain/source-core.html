@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>源初形核 - 几何境域地形图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        @keyframes pulse-core {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes vortex-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        
+        @keyframes energy-flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -100; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-core {
+            animation: pulse-core 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        .vortex-spin {
+            animation: vortex-spin 15s linear infinite;
+            transform-origin: center;
+        }
+        
+        .energy-flow {
+            animation: energy-flow 3s linear infinite;
+        }
+        
+        .terrain-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 250px;
+        }
+        
+        .terrain-area {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .terrain-area:hover {
+            filter: brightness(1.3);
+            stroke-width: 4;
+        }
+        
+        .chaos-crack {
+            stroke: #ef4444;
+            stroke-width: 3;
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+        }
+        
+        .form-vortex {
+            fill: url(#vortexGradient);
+            opacity: 0.6;
+        }
+        
+        .energy-stream {
+            stroke: url(#energyGradient);
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 20, 10;
+        }
+        
+        .race-territory {
+            opacity: 0.7;
+        }
+        
+        .race-territory:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800/90 backdrop-blur-sm border-b border-gray-600 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🌌</span>
+                    <h1 class="text-xl font-bold text-gray-100">几何境域地形图</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-300 hover:text-gray-100 transition">返回首页</a>
+                    <a href="terrain-todolist.html" class="text-gray-300 hover:text-gray-100 transition">地形列表</a>
+                    <select onchange="window.location.href=this.value" class="bg-gray-700 text-gray-100 px-3 py-1 rounded">
+                        <option value="#">选择城市</option>
+                        <option value="central-ring-city.html">中央圆环城</option>
+                        <option value="triangle-spires.html">三角尖塔</option>
+                        <option value="matrix-city.html">矩阵之都</option>
+                        <option value="life-spiral-city.html">生命螺旋城</option>
+                        <option value="source-core.html" selected>源初形核</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">源初形核</h1>
+            <p class="text-lg text-gray-300">世界的起源 • 四族纷争之地</p>
+        </div>
+
+        <!-- Terrain Map -->
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="relative" id="terrainMap">
+                <svg viewBox="0 0 1000 1000" class="w-full h-auto">
+                    <!-- Definitions -->
+                    <defs>
+                        <radialGradient id="coreGradient">
+                            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#dc2626;stop-opacity:0.6" />
+                        </radialGradient>
+                        
+                        <radialGradient id="vortexGradient">
+                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.8" />
+                            <stop offset="50%" style="stop-color:#6366f1;stop-opacity:0.6" />
+                            <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:0.4" />
+                        </radialGradient>
+                        
+                        <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+                            <stop offset="50%" style="stop-color:#a78bfa;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.8" />
+                        </linearGradient>
+                        
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        
+                        <pattern id="chaosPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 0 20 L 20 0 L 40 20 L 20 40 Z" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.3"/>
+                        </pattern>
+                    </defs>
+
+                    <!-- Background -->
+                    <rect width="1000" height="1000" fill="#111827"/>
+
+                    <!-- Chaos Rifts -->
+                    <g class="terrain-area" data-terrain="chaos-rift">
+                        <path d="M 100 200 Q 200 150 300 200 T 500 200 Q 600 250 700 200" class="chaos-crack"/>
+                        <path d="M 300 800 Q 400 750 500 800 T 700 800" class="chaos-crack"/>
+                        <path d="M 200 500 Q 250 400 300 500 T 400 500" class="chaos-crack"/>
+                        <path d="M 600 500 Q 650 600 700 500 T 800 500" class="chaos-crack"/>
+                        <rect x="50" y="150" width="200" height="100" fill="url(#chaosPattern)" opacity="0.5"/>
+                        <rect x="250" y="750" width="200" height="100" fill="url(#chaosPattern)" opacity="0.5"/>
+                    </g>
+
+                    <!-- Form Vortex System -->
+                    <g class="vortex-spin">
+                        <g class="terrain-area" data-terrain="form-vortex">
+                            <!-- Outer Vortex -->
+                            <path d="M 500 500 
+                                     m -300 0 
+                                     a 300 300 0 1 1 600 0 
+                                     a 280 280 0 1 1 -560 0 
+                                     a 260 260 0 1 1 520 0
+                                     a 240 240 0 1 1 -480 0"
+                                  class="form-vortex" stroke="#8b5cf6" stroke-width="3"/>
+                            
+                            <!-- Inner Vortex -->
+                            <path d="M 500 500 
+                                     m -200 0 
+                                     a 200 200 0 1 1 400 0 
+                                     a 180 180 0 1 1 -360 0 
+                                     a 160 160 0 1 1 320 0"
+                                  class="form-vortex" stroke="#a78bfa" stroke-width="3"/>
+                        </g>
+                    </g>
+
+                    <!-- Central Source Core -->
+                    <g class="terrain-area" data-terrain="source-core" class="pulse-core">
+                        <circle cx="500" cy="500" r="120" fill="url(#coreGradient)" filter="url(#glow)"/>
+                        <circle cx="500" cy="500" r="100" fill="#fbbf24" opacity="0.8"/>
+                        <circle cx="500" cy="500" r="80" fill="#f59e0b" opacity="0.9"/>
+                        <circle cx="500" cy="500" r="60" fill="#dc2626" opacity="1"/>
+                        <text x="500" y="505" text-anchor="middle" class="fill-white font-bold text-xl">源初核心</text>
+                    </g>
+
+                    <!-- Race Territories -->
+                    <!-- Circle Territory (North-West) -->
+                    <g class="terrain-area race-territory" data-terrain="circle-territory">
+                        <path d="M 200 200 L 400 200 L 400 400 L 200 400 Z" 
+                              fill="#22c55e" fill-opacity="0.3" stroke="#22c55e" stroke-width="3"/>
+                        <circle cx="300" cy="300" r="80" fill="#22c55e" fill-opacity="0.5"/>
+                        <text x="300" y="305" text-anchor="middle" class="fill-green-300 font-bold">圆形领地</text>
+                    </g>
+
+                    <!-- Triangle Territory (North-East) -->
+                    <g class="terrain-area race-territory" data-terrain="triangle-territory">
+                        <path d="M 600 200 L 800 200 L 800 400 L 600 400 Z" 
+                              fill="#ef4444" fill-opacity="0.3" stroke="#ef4444" stroke-width="3"/>
+                        <polygon points="700,250 750,350 650,350" fill="#ef4444" fill-opacity="0.5"/>
+                        <text x="700" y="305" text-anchor="middle" class="fill-red-300 font-bold">三角领地</text>
+                    </g>
+
+                    <!-- Square Territory (South-West) -->
+                    <g class="terrain-area race-territory" data-terrain="square-territory">
+                        <path d="M 200 600 L 400 600 L 400 800 L 200 800 Z" 
+                              fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6" stroke-width="3"/>
+                        <rect x="250" y="650" width="100" height="100" fill="#3b82f6" fill-opacity="0.5"/>
+                        <text x="300" y="705" text-anchor="middle" class="fill-blue-300 font-bold">方形领地</text>
+                    </g>
+
+                    <!-- Diamond Territory (South-East) -->
+                    <g class="terrain-area race-territory" data-terrain="diamond-territory">
+                        <path d="M 600 600 L 800 600 L 800 800 L 600 800 Z" 
+                              fill="#a78bfa" fill-opacity="0.3" stroke="#a78bfa" stroke-width="3"/>
+                        <polygon points="700,650 750,700 700,750 650,700" fill="#a78bfa" fill-opacity="0.5"/>
+                        <text x="700" y="705" text-anchor="middle" class="fill-purple-300 font-bold">菱形领地</text>
+                    </g>
+
+                    <!-- Energy Streams -->
+                    <g class="terrain-area" data-terrain="energy-stream">
+                        <path d="M 300 300 L 500 500" class="energy-stream"/>
+                        <path d="M 700 300 L 500 500" class="energy-stream"/>
+                        <path d="M 300 700 L 500 500" class="energy-stream"/>
+                        <path d="M 700 700 L 500 500" class="energy-stream"/>
+                        
+                        <!-- Additional energy flows -->
+                        <path d="M 500 200 L 500 400" class="energy-stream"/>
+                        <path d="M 500 600 L 500 800" class="energy-stream"/>
+                        <path d="M 200 500 L 400 500" class="energy-stream"/>
+                        <path d="M 600 500 L 800 500" class="energy-stream"/>
+                    </g>
+
+                    <!-- Energy Nodes -->
+                    <g class="terrain-area" data-terrain="energy-node">
+                        <!-- Nodes along streams -->
+                        <circle cx="400" cy="400" r="15" fill="#fbbf24" filter="url(#glow)"/>
+                        <circle cx="600" cy="400" r="15" fill="#fbbf24" filter="url(#glow)"/>
+                        <circle cx="400" cy="600" r="15" fill="#fbbf24" filter="url(#glow)"/>
+                        <circle cx="600" cy="600" r="15" fill="#fbbf24" filter="url(#glow)"/>
+                        
+                        <!-- Floating energy orbs -->
+                        <g class="float-animation">
+                            <circle cx="150" cy="150" r="10" fill="#a78bfa" opacity="0.8"/>
+                        </g>
+                        <g class="float-animation" style="animation-delay: 1s;">
+                            <circle cx="850" cy="150" r="10" fill="#60a5fa" opacity="0.8"/>
+                        </g>
+                        <g class="float-animation" style="animation-delay: 2s;">
+                            <circle cx="150" cy="850" r="10" fill="#34d399" opacity="0.8"/>
+                        </g>
+                        <g class="float-animation" style="animation-delay: 3s;">
+                            <circle cx="850" cy="850" r="10" fill="#f472b6" opacity="0.8"/>
+                        </g>
+                    </g>
+
+                    <!-- Neutral Zones -->
+                    <g class="terrain-area" data-terrain="neutral-zone">
+                        <circle cx="500" cy="300" r="40" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="10,5" opacity="0.6"/>
+                        <text x="500" y="305" text-anchor="middle" class="fill-gray-400 text-sm">中立区</text>
+                        
+                        <circle cx="300" cy="500" r="40" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="10,5" opacity="0.6"/>
+                        <text x="300" y="505" text-anchor="middle" class="fill-gray-400 text-sm">中立区</text>
+                        
+                        <circle cx="700" cy="500" r="40" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="10,5" opacity="0.6"/>
+                        <text x="700" y="505" text-anchor="middle" class="fill-gray-400 text-sm">中立区</text>
+                        
+                        <circle cx="500" cy="700" r="40" fill="none" stroke="#6b7280" stroke-width="2" stroke-dasharray="10,5" opacity="0.6"/>
+                        <text x="500" y="705" text-anchor="middle" class="fill-gray-400 text-sm">中立区</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Terrain Legend -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-white mb-4">地形图例</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-yellow-500 rounded-full"></div>
+                    <span class="text-sm text-gray-300">源初核心 - 中心能量</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-600 rounded-full"></div>
+                    <span class="text-sm text-gray-300">形态涡流 - 能量场</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-red-500 rounded"></div>
+                    <span class="text-sm text-gray-300">混沌裂隙 - 危险区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-500 rounded"></div>
+                    <span class="text-sm text-gray-300">圆形领地 - 和平区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-red-400 rounded"></div>
+                    <span class="text-sm text-gray-300">三角领地 - 战争区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-blue-500 rounded"></div>
+                    <span class="text-sm text-gray-300">方形领地 - 秩序区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-400 rounded"></div>
+                    <span class="text-sm text-gray-300">菱形领地 - 魔法区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-gray-500 rounded-full"></div>
+                    <span class="text-sm text-gray-300">中立区 - 缓冲地带</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Effects -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-yellow-300 mb-3">⚡ 动态能量流动</h3>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li>• 能量流每 30 秒改变方向</li>
+                    <li>• 顺流移动速度 +50%</li>
+                    <li>• 逆流移动速度 -30%</li>
+                    <li>• 能量节点提供爆发性加成</li>
+                </ul>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-purple-300 mb-3">🌊 混沌裂隙效果</h3>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li>• 随机传送单位</li>
+                    <li>• 每回合造成混沌伤害</li>
+                    <li>• 菱形单位获得特殊加成</li>
+                    <li>• 裂隙会周期性扩张/收缩</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Territory Control -->
+        <div class="mt-6 bg-gray-800 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-white mb-4">领地控制效果</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🟢
+                    </div>
+                    <h4 class="font-semibold text-green-300 mb-1">圆形领地</h4>
+                    <p class="text-xs text-gray-400">治疗效果 +100%</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-red-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🔺
+                    </div>
+                    <h4 class="font-semibold text-red-300 mb-1">三角领地</h4>
+                    <p class="text-xs text-gray-400">攻击力 +50%</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        🟦
+                    </div>
+                    <h4 class="font-semibold text-blue-300 mb-1">方形领地</h4>
+                    <p class="text-xs text-gray-400">防御力 +50%</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-500 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
+                        💎
+                    </div>
+                    <h4 class="font-semibold text-purple-300 mb-1">菱形领地</h4>
+                    <p class="text-xs text-gray-400">魔法效果 +100%</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="terrain-tooltip"></div>
+
+    <script>
+        // Terrain data
+        const terrainData = {
+            'source-core': {
+                name: '源初核心',
+                description: '世界诞生之初的原始能量核心，蕴含着无限的形态之力',
+                advantages: '控制核心获得全局能量加成 +200%',
+                special: '每 10 回合爆发一次，影响整个战场'
+            },
+            'form-vortex': {
+                name: '形态涡流',
+                description: '由核心能量形成的旋转力场，扭曲周围的形态之力',
+                advantages: '内部单位每回合获得形态能量',
+                danger: '对敌方单位造成持续伤害'
+            },
+            'chaos-rift': {
+                name: '混沌裂隙',
+                description: '时空破碎形成的危险区域，充满不稳定的能量',
+                effects: '随机传送、持续伤害、形态变异',
+                warning: '高风险高回报区域'
+            },
+            'circle-territory': {
+                name: '圆形领地',
+                description: '圆形种族控制的区域，充满和平与治愈的能量',
+                advantages: '友军单位自动恢复',
+                special: '圆形种族额外 +50% 效果'
+            },
+            'triangle-territory': {
+                name: '三角领地',
+                description: '三角种族的军事据点，充满战斗的气息',
+                advantages: '所有单位攻击力 +25%',
+                special: '三角种族单位获得先攻'
+            },
+            'square-territory': {
+                name: '方形领地',
+                description: '方形种族建立的要塞，防御工事完善',
+                advantages: '所有单位防御力 +25%',
+                special: '可以建造额外防御设施'
+            },
+            'diamond-territory': {
+                name: '菱形领地',
+                description: '菱形种族的魔法圣地，魔力浓度极高',
+                advantages: '魔法单位消耗 -50%',
+                special: '菱形种族施法距离 +100%'
+            },
+            'energy-stream': {
+                name: '能量流',
+                description: '连接各区域的能量通道，加速形态之力的流动',
+                advantages: '沿通道移动速度大幅提升',
+                dynamic: '流向会定期改变'
+            },
+            'energy-node': {
+                name: '能量节点',
+                description: '能量流的汇聚点，可以释放强大的能量爆发',
+                advantages: '占领后获得爆发性加成',
+                capture: '需要 3 回合占领'
+            },
+            'neutral-zone': {
+                name: '中立区',
+                description: '四族之间的缓冲地带，暂时没有归属',
+                advantages: '可以安全通过',
+                strategic: '控制中立区获得视野优势'
+            }
+        };
+
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const terrainAreas = document.querySelectorAll('.terrain-area');
+
+        terrainAreas.forEach(area => {
+            area.addEventListener('mouseenter', (e) => {
+                const terrainType = area.getAttribute('data-terrain');
+                const terrain = terrainData[terrainType];
+                
+                if (terrain) {
+                    let tooltipContent = `
+                        <div class="font-bold mb-1">${terrain.name}</div>
+                        <div class="text-sm mb-2">${terrain.description}</div>
+                    `;
+                    
+                    if (terrain.advantages) {
+                        tooltipContent += `<div class="text-xs text-yellow-300 mb-1">${terrain.advantages}</div>`;
+                    }
+                    
+                    if (terrain.special) {
+                        tooltipContent += `<div class="text-xs text-blue-300 mb-1">${terrain.special}</div>`;
+                    }
+                    
+                    if (terrain.danger || terrain.warning) {
+                        tooltipContent += `<div class="text-xs text-red-300">${terrain.danger || terrain.warning}</div>`;
+                    }
+                    
+                    tooltip.innerHTML = tooltipContent;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            area.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 10 + 'px';
+            });
+
+            area.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+
+        // Simulate dynamic energy flow changes
+        const energyStreams = document.querySelectorAll('.energy-stream');
+        setInterval(() => {
+            energyStreams.forEach(stream => {
+                const currentDirection = Math.random() > 0.5 ? 1 : -1;
+                stream.style.strokeDasharray = `${20 * currentDirection}, 10`;
+            });
+        }, 30000);
+
+        // Add pulse animation to core
+        const sourceCore = document.querySelector('[data-terrain="source-core"]');
+        if (sourceCore) {
+            sourceCore.classList.add('pulse-core');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>矩阵之都地形图 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes cube-shift {
+            0%, 100% { transform: scale(1) rotate(45deg); }
+            50% { transform: scale(1.1) rotate(45deg); }
+        }
+        
+        @keyframes data-flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -100; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .terrain-block {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .terrain-block:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .terrain-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .legend-item {
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            transform: translateX(5px);
+        }
+        
+        /* 地形样式 */
+        .plain-terrain {
+            fill: #374151;
+            stroke: #4b5563;
+            stroke-width: 2;
+        }
+        
+        .grid-module {
+            fill: #0891b2;
+            stroke: #06b6d4;
+            stroke-width: 2;
+            transform: rotate(45deg);
+            transform-origin: center;
+            transition: all 0.3s ease;
+        }
+        
+        .grid-module:hover {
+            fill: #0ea5e9;
+            transform: scale(1.1) rotate(45deg);
+        }
+        
+        .floating-platform {
+            fill: #6366f1;
+            stroke: #818cf8;
+            stroke-width: 2;
+            filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
+        }
+        
+        .data-flow {
+            stroke: #06b6d4;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5, 5;
+            animation: data-flow 2s linear infinite;
+        }
+        
+        .tech-building {
+            transition: all 0.3s ease;
+        }
+        
+        .tech-building:hover {
+            filter: brightness(1.3);
+            transform: scale(1.05);
+        }
+        
+        .quantum-zone {
+            fill: #7c3aed;
+            stroke: #8b5cf6;
+            stroke-width: 2;
+            stroke-dasharray: 10, 5;
+            opacity: 0.3;
+            animation: pulse 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-cyan-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-cyan-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-cyan-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">地形图</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-cyan-400 transition">地形索引</a>
+                    <a href="central-ring-city.html" class="hover:text-cyan-400 transition">中央圆环城</a>
+                    <a href="triangle-spires.html" class="hover:text-cyan-400 transition">三角尖塔</a>
+                    <a href="matrix-city.html" class="text-cyan-400 font-semibold">矩阵之都</a>
+                    <a href="life-spiral-city.html" class="hover:text-cyan-400 transition">生命螺旋城</a>
+                    <a href="source-core.html" class="hover:text-cyan-400 transition">源初形核</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="relative pb-20">
+        <!-- 标题区域 -->
+        <header class="relative py-12 px-6">
+            <div class="container mx-auto max-w-6xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                            <span class="gradient-text">矩阵之都地形图</span>
+                        </h1>
+                        <p class="text-xl text-gray-300">方碑盟约的技术中心，秩序与规则的象征</p>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-cyan-400">100%</div>
+                            <div class="text-sm text-gray-400">形态场强度</div>
+                        </div>
+                        <div class="w-px h-12 bg-gray-600"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-400">+40%</div>
+                            <div class="text-sm text-gray-400">建造速度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 地图区域 -->
+        <section class="relative px-6">
+            <div class="container mx-auto max-w-6xl">
+                <div class="grid lg:grid-cols-4 gap-8">
+                    <!-- 地图主体 -->
+                    <div class="lg:col-span-3">
+                        <div class="bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-500/30">
+                            <div class="relative" style="height: 600px;">
+                                <!-- SVG 地图 -->
+                                <svg class="w-full h-full" viewBox="0 0 800 600">
+                                    <!-- 背景网格 -->
+                                    <defs>
+                                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#374151" stroke-width="1"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#grid)" />
+                                    
+                                    <!-- 平原地带 -->
+                                    <rect x="50" y="50" width="700" height="500" fill="#374151" opacity="0.3" class="plain-terrain terrain-block"
+                                          data-terrain="平原地带" data-effect="方碑盟约建筑成本-20%，建造速度+40%"/>
+                                    
+                                    <!-- 矩阵城市主体 -->
+                                    <g id="matrix-grid" transform="translate(400, 300)">
+                                        <!-- 立方体模块网格 -->
+                                        <g id="cube-modules">
+                                            <!-- 创建5x5的立方体网格 -->
+                                            <g transform="translate(-120, -120)">
+                                                <!-- 第一行 -->
+                                                <rect x="0" y="0" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0s"/>
+                                                <rect x="60" y="0" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.1s"/>
+                                                <rect x="120" y="0" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.2s"/>
+                                                <rect x="180" y="0" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.3s"/>
+                                                <rect x="240" y="0" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.4s"/>
+                                                
+                                                <!-- 第二行 -->
+                                                <rect x="0" y="60" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.5s"/>
+                                                <rect x="60" y="60" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.6s"/>
+                                                <rect x="120" y="60" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.7s"/>
+                                                <rect x="180" y="60" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.8s"/>
+                                                <rect x="240" y="60" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 0.9s"/>
+                                                
+                                                <!-- 第三行 -->
+                                                <rect x="0" y="120" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1s"/>
+                                                <rect x="60" y="120" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.1s"/>
+                                                <rect x="120" y="120" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.2s"/>
+                                                <rect x="180" y="120" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.3s"/>
+                                                <rect x="240" y="120" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.4s"/>
+                                                
+                                                <!-- 第四行 -->
+                                                <rect x="0" y="180" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.5s"/>
+                                                <rect x="60" y="180" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.6s"/>
+                                                <rect x="120" y="180" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.7s"/>
+                                                <rect x="180" y="180" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.8s"/>
+                                                <rect x="240" y="180" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 1.9s"/>
+                                                
+                                                <!-- 第五行 -->
+                                                <rect x="0" y="240" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 2s"/>
+                                                <rect x="60" y="240" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 2.1s"/>
+                                                <rect x="120" y="240" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 2.2s"/>
+                                                <rect x="180" y="240" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 2.3s"/>
+                                                <rect x="240" y="240" width="40" height="40" class="grid-module terrain-block" style="animation-delay: 2.4s"/>
+                                            </g>
+                                        </g>
+                                        
+                                        <!-- 中央核心 -->
+                                        <circle r="50" fill="#0ea5e9" stroke="#06b6d4" stroke-width="3" opacity="0.8"/>
+                                        <text y="5" text-anchor="middle" fill="white" font-size="12" font-weight="bold">矩阵核心</text>
+                                    </g>
+                                    
+                                    <!-- 浮空平台 -->
+                                    <g id="floating-platforms">
+                                        <ellipse cx="150" cy="150" rx="60" ry="40" class="floating-platform terrain-block"
+                                                data-terrain="西北浮空平台" data-effect="可以建造空中基地"/>
+                                        <ellipse cx="650" cy="150" rx="60" ry="40" class="floating-platform terrain-block"
+                                                data-terrain="东北浮空平台" data-effect="空中防御设施"/>
+                                        <ellipse cx="150" cy="450" rx="60" ry="40" class="floating-platform terrain-block"
+                                                data-terrain="西南浮空平台" data-effect="资源存储区"/>
+                                        <ellipse cx="650" cy="450" rx="60" ry="40" class="floating-platform terrain-block"
+                                                data-terrain="东南浮空平台" data-effect="研究设施"/>
+                                    </g>
+                                    
+                                    <!-- 数据流 -->
+                                    <g id="data-flows">
+                                        <path d="M 400,300 L 150,150" class="data-flow"/>
+                                        <path d="M 400,300 L 650,150" class="data-flow" style="animation-delay: 0.5s"/>
+                                        <path d="M 400,300 L 150,450" class="data-flow" style="animation-delay: 1s"/>
+                                        <path d="M 400,300 L 650,450" class="data-flow" style="animation-delay: 1.5s"/>
+                                        <path d="M 150,150 Q 400,100 650,150" class="data-flow" style="animation-delay: 2s"/>
+                                        <path d="M 150,450 Q 400,500 650,450" class="data-flow" style="animation-delay: 2.5s"/>
+                                    </g>
+                                    
+                                    <!-- 技术设施 -->
+                                    <g id="tech-facilities">
+                                        <!-- 量子计算中心 -->
+                                        <g transform="translate(150, 150)" class="tech-building" data-building="量子计算中心">
+                                            <rect x="-40" y="-30" width="80" height="60" fill="#7c3aed" stroke="#8b5cf6" stroke-width="2" rx="5"/>
+                                            <text y="5" text-anchor="middle" fill="white" font-size="10">量子计算</text>
+                                        </g>
+                                        
+                                        <!-- 空间折叠站 -->
+                                        <g transform="translate(650, 150)" class="tech-building" data-building="空间折叠站">
+                                            <polygon points="0,-35 -30,20 30,20" fill="#059669" stroke="#10b981" stroke-width="2"/>
+                                            <text y="35" text-anchor="middle" fill="white" font-size="10">空间折叠</text>
+                                        </g>
+                                        
+                                        <!-- 物质重组工厂 -->
+                                        <g transform="translate(150, 450)" class="tech-building" data-building="物质重组工厂">
+                                            <circle r="30" fill="#dc2626" stroke="#ef4444" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="white" font-size="10">重组工厂</text>
+                                        </g>
+                                        
+                                        <!-- 矩阵网络中心 -->
+                                        <g transform="translate(650, 450)" class="tech-building" data-building="矩阵网络中心">
+                                            <rect x="-35" y="-25" width="70" height="50" fill="#0891b2" stroke="#06b6d4" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="white" font-size="10">网络中心</text>
+                                        </g>
+                                        
+                                        <!-- 几何研究院 -->
+                                        <g transform="translate(400, 100)" class="tech-building" data-building="几何研究院">
+                                            <polygon points="0,-25 -22,15 22,15" fill="#f59e0b" stroke="#fbbf24" stroke-width="2"/>
+                                            <text y="25" text-anchor="middle" fill="white" font-size="10">几何研究</text>
+                                        </g>
+                                        
+                                        <!-- 能量研究所 -->
+                                        <g transform="translate(400, 500)" class="tech-building" data-building="能量研究所">
+                                            <ellipse rx="35" ry="25" fill="#ec4899" stroke="#f472b6" stroke-width="2"/>
+                                            <text y="5" text-anchor="middle" fill="white" font-size="10">能量研究</text>
+                                        </g>
+                                    </g>
+                                    
+                                    <!-- 量子区域 -->
+                                    <circle cx="400" cy="300" r="200" class="quantum-zone" data-terrain="量子场区域" data-effect="空间能力增强"/>
+                                </svg>
+                                
+                                <!-- 地形提示框 -->
+                                <div id="terrainTooltip" class="terrain-tooltip"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 侧边栏信息 -->
+                    <div class="lg:col-span-1">
+                        <div class="space-y-6">
+                            <!-- 地形图例 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-cyan-400">地形图例</h3>
+                                <div class="space-y-3">
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-6 bg-gray-600 rounded"></div>
+                                        <span class="text-sm">平原地带</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-6 bg-cyan-500 transform rotate-45"></div>
+                                        <span class="text-sm">立方体模块</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-4 bg-indigo-500 rounded-full"></div>
+                                        <span class="text-sm">浮空平台</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-1 bg-cyan-400"></div>
+                                        <span class="text-sm">数据流</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 种族优势 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-cyan-400">方碑盟约优势</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">建筑成本</span>
+                                        <span class="text-green-400">-20%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">建造速度</span>
+                                        <span class="text-green-400">+40%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">模块连接</span>
+                                        <span class="text-green-400">效率+30%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">科技研发</span>
+                                        <span class="text-green-400">+25%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 战略要点 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-cyan-400">战略要点</h3>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li>• 控制浮空平台获得空中优势</li>
+                                    <li>• 模块化建筑灵活重组</li>
+                                    <li>• 数据流传递信息加成</li>
+                                    <li>• 量子区域强化空间能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 地形特征详情 -->
+        <section class="relative px-6 mt-12">
+            <div class="container mx-auto max-w-6xl">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- 立方体模块 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30 hover:border-cyan-500/50 transition">
+                        <h4 class="font-bold mb-2 text-cyan-400">立方体模块</h4>
+                        <p class="text-sm text-gray-400 mb-3">可以自由组合的建筑单元</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-cubes text-cyan-400 mr-1"></i> 模块化设计</p>
+                            <p><i class="fas fa-link text-green-400 mr-1"></i> 连接加成</p>
+                            <p><i class="fas fa-sync text-blue-400 mr-1"></i> 快速重组</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 浮空平台 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30 hover:border-cyan-500/50 transition">
+                        <h4 class="font-bold mb-2 text-cyan-400">浮空平台</h4>
+                        <p class="text-sm text-gray-400 mb-3">悬浮在空中的战略平台</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-cloud text-indigo-400 mr-1"></i> 空中基地</p>
+                            <p><i class="fas fa-eye text-blue-400 mr-1"></i> 视野优势</p>
+                            <p><i class="fas fa-shield-alt text-green-400 mr-1"></i> 防御加成</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 量子区域 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30 hover:border-cyan-500/50 transition">
+                        <h4 class="font-bold mb-2 text-cyan-400">量子区域</h4>
+                        <p class="text-sm text-gray-400 mb-3">空间能力强化的特殊区域</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-atom text-purple-400 mr-1"></i> 空间折叠</p>
+                            <p><i class="fas fa-random text-blue-400 mr-1"></i> 传送增强</p>
+                            <p><i class="fas fa-magic text-green-400 mr-1"></i> 技能效果+20%</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 数据网络 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30 hover:border-cyan-500/50 transition">
+                        <h4 class="font-bold mb-2 text-cyan-400">数据网络</h4>
+                        <p class="text-sm text-gray-400 mb-3">连接所有设施的信息网络</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-network-wired text-cyan-400 mr-1"></i> 信息共享</p>
+                            <p><i class="fas fa-tachometer-alt text-green-400 mr-1"></i> 效率提升</p>
+                            <p><i class="fas fa-brain text-purple-400 mr-1"></i> 协同作战</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-20">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                    <p>&copy; 2025 几何境域. 地形图系统 - 展示世界的几何之美</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <a href="index.html" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-map"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 地形悬停提示
+        const terrainBlocks = document.querySelectorAll('.terrain-block');
+        const tooltip = document.getElementById('terrainTooltip');
+        
+        terrainBlocks.forEach(block => {
+            block.addEventListener('mouseenter', function(e) {
+                const terrain = this.getAttribute('data-terrain');
+                const effect = this.getAttribute('data-effect');
+                const building = this.getAttribute('data-building');
+                
+                let content = '';
+                if (building) {
+                    content = `<strong>${building}</strong>`;
+                } else if (terrain && effect) {
+                    content = `<strong>${terrain}</strong><br>${effect}`;
+                }
+                
+                if (content) {
+                    tooltip.innerHTML = content;
+                    tooltip.style.opacity = '1';
+                }
+            });
+            
+            block.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 30 + 'px';
+            });
+            
+            block.addEventListener('mouseleave', function() {
+                tooltip.style.opacity = '0';
+            });
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

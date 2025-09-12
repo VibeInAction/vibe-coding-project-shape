@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角尖塔地形图 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes energy-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .terrain-block {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .terrain-block:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .terrain-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .legend-item {
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            transform: translateX(5px);
+        }
+        
+        /* 地形样式 */
+        .mountain-terrain {
+            fill: #7c3aed;
+            stroke: #6d28d9;
+            stroke-width: 2;
+        }
+        
+        .highland-terrain {
+            fill: #5b21b6;
+            stroke: #4c1d95;
+            stroke-width: 2;
+        }
+        
+        .energy-bridge {
+            stroke: #a855f7;
+            stroke-width: 4;
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
+            animation: energy-pulse 2s ease-in-out infinite;
+        }
+        
+        .spire {
+            transition: all 0.3s ease;
+        }
+        
+        .spire:hover {
+            filter: brightness(1.3);
+            transform: scale(1.1);
+        }
+        
+        .defense-zone {
+            fill: #a855f7;
+            stroke: #9333ea;
+            stroke-width: 2;
+            stroke-dasharray: 10, 5;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-purple-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-purple-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-purple-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">地形图</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="hover:text-purple-400 transition">地形索引</a>
+                    <a href="central-ring-city.html" class="hover:text-purple-400 transition">中央圆环城</a>
+                    <a href="triangle-spires.html" class="text-purple-400 font-semibold">三角尖塔</a>
+                    <a href="matrix-city.html" class="hover:text-purple-400 transition">矩阵之都</a>
+                    <a href="life-spiral-city.html" class="hover:text-purple-400 transition">生命螺旋城</a>
+                    <a href="source-core.html" class="hover:text-purple-400 transition">源初形核</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="relative pb-20">
+        <!-- 标题区域 -->
+        <header class="relative py-12 px-6">
+            <div class="container mx-auto max-w-6xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                            <span class="gradient-text">三角尖塔地形图</span>
+                        </h1>
+                        <p class="text-xl text-gray-300">三角议会的军事要塞，力量与效率的象征</p>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-400">+150%</div>
+                            <div class="text-sm text-gray-400">形态场强度</div>
+                        </div>
+                        <div class="w-px h-12 bg-gray-600"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-400">+100%</div>
+                            <div class="text-sm text-gray-400">防御加成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 地图区域 -->
+        <section class="relative px-6">
+            <div class="container mx-auto max-w-6xl">
+                <div class="grid lg:grid-cols-4 gap-8">
+                    <!-- 地图主体 -->
+                    <div class="lg:col-span-3">
+                        <div class="bg-gray-800/50 rounded-2xl p-8 border-2 border-purple-500/30">
+                            <div class="relative" style="height: 600px;">
+                                <!-- SVG 地图 -->
+                                <svg class="w-full h-full" viewBox="0 0 800 600">
+                                    <!-- 背景网格 -->
+                                    <defs>
+                                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#374151" stroke-width="1"/>
+                                        </pattern>
+                                        <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#5b21b6;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#grid)" />
+                                    
+                                    <!-- 晶格山脉地形 -->
+                                    <g id="crystal-mountains">
+                                        <!-- 主山脉 -->
+                                        <polygon points="100,500 200,200 300,500" fill="url(#mountainGradient)" class="mountain-terrain terrain-block"
+                                                data-terrain="北晶格山脉" data-effect="三角议会防御+100%，其他种族移动-20%"/>
+                                        <polygon points="500,500 600,250 700,500" fill="url(#mountainGradient)" class="mountain-terrain terrain-block"
+                                                data-terrain="南晶格山脉" data-effect="三角议会防御+100%，其他种族移动-20%"/>
+                                        
+                                        <!-- 山峰细节 -->
+                                        <polygon points="200,200 180,240 220,240" fill="#9333ea" class="terrain-block"/>
+                                        <polygon points="600,250 580,290 620,290" fill="#9333ea" class="terrain-block"/>
+                                    </g>
+                                    
+                                    <!-- 高地区域 -->
+                                    <g id="highlands">
+                                        <ellipse cx="400" cy="300" rx="150" ry="100" fill="#5b21b6" opacity="0.5" class="highland-terrain terrain-block"
+                                                data-terrain="中央高地" data-effect="视野+50%，攻击范围+20%"/>
+                                        
+                                        <!-- 防御区域 -->
+                                        <circle cx="400" cy="300" r="200" class="defense-zone" data-terrain="要塞防御区" data-effect="友军防御+25%"/>
+                                    </g>
+                                    
+                                    <!-- 三角尖塔 -->
+                                    <g id="triangle-spires">
+                                        <!-- 力量之塔 -->
+                                        <g transform="translate(400, 150)" class="spire" data-building="力量之塔">
+                                            <polygon points="0,-80 -70,40 70,40" fill="#8b5cf6" stroke="#a78bfa" stroke-width="3"/>
+                                            <polygon points="0,-60 -50,20 50,20" fill="#9333ea" stroke="#a78bfa" stroke-width="2"/>
+                                            <text y="-90" text-anchor="middle" fill="white" font-size="14" font-weight="bold">力量</text>
+                                        </g>
+                                        
+                                        <!-- 智慧之塔 -->
+                                        <g transform="translate(250, 350)" class="spire" data-building="智慧之塔">
+                                            <polygon points="0,-60 -60,30 60,30" fill="#a855f7" stroke="#c084fc" stroke-width="3"/>
+                                            <polygon points="0,-40 -40,15 40,15" fill="#b876f4" stroke="#c084fc" stroke-width="2"/>
+                                            <text y="-70" text-anchor="middle" fill="white" font-size="14" font-weight="bold">智慧</text>
+                                        </g>
+                                        
+                                        <!-- 防御之塔 -->
+                                        <g transform="translate(550, 350)" class="spire" data-building="防御之塔">
+                                            <polygon points="0,-60 -60,30 60,30" fill="#7c3aed" stroke="#8b5cf6" stroke-width="3"/>
+                                            <polygon points="0,-40 -40,15 40,15" fill="#8b5cf6" stroke="#9333ea" stroke-width="2"/>
+                                            <text y="-70" text-anchor="middle" fill="white" font-size="14" font-weight="bold">防御</text>
+                                        </g>
+                                    </g>
+                                    
+                                    <!-- 能量桥梁 -->
+                                    <g id="energy-bridges">
+                                        <line x1="250" y1="350" x2="400" y2="150" class="energy-bridge"/>
+                                        <line x1="550" y1="350" x2="400" y2="150" class="energy-bridge" style="animation-delay: 0.7s"/>
+                                        <line x1="250" y1="350" x2="550" y2="350" class="energy-bridge" style="animation-delay: 1.4s"/>
+                                    </g>
+                                    
+                                    <!-- 军事设施 -->
+                                    <g id="military-facilities">
+                                        <!-- 战争学院 -->
+                                        <rect x="150" y="420" width="80" height="60" fill="#dc2626" stroke="#ef4444" stroke-width="2" rx="5" class="terrain-block"
+                                              data-building="战争学院" data-effect="训练速度+30%"/>
+                                        <text x="190" y="455" text-anchor="middle" fill="white" font-size="12">战争学院</text>
+                                        
+                                        <!-- 棱镜兵工厂 -->
+                                        <rect x="570" y="420" width="80" height="60" fill="#ea580c" stroke="#f97316" stroke-width="2" rx="5" class="terrain-block"
+                                              data-building="棱镜兵工厂" data-effect="武器生产+40%"/>
+                                        <text x="610" y="455" text-anchor="middle" fill="white" font-size="12">兵工厂</text>
+                                        
+                                        <!-- 三角训练场 -->
+                                        <polygon points="400,450 350,520 450,520" fill="#059669" stroke="#10b981" stroke-width="2" class="terrain-block"
+                                                data-building="三角训练场" data-effect="实战演练"/>
+                                        <text x="400" y="495" text-anchor="middle" fill="white" font-size="12">训练场</text>
+                                        
+                                        <!-- 要塞护盾发生器 -->
+                                        <circle cx="400" cy="300" r="30" fill="#0284c7" stroke="#0ea5e9" stroke-width="3" class="pulse-animation terrain-block"
+                                                data-building="要塞护盾" data-effect="城市防御系统"/>
+                                        <text x="400" y="305" text-anchor="middle" fill="white" font-size="10">护盾</text>
+                                    </g>
+                                    
+                                    <!-- 形态场强度指示 -->
+                                    <g id="field-strength">
+                                        <circle cx="400" cy="100" r="6" fill="#a855f7" class="pulse-animation"/>
+                                        <circle cx="200" cy="400" r="6" fill="#a855f7" class="pulse-animation" style="animation-delay: 0.5s"/>
+                                        <circle cx="600" cy="400" r="6" fill="#a855f7" class="pulse-animation" style="animation-delay: 1s"/>
+                                        <circle cx="400" cy="550" r="6" fill="#a855f7" class="pulse-animation" style="animation-delay: 1.5s"/>
+                                    </g>
+                                </svg>
+                                
+                                <!-- 地形提示框 -->
+                                <div id="terrainTooltip" class="terrain-tooltip"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 侧边栏信息 -->
+                    <div class="lg:col-span-1">
+                        <div class="space-y-6">
+                            <!-- 地形图例 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-purple-400">地形图例</h3>
+                                <div class="space-y-3">
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-6 bg-purple-600 rounded"></div>
+                                        <span class="text-sm">晶格山脉</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-6 bg-purple-800 rounded"></div>
+                                        <span class="text-sm">中央高地</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-6 h-1 bg-purple-400"></div>
+                                        <span class="text-sm">能量桥梁</span>
+                                    </div>
+                                    <div class="legend-item flex items-center space-x-3">
+                                        <div class="w-4 h-4 border-2 border-purple-400 rounded"></div>
+                                        <span class="text-sm">防御区域</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 种族优势 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-purple-400">三角议会优势</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">防御力</span>
+                                        <span class="text-green-400">+100%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">攻击力</span>
+                                        <span class="text-green-400">+50%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">建筑连接</span>
+                                        <span class="text-green-400">效果翻倍</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">高地优势</span>
+                                        <span class="text-green-400">视野+50%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 战略要点 -->
+                            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                                <h3 class="text-lg font-bold mb-4 text-purple-400">战略要点</h3>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li>• 控制高地获得视野优势</li>
+                                    <li>• 三塔连接形成防御网络</li>
+                                    <li>• 山脉阻碍敌人进攻</li>
+                                    <li>• 能量桥梁快速调动</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 地形特征详情 -->
+        <section class="relative px-6 mt-12">
+            <div class="container mx-auto max-w-6xl">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- 晶格山脉 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition">
+                        <h4 class="font-bold mb-2 text-purple-400">晶格山脉</h4>
+                        <p class="text-sm text-gray-400 mb-3">三角形的山峰，呈晶格结构</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-mountain text-purple-400 mr-1"></i> 移动速度-20%</p>
+                            <p><i class="fas fa-shield-alt text-green-400 mr-1"></i> 三角防御+100%</p>
+                            <p><i class="fas fa-eye text-blue-400 mr-1"></i> 高地视野优势</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 能量桥梁 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition">
+                        <h4 class="font-bold mb-2 text-purple-400">能量桥梁</h4>
+                        <p class="text-sm text-gray-400 mb-3">连接三塔的能量通道</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-bolt text-yellow-400 mr-1"></i> 瞬间传送</p>
+                            <p><i class="fas fa-link text-green-400 mr-1"></i> 连接加成</p>
+                            <p><i class="fas fa-sync text-blue-400 mr-1"></i> 能量传递</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 三角结构 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition">
+                        <h4 class="font-bold mb-2 text-purple-400">三角结构</h4>
+                        <p class="text-sm text-gray-400 mb-3">建筑必须三角连接</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-project-diagram text-green-400 mr-1"></i> 结构稳定</p>
+                            <p><i class="fas fa-plus text-blue-400 mr-1"></i> 效果叠加</p>
+                            <p><i class="fas fa-cogs text-purple-400 mr-1"></i> 效率提升</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 军事设施 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition">
+                        <h4 class="font-bold mb-2 text-purple-400">军事设施</h4>
+                        <p class="text-sm text-gray-400 mb-3">完善的军事体系</p>
+                        <div class="space-y-1 text-xs">
+                            <p><i class="fas fa-graduation-cap text-orange-400 mr-1"></i> 训练+30%</p>
+                            <p><i class="fas fa-industry text-red-400 mr-1"></i> 生产+40%</p>
+                            <p><i class="fas fa-shield-alt text-blue-400 mr-1"></i> 防御系统</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-20">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                    <p>&copy; 2025 几何境域. 地形图系统 - 展示世界的几何之美</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <a href="index.html" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-map"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 地形悬停提示
+        const terrainBlocks = document.querySelectorAll('.terrain-block');
+        const tooltip = document.getElementById('terrainTooltip');
+        
+        terrainBlocks.forEach(block => {
+            block.addEventListener('mouseenter', function(e) {
+                const terrain = this.getAttribute('data-terrain');
+                const effect = this.getAttribute('data-effect');
+                const building = this.getAttribute('data-building');
+                
+                let content = '';
+                if (building) {
+                    content = `<strong>${building}</strong>`;
+                } else if (terrain && effect) {
+                    content = `<strong>${terrain}</strong><br>${effect}`;
+                }
+                
+                if (content) {
+                    tooltip.innerHTML = content;
+                    tooltip.style.opacity = '1';
+                }
+            });
+            
+            block.addEventListener('mousemove', function(e) {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 30 + 'px';
+            });
+            
+            block.addEventListener('mouseleave', function() {
+                tooltip.style.opacity = '0';
+            });
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

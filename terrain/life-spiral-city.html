@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命螺旋城 - 几何境域地形图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes spiral-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .spiral-pattern {
+            animation: spiral-rotate 20s linear infinite;
+            transform-origin: center;
+        }
+        
+        .terrain-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 250px;
+        }
+        
+        .terrain-area {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .terrain-area:hover {
+            filter: brightness(1.2);
+            stroke-width: 3;
+        }
+        
+        .life-energy {
+            fill: url(#lifeGradient);
+            opacity: 0.7;
+        }
+        
+        .spiral-path {
+            fill: none;
+            stroke: #10b981;
+            stroke-width: 3;
+            stroke-dasharray: 10, 5;
+            opacity: 0.6;
+        }
+        
+        .crystal-cluster {
+            fill: #a78bfa;
+            stroke: #8b5cf6;
+            stroke-width: 2;
+        }
+        
+        .ancient-tree {
+            fill: #059669;
+            stroke: #047857;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-green-900/90 backdrop-blur-sm border-b border-green-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🌿</span>
+                    <h1 class="text-xl font-bold text-green-100">几何境域地形图</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="../index.html" class="text-green-200 hover:text-green-100 transition">返回首页</a>
+                    <a href="terrain-todolist.html" class="text-green-200 hover:text-green-100 transition">地形列表</a>
+                    <select onchange="window.location.href=this.value" class="bg-green-800 text-green-100 px-3 py-1 rounded">
+                        <option value="#">选择城市</option>
+                        <option value="central-ring-city.html">中央圆环城</option>
+                        <option value="triangle-spires.html">三角尖塔</option>
+                        <option value="matrix-city.html">矩阵之都</option>
+                        <option value="life-spiral-city.html" selected>生命螺旋城</option>
+                        <option value="source-core.html">源初形核</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-900 mb-2">生命螺旋城</h1>
+            <p class="text-lg text-green-700">自然之力的源泉 • 生命的摇篮</p>
+        </div>
+
+        <!-- Terrain Map -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="relative" id="terrainMap">
+                <svg viewBox="0 0 1000 1000" class="w-full h-auto">
+                    <!-- Definitions -->
+                    <defs>
+                        <radialGradient id="lifeGradient">
+                            <stop offset="0%" style="stop-color:#86efac;stop-opacity:0.8" />
+                            <stop offset="100%" style="stop-color:#059669;stop-opacity:0.3" />
+                        </radialGradient>
+                        
+                        <pattern id="spiralPattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="#10b981" stroke-width="1" opacity="0.3"/>
+                        </pattern>
+                        
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Background -->
+                    <rect width="1000" height="1000" fill="#f0fdf4"/>
+
+                    <!-- Spiral Forest Background -->
+                    <g class="spiral-pattern">
+                        <path d="M 500 500 m -200 0 a 200 200 0 1 1 400 0 a 180 180 0 1 1 -360 0 a 160 160 0 1 1 320 0 a 140 140 0 1 1 -280 0 a 120 120 0 1 1 240 0 a 100 100 0 1 1 -200 0 a 80 80 0 1 1 160 0 a 60 60 0 1 1 -120 0 a 40 40 0 1 1 80 0 a 20 20 0 1 1 -40 0" 
+                              fill="none" stroke="#86efac" stroke-width="2" opacity="0.3"/>
+                    </g>
+
+                    <!-- Outer Spiral Forest -->
+                    <g class="terrain-area" data-terrain="spiral-forest">
+                        <path d="M 500 500 
+                                 m -350 0 
+                                 a 350 350 0 0 1 700 0 
+                                 a 330 330 0 0 1 -660 0 
+                                 a 310 310 0 0 1 620 0
+                                 a 290 290 0 0 1 -580 0
+                                 a 270 270 0 0 1 540 0
+                                 a 250 250 0 0 1 -500 0"
+                              fill="url(#lifeGradient)" stroke="#059669" stroke-width="3"/>
+                        <text x="500" y="150" text-anchor="middle" class="fill-green-800 font-bold text-lg">螺旋林海</text>
+                    </g>
+
+                    <!-- Life Gardens -->
+                    <g class="terrain-area" data-terrain="life-garden">
+                        <!-- Garden 1 -->
+                        <circle cx="350" cy="350" r="80" fill="#d9f99d" stroke="#65a30d" stroke-width="2"/>
+                        <text x="350" y="355" text-anchor="middle" class="fill-green-900 font-semibold">生命花园</text>
+                        
+                        <!-- Garden 2 -->
+                        <circle cx="650" cy="350" r="80" fill="#d9f99d" stroke="#65a30d" stroke-width="2"/>
+                        <text x="650" y="355" text-anchor="middle" class="fill-green-900 font-semibold">生命花园</text>
+                        
+                        <!-- Garden 3 -->
+                        <circle cx="350" cy="650" r="80" fill="#d9f99d" stroke="#65a30d" stroke-width="2"/>
+                        <text x="350" y="655" text-anchor="middle" class="fill-green-900 font-semibold">生命花园</text>
+                        
+                        <!-- Garden 4 -->
+                        <circle cx="650" cy="650" r="80" fill="#d9f99d" stroke="#65a30d" stroke-width="2"/>
+                        <text x="650" y="655" text-anchor="middle" class="fill-green-900 font-semibold">生命花园</text>
+                    </g>
+
+                    <!-- Central Life Spring -->
+                    <g class="terrain-area" data-terrain="life-spring">
+                        <circle cx="500" cy="500" r="100" fill="#4ade80" stroke="#16a34a" stroke-width="4" filter="url(#glow)"/>
+                        <circle cx="500" cy="500" r="80" fill="#22c55e" stroke="#15803d" stroke-width="3"/>
+                        <circle cx="500" cy="500" r="60" fill="#16a34a" stroke="#166534" stroke-width="2"/>
+                        <text x="500" y="505" text-anchor="middle" class="fill-white font-bold text-xl">生命之泉</text>
+                    </g>
+
+                    <!-- Ancient Trees -->
+                    <g class="terrain-area" data-terrain="ancient-tree">
+                        <!-- Tree 1 -->
+                        <g transform="translate(200, 300)">
+                            <rect x="-20" y="-40" width="40" height="80" class="ancient-tree"/>
+                            <circle cx="0" cy="-40" r="30" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
+                        </g>
+                        
+                        <!-- Tree 2 -->
+                        <g transform="translate(800, 300)">
+                            <rect x="-20" y="-40" width="40" height="80" class="ancient-tree"/>
+                            <circle cx="0" cy="-40" r="30" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
+                        </g>
+                        
+                        <!-- Tree 3 -->
+                        <g transform="translate(200, 700)">
+                            <rect x="-20" y="-40" width="40" height="80" class="ancient-tree"/>
+                            <circle cx="0" cy="-40" r="30" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
+                        </g>
+                        
+                        <!-- Tree 4 -->
+                        <g transform="translate(800, 700)">
+                            <rect x="-20" y="-40" width="40" height="80" class="ancient-tree"/>
+                            <circle cx="0" cy="-40" r="30" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>
+                        </g>
+                    </g>
+
+                    <!-- Crystal Clusters -->
+                    <g class="terrain-area" data-terrain="crystal-cluster">
+                        <!-- Cluster 1 -->
+                        <g transform="translate(150, 500)">
+                            <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" class="crystal-cluster"/>
+                        </g>
+                        
+                        <!-- Cluster 2 -->
+                        <g transform="translate(850, 500)">
+                            <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" class="crystal-cluster"/>
+                        </g>
+                        
+                        <!-- Cluster 3 -->
+                        <g transform="translate(500, 150)">
+                            <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" class="crystal-cluster"/>
+                        </g>
+                        
+                        <!-- Cluster 4 -->
+                        <g transform="translate(500, 850)">
+                            <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" class="crystal-cluster"/>
+                        </g>
+                    </g>
+
+                    <!-- Vine Network Paths -->
+                    <g class="terrain-area" data-terrain="vine-network">
+                        <path d="M 350 350 Q 425 425 500 500" class="spiral-path"/>
+                        <path d="M 650 350 Q 575 425 500 500" class="spiral-path"/>
+                        <path d="M 350 650 Q 425 575 500 500" class="spiral-path"/>
+                        <path d="M 650 650 Q 575 575 500 500" class="spiral-path"/>
+                        <path d="M 200 300 Q 350 350 350 350" class="spiral-path"/>
+                        <path d="M 800 300 Q 650 350 650 350" class="spiral-path"/>
+                        <path d="M 200 700 Q 350 650 350 650" class="spiral-path"/>
+                        <path d="M 800 700 Q 650 650 650 650" class="spiral-path"/>
+                    </g>
+
+                    <!-- Ecological Reserves -->
+                    <g class="terrain-area" data-terrain="eco-reserve">
+                        <rect x="100" y="400" width="120" height="200" rx="20" fill="#bbf7d0" stroke="#22c55e" stroke-width="2" opacity="0.7"/>
+                        <text x="160" y="505" text-anchor="middle" class="fill-green-900 font-semibold">生态保护区</text>
+                        
+                        <rect x="780" y="400" width="120" height="200" rx="20" fill="#bbf7d0" stroke="#22c55e" stroke-width="2" opacity="0.7"/>
+                        <text x="840" y="505" text-anchor="middle" class="fill-green-900 font-semibold">生态保护区</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Terrain Legend -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-green-900 mb-4">地形图例</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-400 rounded"></div>
+                    <span class="text-sm">螺旋林海 - 自然地形</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-200 rounded-full"></div>
+                    <span class="text-sm">生命花园 - 生命能量</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-600 rounded-full"></div>
+                    <span class="text-sm">生命之泉 - 中心区域</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-800 rounded"></div>
+                    <span class="text-sm">古树 - 高地优势</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-purple-400 rounded"></div>
+                    <span class="text-sm">水晶簇 - 能量节点</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-300 rounded"></div>
+                    <span class="text-sm">藤蔓网络 - 快速通道</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-green-100 rounded"></div>
+                    <span class="text-sm">生态保护区 - 资源区</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Racial Advantages -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-green-900 mb-3">🟢 圆形种族优势</h3>
+                <ul class="space-y-2 text-sm text-green-800">
+                    <li>• 生命花园治疗效果 +50%</li>
+                    <li>• 藤蔓网络移动速度 +30%</li>
+                    <li>• 生命之泉能量恢复 +40%</li>
+                </ul>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-purple-900 mb-3">💜 菱形种族优势</h3>
+                <ul class="space-y-2 text-sm text-purple-800">
+                    <li>• 水晶簇能量收集 +60%</li>
+                    <li>• 生态保护区视野 +40%</li>
+                    <li>• 古树附近防御 +25%</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="terrain-tooltip"></div>
+
+    <script>
+        // Terrain data
+        const terrainData = {
+            'spiral-forest': {
+                name: '螺旋林海',
+                description: '茂密的森林以螺旋形式向外延伸，提供丰富的自然资源和隐蔽性',
+                advantages: '所有单位获得 +20% 闪避率',
+                resources: '木材、草药、野生动物'
+            },
+            'life-garden': {
+                name: '生命花园',
+                description: '充满生命能量的神圣花园，能够治愈伤患并恢复能量',
+                advantages: '友军单位持续恢复生命值',
+                resources: '生命之水、治愈草药'
+            },
+            'life-spring': {
+                name: '生命之泉',
+                description: '整座城市的能量源泉，源源不断地输出生命力',
+                advantages: '控制关键战略点，影响全局',
+                resources: '纯净生命能量'
+            },
+            'ancient-tree': {
+                name: '古树',
+                description: '千年古树拥有强大的自然力量，是天然的瞭望塔',
+                advantages: '高地视野，防御加成 +30%',
+                resources: '古树之果、木材'
+            },
+            'crystal-cluster': {
+                name: '水晶簇',
+                description: '自然形成的水晶聚集地，蕴含强大的能量',
+                advantages: '魔法单位施法消耗 -25%',
+                resources: '魔法水晶、能量结晶'
+            },
+            'vine-network': {
+                name: '藤蔓网络',
+                description: '连接各区域的藤蔓通道，允许快速机动',
+                advantages: '单位移动速度 +50%',
+                special: '只能轻型单位通过'
+            },
+            'eco-reserve': {
+                name: '生态保护区',
+                description: '精心保护的生态区域，拥有独特的生物资源',
+                advantages: '资源产出 +100%',
+                resources: '稀有生物、特殊植物'
+            }
+        };
+
+        // Tooltip functionality
+        const tooltip = document.getElementById('tooltip');
+        const terrainAreas = document.querySelectorAll('.terrain-area');
+
+        terrainAreas.forEach(area => {
+            area.addEventListener('mouseenter', (e) => {
+                const terrainType = area.getAttribute('data-terrain');
+                const terrain = terrainData[terrainType];
+                
+                if (terrain) {
+                    tooltip.innerHTML = `
+                        <div class="font-bold mb-1">${terrain.name}</div>
+                        <div class="text-sm mb-2">${terrain.description}</div>
+                        <div class="text-xs text-green-300 mb-1">${terrain.advantages}</div>
+                        <div class="text-xs text-gray-300">资源: ${terrain.resources}</div>
+                    `;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            area.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY - 10 + 'px';
+            });
+
+            area.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+
+        // Add floating animation to crystals
+        const crystals = document.querySelectorAll('.crystal-cluster');
+        crystals.forEach((crystal, index) => {
+            crystal.style.animationDelay = `${index * 0.5}s`;
+            crystal.classList.add('float-animation');
+        });
+    </script>
+</body>
+</html>
