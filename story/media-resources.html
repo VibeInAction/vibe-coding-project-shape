@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视觉艺术 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 几何形状动画 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+        }
+        
+        @keyframes energy-flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -100; }
+        }
+        
+        /* CSS 形状类 */
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-animation {
+            animation: rotate 20s linear infinite;
+        }
+        
+        .morph-animation {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .orbit-animation {
+            animation: orbit 10s linear infinite;
+        }
+        
+        /* 几何背景 */
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        /* 渐变文字 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 圆环族样式 */
+        .circle-shape {
+            width: 100px;
+            height: 100px;
+            border: 8px solid #3B82F6;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .circle-shape::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            border: 4px solid #60A5FA;
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .circle-shape::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%;
+            height: 30%;
+            background: #93C5FD;
+            border-radius: 50%;
+        }
+        
+        /* 三角议会样式 */
+        .triangle-shape {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 86px solid #8B5CF6;
+            position: relative;
+        }
+        
+        .triangle-shape::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -30px;
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 52px solid #A78BFA;
+        }
+        
+        /* 方碑盟约样式 */
+        .square-shape {
+            width: 80px;
+            height: 80px;
+            background: #06B6D4;
+            position: relative;
+            transform: rotate(45deg);
+        }
+        
+        .square-shape::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 50px;
+            height: 50px;
+            background: #67E8F9;
+        }
+        
+        /* 螺旋之子样式 */
+        .spiral-shape {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .spiral-shape::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, #10B981, #34D399, #6EE7B7, #10B981);
+            animation: rotate 4s linear infinite;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+        
+        /* 混沌形态 */
+        .chaos-shape {
+            width: 80px;
+            height: 80px;
+            background: #EF4444;
+            animation: morph 3s ease-in-out infinite;
+        }
+        
+        /* 场景样式 */
+        .scene-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            overflow: hidden;
+        }
+        
+        /* 能量流效果 */
+        .energy-flow {
+            stroke: #3B82F6;
+            stroke-width: 2;
+            stroke-dasharray: 10, 5;
+            animation: energy-flow 2s linear infinite;
+        }
+        
+        /* 卡片样式 */
+        .media-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 角色设计 */
+        .character-design {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            position: relative;
+        }
+        
+        /* 故事场景 */
+        .story-scene {
+            position: relative;
+            height: 250px;
+            background: radial-gradient(ellipse at center, #334155 0%, #1e293b 100%);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-animation"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-animation" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-palette text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">视觉艺术</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#story-illustrations" class="hover:text-blue-400 transition">故事配图</a>
+                    <a href="#character-concepts" class="hover:text-blue-400 transition">角色概念</a>
+                    <a href="#scene-illustrations" class="hover:text-blue-400 transition">场景插画</a>
+                    <a href="#design-elements" class="hover:text-blue-400 transition">设计元素</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">几何艺术世界</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">探索几何境域的视觉世界</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                通过独特的几何艺术风格，展现一个充满想象力的世界。
+                每一个图形都经过精心设计，为故事和游戏增添视觉魅力。
+            </p>
+        </div>
+    </header>
+
+    <!-- 故事配图 -->
+    <section id="story-illustrations" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">故事配图</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- 第一章：觉醒 -->
+                <div class="media-card bg-gray-800/50 rounded-2xl p-6 border border-blue-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-blue-400">第一章：觉醒</h3>
+                    <div class="character-design mb-4">
+                        <!-- 中央圆环破裂场景 -->
+                        <div class="relative">
+                            <div class="circle-shape float-animation">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-4 h-4 bg-red-500 rounded-full pulse-animation"></div>
+                                </div>
+                            </div>
+                            <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-yellow-400 rounded-full pulse-animation"></div>
+                                    <div class="w-2 h-2 bg-yellow-400 rounded-full pulse-animation" style="animation-delay: 0.2s"></div>
+                                    <div class="w-2 h-2 bg-yellow-400 rounded-full pulse-animation" style="animation-delay: 0.4s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">
+                        中央圆环的意外破裂，形素泄露的瞬间
+                    </p>
+                </div>
+
+                <!-- 第三章：真相 -->
+                <div class="media-card bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-purple-400">第三章：真相</h3>
+                    <div class="character-design mb-4">
+                        <!-- 源初形核 -->
+                        <div class="relative">
+                            <div class="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full pulse-animation"></div>
+                            <div class="absolute inset-0">
+                                <div class="w-4 h-4 bg-white rounded-full orbit-animation"></div>
+                                <div class="w-4 h-4 bg-blue-400 rounded-full orbit-animation" style="animation-duration: 15s; animation-delay: -5s"></div>
+                                <div class="w-4 h-4 bg-purple-400 rounded-full orbit-animation" style="animation-duration: 20s; animation-delay: -10s"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">
+                        源初形核的能量流动，世界的中心
+                    </p>
+                </div>
+
+                <!-- 第六章：终极对决 -->
+                <div class="media-card bg-gray-800/50 rounded-2xl p-6 border border-red-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-red-400">第六章：终极对决</h3>
+                    <div class="character-design mb-4">
+                        <!-- 秩序与混沌的碰撞 -->
+                        <div class="relative">
+                            <div class="flex items-center justify-center space-x-8">
+                                <div class="circle-shape scale-75"></div>
+                                <div class="chaos-shape scale-75"></div>
+                            </div>
+                            <svg class="absolute inset-0 w-full h-full">
+                                <line x1="25%" y1="50%" x2="75%" y2="50%" stroke="#F59E0B" stroke-width="3" stroke-dasharray="5,5" opacity="0.8">
+                                    <animate attributeName="stroke-dashoffset" values="0;10" dur="1s" repeatCount="indefinite"/>
+                                </line>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">
+                        秩序与混沌的最终碰撞
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 角色概念图 -->
+    <section id="character-concepts" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">角色概念设计</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 艾欧 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 text-center">
+                    <div class="character-design mb-4">
+                        <div class="relative">
+                            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div class="w-8 h-8 bg-blue-300 rounded-full"></div>
+                            </div>
+                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-20 bg-blue-600 rounded-t-full"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mb-2">艾欧</h3>
+                    <p class="text-xs text-gray-400">圆环族学者</p>
+                    <div class="mt-2 flex justify-center space-x-1">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- 塞琳 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 text-center">
+                    <div class="character-design mb-4">
+                        <div class="relative">
+                            <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-eye text-white"></i>
+                            </div>
+                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-20 bg-purple-600 rounded-t-full"></div>
+                            <div class="absolute top-0 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i class="fas fa-star text-xs text-yellow-800"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mb-2">塞琳</h3>
+                    <p class="text-xs text-gray-400">圆环族长老</p>
+                    <div class="mt-2 flex justify-center space-x-1">
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- 托里克 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 text-center">
+                    <div class="character-design mb-4">
+                        <div class="relative">
+                            <div class="triangle-shape scale-75"></div>
+                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-purple-700"></div>
+                            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-purple-400"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mb-2">托里克</h3>
+                    <p class="text-xs text-gray-400">三角议会将军</p>
+                    <div class="mt-2 flex justify-center space-x-1">
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- 不规则者 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 text-center">
+                    <div class="character-design mb-4">
+                        <div class="relative">
+                            <div class="chaos-shape morph-animation"></div>
+                            <div class="absolute inset-0 bg-red-500/20 rounded-full pulse-animation"></div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold mb-2">不规则者</h3>
+                    <p class="text-xs text-gray-400">混沌实体</p>
+                    <div class="mt-2 flex justify-center space-x-1">
+                        <div class="w-2 h-2 bg-red-400 rounded-full pulse-animation"></div>
+                        <div class="w-2 h-2 bg-red-400 rounded-full pulse-animation" style="animation-delay: 0.2s"></div>
+                        <div class="w-2 h-2 bg-red-400 rounded-full pulse-animation" style="animation-delay: 0.4s"></div>
+                        <div class="w-2 h-2 bg-red-400 rounded-full pulse-animation" style="animation-delay: 0.6s"></div>
+                        <div class="w-2 h-2 bg-red-400 rounded-full pulse-animation" style="animation-delay: 0.8s"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 场景插画 -->
+    <section id="scene-illustrations" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">场景插画</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 中央圆环城 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 border border-blue-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-blue-400">中央圆环城</h3>
+                    <div class="story-scene mb-4">
+                        <svg class="w-full h-full">
+                            <!-- 外环 -->
+                            <circle cx="50%" cy="50%" r="80" fill="none" stroke="#3B82F6" stroke-width="3" opacity="0.8"/>
+                            <circle cx="50%" cy="50%" r="60" fill="none" stroke="#60A5FA" stroke-width="2" opacity="0.6"/>
+                            <circle cx="50%" cy="50%" r="40" fill="none" stroke="#93C5FD" stroke-width="2" opacity="0.4"/>
+                            <circle cx="50%" cy="50%" r="20" fill="#DBEAFE"/>
+                            
+                            <!-- 能量流 -->
+                            <path d="M 50,120 Q 100,150 150,120" fill="none" stroke="#FBBF24" stroke-width="2" class="energy-flow"/>
+                            <path d="M 150,120 Q 180,70 150,20" fill="none" stroke="#FBBF24" stroke-width="2" class="energy-flow" style="animation-delay: 0.5s"/>
+                            <path d="M 150,20 Q 100,10 50,20" fill="none" stroke="#FBBF24" stroke-width="2" class="energy-flow" style="animation-delay: 1s"/>
+                            
+                            <!-- 建筑 -->
+                            <rect x="45" y="140" width="10" height="40" fill="#1E40AF"/>
+                            <rect x="70" y="130" width="10" height="50" fill="#1E40AF"/>
+                            <rect x="95" y="135" width="10" height="45" fill="#1E40AF"/>
+                            <rect x="120" y="125" width="10" height="55" fill="#1E40AF"/>
+                            <rect x="145" y="140" width="10" height="40" fill="#1E40AF"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">
+                        圆环族的都城，层层环绕的和谐建筑
+                    </p>
+                </div>
+
+                <!-- 混沌裂隙 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 border border-red-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-center text-red-400">混沌裂隙</h3>
+                    <div class="story-scene mb-4">
+                        <div class="relative h-full">
+                            <!-- 裂隙主体 -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-32 h-40 bg-gradient-to-b from-red-900 via-red-600 to-red-900 transform rotate-12 morph-animation"></div>
+                            </div>
+                            
+                            <!-- 混沌粒子 -->
+                            <div class="absolute top-10 left-20 w-3 h-3 bg-red-400 rounded-full pulse-animation"></div>
+                            <div class="absolute top-20 right-24 w-2 h-2 bg-orange-400 rounded-full pulse-animation" style="animation-delay: 0.3s"></div>
+                            <div class="absolute bottom-16 left-32 w-4 h-4 bg-yellow-400 rounded-full pulse-animation" style="animation-delay: 0.6s"></div>
+                            <div class="absolute bottom-24 right-28 w-2 h-2 bg-red-500 rounded-full pulse-animation" style="animation-delay: 0.9s"></div>
+                            
+                            <!-- 扭曲效果 -->
+                            <svg class="absolute inset-0 w-full h-full">
+                                <path d="M 50,50 Q 100,100 150,50 T 250,50" fill="none" stroke="#EF4444" stroke-width="2" opacity="0.5">
+                                    <animate attributeName="d" 
+                                             values="M 50,50 Q 100,100 150,50 T 250,50;
+                                                     M 50,60 Q 100,90 150,60 T 250,60;
+                                                     M 50,50 Q 100,100 150,50 T 250,50"
+                                             dur="3s" repeatCount="indefinite"/>
+                                </path>
+                                <path d="M 50,150 Q 100,200 150,150 T 250,150" fill="none" stroke="#DC2626" stroke-width="2" opacity="0.5">
+                                    <animate attributeName="d" 
+                                             values="M 50,150 Q 100,200 150,150 T 250,150;
+                                                     M 50,140 Q 100,210 150,140 T 250,140;
+                                                     M 50,150 Q 100,200 150,150 T 250,150"
+                                             dur="4s" repeatCount="indefinite"/>
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">
+                        不断扭曲变形的混沌入口
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 设计元素 -->
+    <section id="design-elements" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">设计元素库</span>
+            </h2>
+            
+            <!-- 几何形状展示 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <h3 class="text-xl font-bold mb-6 text-center">基础几何元素</h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                    <!-- 圆形元素 -->
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="circle-shape scale-75"></div>
+                        </div>
+                        <h4 class="font-semibold mb-2">圆形</h4>
+                        <p class="text-sm text-gray-400">象征着生命的循环与无限可能</p>
+                        <div class="mt-3 flex justify-center space-x-2">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full"></div>
+                            <div class="w-8 h-8 border-2 border-blue-500 rounded-full"></div>
+                            <div class="w-8 h-8 bg-blue-500/20 border-2 border-blue-500 rounded-full"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 三角形元素 -->
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="triangle-shape scale-75"></div>
+                        </div>
+                        <h4 class="font-semibold mb-2">三角形</h4>
+                        <p class="text-sm text-gray-400">象征力量与坚定的意志</p>
+                        <div class="mt-3 flex justify-center space-x-2">
+                            <div class="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-purple-500"></div>
+                            <div class="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-purple-500"></div>
+                            <div class="w-8 h-8 bg-purple-500/20" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%)"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 方形元素 -->
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="square-shape scale-75"></div>
+                        </div>
+                        <h4 class="font-semibold mb-2">方形</h4>
+                        <p class="text-sm text-gray-400">象征秩序与规则的平衡</p>
+                        <div class="mt-3 flex justify-center space-x-2">
+                            <div class="w-8 h-8 bg-cyan-500"></div>
+                            <div class="w-8 h-8 border-2 border-cyan-500"></div>
+                            <div class="w-8 h-8 bg-cyan-500/20 border border-cyan-500"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 螺旋元素 -->
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="spiral-shape scale-75"></div>
+                        </div>
+                        <h4 class="font-semibold mb-2">螺旋</h4>
+                        <p class="text-sm text-gray-400">象征进化与不断变化的成长</p>
+                        <div class="mt-3 flex justify-center space-x-2">
+                            <div class="w-8 h-8 bg-green-500 rounded-full" style="background: conic-gradient(from 0deg, #10B981, #34D399)"></div>
+                            <div class="w-8 h-8" style="background: repeating-conic-gradient(#10B981 0deg 30deg, #34D399 30deg 60deg)"></div>
+                            <div class="w-8 h-8 bg-green-500/30" style="clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 色彩系统 -->
+                <h3 class="text-xl font-bold mb-6 text-center">色彩系统</h3>
+                <div class="grid md:grid-cols-4 gap-4 mb-8">
+                    <div class="text-center">
+                        <div class="h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg mb-2"></div>
+                        <p class="text-sm font-semibold">圆环族 - 智慧之蓝</p>
+                        <p class="text-xs text-gray-400">深邃的蓝色象征智慧与和谐</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-20 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg mb-2"></div>
+                        <p class="text-sm font-semibold">三角议会 - 力量之紫</p>
+                        <p class="text-xs text-gray-400">神秘的紫色象征力量与威严</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-20 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg mb-2"></div>
+                        <p class="text-sm font-semibold">方碑盟约 - 秩序之青</p>
+                        <p class="text-xs text-gray-400">清澈的青色象征秩序与纯净</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-lg mb-2"></div>
+                        <p class="text-sm font-semibold">螺旋之子 - 生命之绿</p>
+                        <p class="text-xs text-gray-400">生机勃勃的绿色象征生命与希望</p>
+                    </div>
+                </div>
+                
+                <!-- 动画效果 -->
+                <h3 class="text-xl font-bold mb-6 text-center">动画效果库</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-3 float-animation"></div>
+                        <p class="text-center text-sm">浮动效果</p>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <div class="w-16 h-16 bg-purple-500 rounded-full mx-auto mb-3 pulse-animation"></div>
+                        <p class="text-center text-sm">脉冲效果</p>
+                    </div>
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <div class="w-16 h-16 bg-cyan-500 mx-auto mb-3 rotate-animation"></div>
+                        <p class="text-center text-sm">旋转效果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 进度展示 -->
+    <section class="relative py-20 px-6">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">完成进度</span>
+            </h2>
+            
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- 故事配图 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#3B82F6" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="0" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">100%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-2">故事配图</h4>
+                        <p class="text-sm text-gray-400">关键场景视觉化</p>
+                    </div>
+                    
+                    <!-- 角色概念 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#8B5CF6" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="0" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">100%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-2">角色概念</h4>
+                        <p class="text-sm text-gray-400">角色形象设计</p>
+                    </div>
+                    
+                    <!-- 场景插画 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#06B6D4" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="0" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">100%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-2">场景插画</h4>
+                        <p class="text-sm text-gray-400">世界场景展现</p>
+                    </div>
+                    
+                    <!-- 设计元素 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#10B981" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="0" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">100%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-2">视觉风格</h4>
+                        <p class="text-sm text-gray-400">统一设计语言</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span class="font-bold">视觉资源已完整构建</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="../game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 卡片悬停效果
+        document.querySelectorAll('.media-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 进度环动画
+        const progressCircles = document.querySelectorAll('svg circle[stroke-dasharray]');
+        const progressObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const circle = entry.target;
+                    circle.style.strokeDashoffset = '351.86';
+                    circle.style.transition = 'stroke-dashoffset 1.5s ease-out';
+                    setTimeout(() => {
+                        circle.style.strokeDashoffset = '0';
+                    }, 100);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        progressCircles.forEach(circle => {
+            progressObserver.observe(circle);
+        });
+    </script>
+</body>
+</html>

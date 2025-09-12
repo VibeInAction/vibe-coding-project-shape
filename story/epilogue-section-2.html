@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>终章：新的开始 - 新的威胁 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes threat-glow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(239, 68, 68, 0.3),
+                           0 0 60px rgba(239, 68, 68, 0.1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(239, 68, 68, 0.5),
+                           0 0 100px rgba(239, 68, 68, 0.3);
+            }
+        }
+        
+        @keyforms anomaly-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: hue-rotate(0deg);
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: hue-rotate(180deg);
+            }
+        }
+        
+        @keyforms distortion-wave {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .threat-effect {
+            animation: threat-glow 4s ease-in-out infinite;
+        }
+        
+        .anomaly-effect {
+            animation: anomaly-pulse 3s ease-in-out infinite;
+        }
+        
+        .distortion-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .distortion-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.3), transparent);
+            animation: distortion-wave 3s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+        
+        .theme-transition * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-red-500 rounded-full rotate-slow" style="animation-direction: reverse;"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-orange-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-red-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-32 h-32 border-2 border-orange-500 anomaly-effect"></div>
+    </div>
+
+    <!-- 导航 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-red-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">终章：新的开始</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fontDecrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="fontSize" class="text-sm">16px</span>
+                    <button id="fontIncrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="themeToggle" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="relative z-10 bg-gray-800/50 border-b border-gray-700 px-6 py-2">
+        <div class="container mx-auto">
+            <div class="flex items-center space-x-2 text-sm">
+                <a href="index.html" class="text-gray-400 hover:text-white transition">故事目录</a>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <a href="index.html#chapters" class="text-gray-400 hover:text-white transition">章节</a>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <span class="text-red-400">终章：新的开始</span>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <span class="text-gray-300">新的威胁</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <!-- 章节标题 -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">第二节：新的威胁</span>
+            </h1>
+            <div class="w-32 h-1 bg-gradient-to-r from-red-500 to-orange-500 mx-auto mb-6 threat-effect"></div>
+            <p class="text-gray-400 text-lg">和平之下，暗流涌动</p>
+        </header>
+
+        <!-- 章节内容 -->
+        <div class="story-content text-lg" id="storyContent">
+            <p>
+                均衡时代的第五年，一个异常的发现打破了和谐之城的宁静。
+                薇拉在她的形素研究中发现了一些不寻常的波动——不是来自被封印的混沌之源，
+                而是来自几何境域的深处，仿佛有什么东西正在苏醒。
+            </p>
+            
+            <p>
+                "这不像是混沌，"薇拉在紧急召开的守护者会议上说道，
+                她的全息投影展示着复杂的形素波动图，"但也不是任何我们已知的几何形态。
+                它像是一种...变异。"
+            </p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-red-500/30 my-8">
+                <h3 class="text-xl font-bold mb-4 text-red-400">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>异常现象
+                </h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li><i class="fas fa-radiation text-orange-400 mr-2"></i>形素波动异常，频率不断升高</li>
+                    <li><i class="fas fa-microscope text-red-400 mr-2"></i>某些几何形态开始自发变异</li>
+                    <li><i class="fas fa-thermometer-half text-yellow-400 mr-2"></i>空间稳定性下降，出现微小裂缝</li>
+                    <li><i class="fas fa-eye text-purple-400 mr-2"></i>敏感者能感受到模糊的"注视"</li>
+                </ul>
+            </div>
+            
+            <p>
+                艾欧立刻组织了调查队。他们追踪着异常波动的来源，
+                最终来到了几何境域最古老的区域——"始源之地"。
+                据说，这里是源初形核第一次创造几何形态的地方。
+            </p>
+            
+            <p>
+                在始源之地的核心，他们发现了一个令人震惊的场景：
+                空间本身正在扭曲，形成一个巨大的漩涡。而在漩涡的中心，
+                他们看到了前所未见的东西——既不是纯粹的几何形态，也不是混沌，
+                而是一种二者的诡异融合。
+            </p>
+            
+            <div class="dialogue">
+                "天哪..."托里克倒吸一口冷气，"这不可能。几何形态和混沌怎么会...融合？"
+            </div>
+            
+            <p>
+                更令人担忧的是，这个存在似乎拥有意识。当调查队靠近时，
+                漩涡中的形态开始变化，时而呈现出规则的几何形状，
+                时而又扭曲成不规则的混沌形态。它像是在尝试理解自己的存在。
+            </p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-orange-500/30 my-8 distortion-effect">
+                <h3 class="text-xl font-bold mb-4 text-orange-400">
+                    <i class="fas fa-dna mr-2"></i>变异形素的特征
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold mb-2 text-red-400">双重属性</h4>
+                        <p class="text-sm text-gray-400">同时具备几何的秩序和混沌的不稳定性</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-purple-400">自我进化</h4>
+                        <p class="text-sm text-gray-400">能够快速适应外部环境，改变自身形态</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-yellow-400">能量吸收</h4>
+                        <p class="text-sm text-gray-400">从周围环境中汲取形素能量壮大自身</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-cyan-400">空间扭曲</h4>
+                        <p class="text-sm text-gray-400">影响周围的空间结构，创造异常区域</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>
+                调查队立即撤离并向守护者议会报告。这个发现让所有人都感到了不安。
+                如果几何形态和混沌能够融合，那么他们将面对一个全新的威胁——
+                一个可能比纯粹的混沌更加危险的存在。
+            </p>
+            
+            <p>
+                "我们必须立即行动，"拉克严肃地说，他的方碑逻辑分析系统已经模拟了数百种可能性，
+                "根据我的计算，如果我们不阻止它，三个月内这个变异体就会扩散到整个几何境域。"
+            </p>
+            
+            <div class="dialogue">
+                "但是直接攻击可能会激怒它，"塞琳提醒道，"它显然具有智慧。
+                也许我们应该尝试沟通？"
+            </div>
+            
+            <p>
+                经过激烈的讨论，守护者们决定采取双管齐下的策略。
+                一方面，托里克带领联合军队建立防线，防止变异体扩散；
+                另一方面，艾欧、塞琳和薇拉尝试与这个存在建立联系。
+            </p>
+            
+            <p>
+                第一次接触尝试以失败告终。当他们靠近时，变异体产生了强烈的防御反应，
+                空间裂缝扩大，差点将整个调查队吞噬。显然，这个存在对任何靠近者都抱有敌意。
+            </p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-red-500/30 my-8">
+                <h3 class="text-xl font-bold mb-4 text-red-400">
+                    <i class="fas fa-shield-alt mr-2"></i>联合防线
+                </h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-circle text-blue-400 mr-3 mt-1"></i>
+                        <div>
+                            <strong>圆环护盾网络：</strong>覆盖整个异常区域的能量屏障
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-play text-red-400 mr-3 mt-1"></i>
+                        <div>
+                            <strong>三角打击部队：</strong>随时准备应对突发的空间裂缝
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-square text-cyan-400 mr-3 mt-1"></i>
+                        <div>
+                            <strong>方碑稳定器：</strong>维持区域的空间稳定性
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-sync text-green-400 mr-3 mt-1"></i>
+                        <div>
+                            <strong>螺旋监测站：</strong>持续追踪变异体的能量变化
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <p>
+                就在局势越来越紧张的时候，薇拉做出了一个惊人的发现。
+                通过分析变异体的形素模式，她发现这个存在并不是凭空产生的。
+                它的起源可以追溯到那场最终之战——当四位守护者牺牲自己封印混沌之源时，
+                一部分混沌形素与他们的能量产生了不可预料的反应。
+            </p>
+            
+            <p>
+                "这是...我们的责任，"艾欧沉重地说，"我们的牺牲虽然封印了混沌，
+                但也创造了这个新的威胁。"
+            </p>
+            
+            <div class="dialogue">
+                "不，"塞琳摇摇头，"这不是失败。这是自然的平衡。
+                有光就有影，有秩序就有混沌。也许这就是我们必须面对的下一个挑战。"
+            </div>
+            
+            <p>
+                真相的揭示让守护者们陷入了沉思。他们意识到，
+                对抗这种新的威胁需要全新的方法。单纯的毁灭或封印可能已经不够，
+                他们需要找到一种方式，让这个存在接受自己的双重本性，
+                就像他们学会了接纳不同种族一样。
+            </p>
+            
+            <p>
+                夜幕降临，和谐之城的灯火在远处闪烁。艾欧站在防线的最前沿，
+                凝视着那片不断扭曲的空间。她知道，几何境域即将面临新的考验。
+                但这一次，他们不再孤单。四大种族已经学会了团结，
+                而这种团结，或许就是应对任何威胁的关键。
+            </p>
+            
+            <div class="mt-12 p-6 bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-xl border border-red-500/50 threat-effect">
+                <h3 class="text-2xl font-bold mb-4 text-center">新的挑战</h3>
+                <p class="text-center italic text-gray-300">
+                    "当秩序与混沌的界限变得模糊，<br>
+                    当创造与毁灭融为一体，<br>
+                    守护者们必须重新定义什么是平衡。"
+                </p>
+            </div>
+        </div>
+
+        <!-- 章节导航 -->
+        <div class="mt-16 flex justify-between items-center">
+            <a href="epilogue-section-1.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一节：均衡时代</span>
+            </a>
+            <a href="epilogue-section-3.html" class="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 rounded-lg transition">
+                <span>下一节：无尽的故事</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-comments mr-2 text-red-400"></i>
+                读者评论
+            </h3>
+            <div id="comments" class="space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            <div class="mt-6">
+                <textarea id="commentInput" class="w-full bg-gray-700 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" rows="3" placeholder="分享你的想法..."></textarea>
+                <button id="submitComment" class="mt-3 px-6 py-2 bg-gradient-to-r from-red-500 to-orange-600 rounded-lg hover:from-red-600 hover:to-orange-700 transition">
+                    发表评论
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-16">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 终章：新的开始
+            </p>
+            <div class="mt-4 flex justify-center space-x-6">
+                <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-home mr-1"></i>返回主页
+                </a>
+                <a href="../world-lore.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-book mr-1"></i>世界观
+                </a>
+                <a href="index.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-list mr-1"></i>故事目录
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 阅读进度
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('readingProgress').style.width = scrolled + '%';
+        });
+
+        // 字体大小调整
+        let fontSize = 16;
+        const content = document.getElementById('storyContent');
+        
+        document.getElementById('fontIncrease').addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                content.style.fontSize = fontSize + 'px';
+                document.getElementById('fontSize').textContent = fontSize + 'px';
+            }
+        });
+        
+        document.getElementById('fontDecrease').addEventListener('click', () => {
+            if (fontSize > 12) {
+                fontSize -= 2;
+                content.style.fontSize = fontSize + 'px';
+                document.getElementById('fontSize').textContent = fontSize + 'px';
+            }
+        });
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        let isDarkTheme = true;
+        
+        themeToggle.addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            body.classList.add('theme-transition');
+            
+            if (isDarkTheme) {
+                body.className = body.className.replace('bg-gray-100 text-gray-900', 'bg-gray-900 text-white');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                body.className = body.className.replace('bg-gray-900 text-white', 'bg-gray-100 text-gray-900');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            setTimeout(() => {
+                body.classList.remove('theme-transition');
+            }, 300);
+        });
+
+        // 评论系统
+        const comments = [
+            {
+                author: "形素观察者",
+                content: "哇！秩序和混沌的融合体？这个设定太有意思了！期待他们如何解决这个问题！",
+                time: "1小时前"
+            },
+            {
+                author: "几何研究者",
+                content: "所以变异体是封印混沌时意外产生的？这说明没有完美的解决方案，每个选择都有后果。",
+                time: "3小时前"
+            }
+        ];
+
+        function renderComments() {
+            const commentsContainer = document.getElementById('comments');
+            commentsContainer.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-red-400">${comment.author}</span>
+                        <span class="text-xs text-gray-400">${comment.time}</span>
+                    </div>
+                    <p class="text-gray-300">${comment.content}</p>
+                </div>
+            `).join('');
+        }
+
+        renderComments();
+
+        document.getElementById('submitComment').addEventListener('click', () => {
+            const input = document.getElementById('commentInput');
+            const content = input.value.trim();
+            
+            if (content) {
+                comments.unshift({
+                    author: "读者",
+                    content: content,
+                    time: "刚刚"
+                });
+                renderComments();
+                input.value = '';
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

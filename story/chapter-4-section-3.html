@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第四章：联盟之路 - 争取方碑盟约</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes matrix-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(6, 182, 212, 0.5),
+                           inset 0 0 20px rgba(6, 182, 212, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(6, 182, 212, 0.8),
+                           inset 0 0 30px rgba(6, 182, 212, 0.3);
+            }
+        }
+        
+        @keyframes data-flow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .matrix-glow {
+            animation: matrix-glow 3s ease-in-out infinite;
+        }
+        
+        .data-stream {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, #06b6d4, transparent);
+            animation: data-flow 3s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .matrix-display {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .matrix-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(6, 182, 212, 0.1) 2px,
+                rgba(6, 182, 212, 0.1) 4px
+            );
+            pointer-events: none;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #f59e0b;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #d97706;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .council-record {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-cyan-500 rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-cyan-600 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-cyan-700 rounded-lg rotate-slow" style="animation-duration: 50s;"></div>
+        <!-- 数据流效果 -->
+        <div class="absolute top-1/4 left-1/4 data-stream" style="animation-delay: 0s;"></div>
+        <div class="absolute top-1/3 right-1/3 data-stream" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 data-stream" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-yellow-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第四章：</span>
+                        <span class="font-semibold text-yellow-400">联盟之路</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-yellow-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-yellow-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-yellow-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第四章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-yellow-400">争取方碑盟约</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-yellow-500 to-amber-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-yellow-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第四章 · 第三节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">争取方碑盟约</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 11 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    有了圆环族和三角议会的支持，艾欧的信心更加充足了。接下来的目标是方碑盟约——那个由严格规则和秩序组成的文明。与拉克的友谊让这次谈判相对容易，但方碑盟约内部的保守势力依然是巨大的障碍。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "方碑盟约不是那么容易说服的，"拉克在前往矩阵城邦的路上对艾欧说，"我们的一切都建立在规则之上。任何改变规则的行为都会遇到强烈的抵抗。"
+                </p>
+                
+                <h2>矩阵城邦</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    矩阵城邦是方碑盟约的首都，也是整个几何境域最有序的城市。这里的每一条街道都呈完美的网格状，每一座建筑都符合严格的几何比例。城市中央的矩阵塔——一个巨大的立方体建筑——是方碑盟约的权力中心。
+                </p>
+                
+                <div class="dialogue">
+                    "看那里，"拉克指向矩阵塔，"那就是盟约理事会所在地。每一个决定都经过严格的逻辑推理，每一个行动都有明确的规则指引。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    矩阵塔的表面覆盖着无数的数据流，这些数据流构成了方碑盟约的矩阵系统——一个维系着整个城市运转的复杂网络。
+                </p>
+                
+                <h3>盟约的结构</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    方碑盟约由三个主要机构组成：理事会、监理会和执行部。每个机构都有自己的职责和权力范围，形成了一个相互制衡的系统。
+                </p>
+                
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li><strong>理事会</strong>：由九名理事组成，负责制定规则和重大决策</li>
+                    <li><strong>监理会</strong>：监督规则的执行，确保一切按程序进行</li>
+                    <li><strong>执行部</strong>：负责具体实施理事会制定的决策</li>
+                </ul>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    拉克作为执行部的负责人，有一定的影响力，但要改变整个盟约的政策，还需要获得理事会的支持。
+                </p>
+                
+                <h2>理事会的质疑</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    理事会的会议厅是一个巨大的立方体空间，象征着方碑盟约对稳定和结构的追求。九名理事坐在呈矩阵排列的座位上，每个人的位置都经过精心计算，以确保绝对的公平。
+                </p>
+                
+                <div class="council-record bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-cyan-400">理事会记录</h3>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">理事001：拉克指挥官，你要求我们加入一个未经正式认可的'联盟'。这个请求缺乏必要的程序依据。</p>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">拉克：尊敬的理事们，混沌的威胁是真实存在的。我们的检测系统已经发现多处矩阵异常。</p>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">理事005：异常并不等于威胁。根据方碑守则第37条，任何对现有系统的改动都必须经过三次验证。</p>
+                    <p class="text-gray-300 font-mono text-sm">艾欧：如果等到三次验证完成，可能已经太迟了。</p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    理事们的反应在艾欧的预料之中。方碑盟约的规则既是他们的力量来源，也是他们的枷锁。要说服他们，必须用他们能够理解的方式——逻辑和数据。
+                </p>
+                
+                <h3>数据的证明</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "尊敬的理事们，"艾欧站出来说，"我理解方碑盟约对规则的重视。但有时候，规则本身也需要进化以应对新的威胁。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她展开了一份详细的数据报告，这是她在旅途中收集的所有关于混沌入侵的信息：
+                </p>
+                
+                <div class="matrix-display bg-gray-800/50 rounded-lg p-6 my-4 matrix-glow">
+                    <h3 class="text-lg font-bold mb-3 text-cyan-400">混沌入侵数据分析</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <h4 class="font-semibold mb-2">受影响区域</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>三角边境：87%的防御结构受损</li>
+                                <li>圆环外围：23%的和谐圆环出现裂缝</li>
+                                <li>螺旋领域：45%的进化实验失控</li>
+                                <li>方碑边境：12%的矩阵节点异常</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">预测模型</h4>
+                            <p class="mb-2">基于当前扩散速度：</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>30天内：影响范围扩大300%</li>
+                                <li>60天内：矩阵系统大规模崩溃</li>
+                                <li>90天内：几何境域完全混沌化</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    数据比任何言语都更有说服力。理事们虽然表情严肃，但眼中的犹豫已经说明了问题。
+                </p>
+                
+                <h2>规则的困境</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "即使数据真实，"首席理事索伦说，"方碑盟约也不能轻易打破规则。我们的力量来自于对规则的遵守。"
+                </p>
+                
+                <div class="dialogue">
+                    "但规则是为了保护我们，"拉克反驳道，"如果遵守规则会导致我们的毁灭，那这些规则还有什么意义？"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这是一个哲学性的问题，也是方碑盟约面临的最大困境。他们如此依赖规则，以至于忘记了规则存在的初衷。
+                </p>
+                
+                <h3>古老的协议</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在争论陷入僵局时，拉克突然想起了什么。"等等，"她说，"矩阵系统中有一些古老的协议，是在方碑盟约成立之初就写入的。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她迅速连接到矩阵核心，开始搜索那些被遗忘的代码。很快，她找到了一个关键的协议——"紧急状态应对协议"。
+                </p>
+                
+                <div class="council-record bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-cyan-400">紧急状态协议</h3>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">协议编号：ANC-001</p>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">触发条件：当检测到足以威胁整个几何境域的非常规危机时</p>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">授权等级：最高理事授权</p>
+                    <p class="text-gray-300 mb-2 font-mono text-sm">允许行动：暂停常规规则，组建紧急应对联盟</p>
+                    <p class="text-gray-300 font-mono text-sm">备注：此协议由方碑创始人亲自制定，从未被使用过</p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个发现改变了一切。原来方碑的祖先们早就预见到了这种可能性，并留下了应对的方法。
+                </p>
+                
+                <h2>投票</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    根据紧急状态协议，需要至少六名理事同意才能激活协议。投票开始了，每一票都关系到方碑盟约的未来。
+                </p>
+                
+                <div class="dialogue">
+                    "我投赞成票，"拉克首先表态，"作为执行部负责人，我亲眼见证了混沌的威胁。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    一位年长的理事犹豫了一下："我也投赞成。如果我们的祖先预见到了这种情况，我们应该相信他们的智慧。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    投票继续进行。最终结果是六票赞成，三票反对。紧急状态协议被激活了。
+                </p>
+                
+                <h3>改革的机会</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    协议的激活不仅意味着方碑盟约会加入联盟，更重要的是，它给了拉克一个推动改革的机会。
+                </p>
+                
+                <div class="dialogue">
+                    "这是我们的机会，"拉克对艾欧说，"我们可以借助这个机会，让方碑盟约变得更加灵活，更加适应变化的世界。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    但改革从来都不是容易的。即使在紧急状态下，许多理事仍然对改变感到不安。
+                </p>
+                
+                <h2>方碑的贡献</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    尽管有争议，方碑盟约一旦做出决定，就会全力执行。在拉克的领导下，方碑的资源开始向联盟倾斜：
+                </p>
+                
+                <div class="matrix-display bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-cyan-400">方碑支援计划</h3>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>部署形素监测矩阵，覆盖所有已知的混沌入侵点</li>
+                        <li>开发混沌识别算法，提前预警混沌活动</li>
+                        <li>建立联盟数据中心，实现信息共享</li>
+                        <li>提供工程支援，修复被混沌破坏的基础设施</li>
+                    </ol>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    方碑盟约的系统性和组织性给了联盟一个强大的后勤支持。他们的矩阵系统能够精确地跟踪和分析混沌的动向，为其他种族提供了宝贵的情报。
+                </p>
+                
+                <h3>新的矩阵</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    更重要的是，拉克开始推动矩阵系统的升级。新的系统将更加灵活，能够适应不断变化的情况。
+                </p>
+                
+                <div class="dialogue">
+                    "规则不应该限制我们，而应该保护我们，"拉克在理事会上说，"我们需要一个既保持秩序，又能够适应变化的系统。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这项改革得到了许多年轻理事的支持。他们看到了旧系统的局限性，也认识到了改变的必要性。
+                </p>
+                
+                <h2>内部的阻力</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    然而，改革遭到了以索伦为首的传统派的强烈反对。他们认为，任何对规则的松动都是对方碑精神的背叛。
+                </p>
+                
+                <div class="dialogue">
+                    "我们方碑的力量来自于规则，"索伦在理事会上警告道，"如果我们开始随意改变规则，很快就会陷入混乱。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这种分歧在方碑盟约内部造成了严重的对立。支持改革和坚持传统的两派形成了鲜明的对立。
+                </p>
+                
+                <h3>妥协的方案</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    为了避免内部分裂，拉克提出了一个妥协方案：保留核心规则不变，但建立一个"快速响应机制"，允许在紧急情况下暂时调整某些规则。
+                </p>
+                
+                <div class="council-record bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-cyan-400">快速响应机制</h3>
+                    <p class="text-gray-300 mb-2 text-sm">1. 触发条件：检测到A级以上威胁</p>
+                    <p class="text-gray-300 mb-2 text-sm">2. 启动程序：需要六名理事联合授权</p>
+                    <p class="text-gray-300 mb-2 text-sm">3. 有效期：72小时，可延长</p>
+                    <p class="text-gray-300 mb-2 text-sm">4. 限制：仅限于应对特定威胁的必要调整</p>
+                    <p class="text-gray-300 text-sm">5. 监督：监理会全程监督，确保权力不被滥用</p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个方案既维护了规则的神圣性，又给了盟约必要的灵活性。经过激烈的辩论，最终以微弱优势通过了。
+                </p>
+                
+                <h2>联盟的力量</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    有了方碑盟约的加入，几何守护者联盟的实力大增。现在联盟拥有了：
+                </p>
+                
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li>圆环族的和谐感知能力</li>
+                    <li>三角议会的军事力量</li>
+                    <li>方碑盟约的组织和后勤</li>
+                    <li>螺旋之子的适应性和创新能力</li>
+                </ul>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    四大种族的力量开始互补，形成了一个有机的整体。圆环族的监测网络发现了混沌的动向，三角议会迅速部署兵力，方碑盟约提供精确的情报和后勤支持，螺旋之子则负责应对复杂多变的战场环境。
+                </p>
+                
+                <h3>第一次合作</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    联盟成立后的第一次行动发生在方碑边境。一个混沌裂隙正在扩大，威胁着附近的矩阵节点。
+                </p>
+                
+                <div class="dialogue">
+                    "这次行动将由我们三方共同指挥，"托里克将军在战术会议上说，"三角议会负责正面攻击，方碑提供技术支援，圆环族负责净化被污染的区域。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    行动取得了圆满成功。在联盟的配合下，混沌裂隙被迅速封闭，损失的矩阵节点也被修复。更重要的是，这次行动证明了联盟的价值——当四大种族团结一心时，他们的力量远超各自为战。
+                </p>
+                
+                <h2>最后的挑战</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    现在，联盟已经获得了三个种族的支持。但还有一个重要的成员没有完全加入——螺旋之子。
+                </p>
+                
+                <div class="dialogue">
+                    "螺旋之子一直在观察我们，"薇拉通过远程通讯说，"他们想看看这个联盟能否持续下去。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧知道，要说服螺旋之子，她必须证明联盟不仅是力量的结合，更是理念的融合。螺旋之子最看重的是进化和适应，他们需要看到这个联盟能够随着时间成长和改变。
+                </p>
+                
+                <h3>前进的道路</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    站在矩阵塔的最高层，艾欧俯瞰着整个城市。方碑盟约的加入让联盟更加完整，但挑战依然存在。
+                </p>
+                
+                <div class="dialogue">
+                    "我们已经走了这么远，"拉克说，"但我感觉真正的大战还在前面。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧点头："是的，但至少我们现在不再是一个人了。无论面对什么挑战，我们都会一起面对。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    窗外的天空中，几何守护者联盟的旗帜正在迎风飘扬。那是一个融合了四种几何形态的标志，象征着团结和希望。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    而现在，她要去完成最后一步——让螺旋之子也加入这个大家庭。
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-4-section-2.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：联合三角议会</span>
+                    </a>
+                    <a href="chapter-4-section-4.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg font-semibold hover:from-yellow-700 hover:to-amber-700 transition">
+                        <span>下一节：引导螺旋之子</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-yellow-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-yellow-600 rounded-lg hover:bg-yellow-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader14/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">系统工程师</span>
+                                <span class="text-sm text-gray-500">1小时前</span>
+                            </div>
+                            <p class="text-gray-300">方碑盟约的故事太真实了！作为一个程序员，我完全理解规则和变革之间的冲突。有时候最困难的不是改变，而是知道什么时候该改变。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 68
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader15/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">规则守护者</span>
+                                <span class="text-sm text-gray-500">3小时前</span>
+                            </div>
+                            <p class="text-gray-300">紧急状态协议的设定太聪明了！这显示了方碑祖先们的远见。他们预见到了规则可能成为束缚，所以留下了后路。这才是真正的智慧——既重视规则，又不被规则束缚。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 52
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader16/40/40.jpg" alt="读者头像" class="w10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">数据分析师</span>
+                                <span class="text-sm text-gray-500">5小时前</span>
+                            </div>
+                            <p class="text-gray-300">混沌入侵数据分析部分写得真专业！预测模型、扩散速度、影响范围...这些都显示作者对系统分析有很深的理解。最棒的是，方碑的应对不是硬碰硬，而是用数据说话。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 47
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 下一节更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

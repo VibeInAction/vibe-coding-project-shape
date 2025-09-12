@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章：终极对决 - 牺牲与重生 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyforms sacrifice-glow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.5),
+                           0 0 60px rgba(251, 191, 36, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(251, 191, 36, 0.8),
+                           0 0 100px rgba(251, 191, 36, 0.5);
+            }
+        }
+        
+        @keyframes rebirth-sparkle {
+            0% { 
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.2) rotate(180deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyforms energy-flow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        
+        @keyforms memory-fade {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .sacrifice-glow {
+            animation: sacrifice-glow 3s ease-in-out infinite;
+        }
+        
+        .rebirth-sparkle {
+            animation: rebirth-sparkle 2s ease-out;
+        }
+        
+        .energy-flow {
+            animation: energy-flow 3s linear infinite;
+        }
+        
+        .memory-fade {
+            animation: memory-fade 4s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .sacrifice-scene {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        .comment-system {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .comment-system::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comment-system::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .comment-system::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.5);
+            border-radius: 3px;
+        }
+        
+        /* 深色模式样式 */
+        .dark {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-gray-900 {
+            background-color: #020617;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #1e293b;
+        }
+        
+        .dark .text-gray-700 {
+            color: #cbd5e1;
+        }
+        
+        .dark .border-gray-700 {
+            border-color: #334155;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sacrifice-scene {
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-amber-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-amber-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-amber-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-amber-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回章节目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第六章</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button id="fontSizeDecrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="fontSizeDisplay" class="text-sm">16px</span>
+                        <button id="fontSizeIncrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container mx-auto px-6 py-4">
+        <nav class="flex items-center space-x-2 text-sm text-gray-400">
+            <a href="../index.html" class="hover:text-white transition">游戏主页</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html" class="hover:text-white transition">故事</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">章节目录</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">第六章</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-amber-400">牺牲与重生</span>
+        </nav>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">牺牲与重生</span>
+            </h1>
+            <p class="text-xl text-gray-400">第六章 · 第三节</p>
+            <div class="mt-6 flex justify-center items-center space-x-8 text-sm text-gray-500">
+                <span><i class="far fa-calendar-alt mr-1"></i>发布于 2024年</span>
+                <span><i class="far fa-clock mr-1"></i>阅读时间约 22 分钟</span>
+                <span><i class="far fa-eye mr-1"></i>6,789 次阅读</span>
+            </div>
+        </header>
+
+        <!-- 章节内容 -->
+        <article id="storyContent" class="story-content text-lg">
+            <p class="text-center text-gray-400 mb-8">
+                <i class="fas fa-quote-left mr-2"></i>
+                有时候，结束只是为了更好的开始；牺牲，是为了守护更多
+                <i class="fas fa-quote-right ml-2"></i>
+            </p>
+
+            <div class="prose prose-lg max-w-none">
+                <p>
+                    胜利的代价是沉重的。守护者们失去了大部分力量，源初形核
+                    也几乎耗尽。更糟糕的是，虽然混沌之源被净化了，但连接
+                    异次元的通道依然存在。只要通道还在，混沌就有一天会
+                    卷土重来。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-amber-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>当前的危机
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">守护者状态</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 艾欧：形素感知能力大幅减弱</li>
+                                <li>• 塞琳：圆环护盾几乎失效</li>
+                                <li>• 托里克：三角之力仅剩三成</li>
+                                <li>• 拉克：数据链接不稳定</li>
+                                <li>• 薇拉：螺旋预测时灵时不灵</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">残余威胁</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 混沌通道尚未完全封闭</li>
+                                <li>• 散落的混沌实体仍在活动</li>
+                                <li>• 世界规则部分被改变</li>
+                                <li>• 源初形核需要时间恢复</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "我们需要封闭通道，"艾欧虚弱地说，"但以我们现在的状态，
+                    根本做不到。"
+                </p>
+
+                <div class="dialogue">
+                    "也许...也许有办法，"塞琳长老的声音很轻，"古老的
+                    记载中提到过，要完全封闭混沌通道，需要付出巨大的
+                    牺牲。"
+                </div>
+
+                <p>
+                    "什么牺牲？"托里克警觉地问。
+                </p>
+
+                <p>
+                    塞琳没有直接回答，而是拿出了一本古老的典籍。那是圆环
+                    族最珍贵的文献之一，记载着世界诞生之初的秘密。
+                </p>
+
+                <!-- 牺牲场景 -->
+                <div class="my-12">
+                    <div class="sacrifice-scene">
+                        <!-- 背景效果 -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-amber-900/10 to-gray-900"></div>
+                        
+                        <!-- 五位守护者的虚影 -->
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="flex items-center justify-center space-x-8">
+                                <div class="w-16 h-16 bg-blue-500/30 rounded-full sacrifice-glow memory-fade"></div>
+                                <div class="w-16 h-16 bg-red-500/30 transform rotate-180 sacrifice-glow memory-fade" style="animation-delay: 0.5s;"></div>
+                                <div class="w-16 h-16 bg-cyan-500/30 sacrifice-glow memory-fade" style="animation-delay: 1s;"></div>
+                                <div class="w-16 h-16 bg-teal-500/30 rounded-full sacrifice-glow memory-fade" style="animation-delay: 1.5s;"></div>
+                                <div class="w-16 h-16 bg-purple-500/30 rounded-full sacrifice-glow memory-fade" style="animation-delay: 2s;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 能量流 -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent energy-flow"></div>
+                        <div class="absolute top-1/3 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent energy-flow" style="animation-delay: 0.7s;"></div>
+                        <div class="absolute top-2/3 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent energy-flow" style="animation-delay: 1.4s;"></div>
+                        
+                        <!-- 闪光效果 -->
+                        <div class="absolute top-1/4 left-1/4">
+                            <div class="w-2 h-2 bg-amber-400 rounded-full rebirth-sparkle"></div>
+                        </div>
+                        <div class="absolute top-1/3 right-1/3">
+                            <div class="w-3 h-3 bg-amber-400 rounded-full rebirth-sparkle" style="animation-delay: 0.3s;"></div>
+                        </div>
+                        <div class="absolute bottom-1/4 left-1/3">
+                            <div class="w-2 h-2 bg-amber-400 rounded-full rebirth-sparkle" style="animation-delay: 0.6s;"></div>
+                        </div>
+                        <div class="absolute bottom-1/3 right-1/4">
+                            <div class="w-3 h-3 bg-amber-400 rounded-full rebirth-sparkle" style="animation-delay: 0.9s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    典籍上记载，要完全封闭混沌通道，需要五位守护者将自己的
+                    生命能量融入源初形核。这不是简单的死亡，而是将存在的
+                    本质转化为封印的力量。
+                </p>
+
+                <p>
+                    "这意味着..."拉克长已经明白了。
+                </p>
+
+                <div class="dialogue">
+                    "是的，"塞琳长老的声音带着悲伤，"我们将永远消失，
+                    但我们的意识会化为守护世界的力量。"
+                </div>
+
+                <p>
+                    沉默笼罩了整个帐篷。每个人都在思考这个选择。他们刚刚
+                    体验过终极形态的美好，那种超越个体的和谐感。而现在，
+                    他们要面临真正的牺牲。
+                </p>
+
+                <p>
+                    "值得吗？"薇拉轻声问。
+                </p>
+
+                <p>
+                    艾欧想起了这一路的旅程。从一个普通的圆环族学者，
+                    到现在的守护者领袖。她见证了太多的痛苦和牺牲，
+                    但也看到了希望和光明。
+                </p>
+
+                <p>
+                    "如果我们的牺牲能够换来世界的和平，"艾欧坚定地说，
+                    "那就值得。"
+                </p>
+
+                <p>
+                    "三角的荣耀，不在于征服，而在于守护，"托里克将军
+                    拿起了他的战锤，"我准备好了。"
+                </p>
+
+                <p>
+                    "方碑的意义，是创造永恒的秩序，"拉克长调整了
+                    眼镜，"如果我们的牺牲能够创造永恒的和平，我愿意。"
+                </p>
+
+                <div class="dialogue">
+                    "螺旋的变化，是为了更好的未来，"薇拉微笑着，
+                    "如果这就是最好的变化，我接受。"
+                </div>
+
+                <p>
+                    决定已经做出。最后的仪式将在日出时分进行，在混沌之源
+                    被净化的地方。那里将成为他们永恒的安息之地，也成为
+                    守护世界的封印。
+                </p>
+
+                <p>
+                    那一夜，没有人能够入睡。他们聚在一起，回忆着这一路
+                    走来的点点滴滴。
+                </p>
+
+                <p>
+                    "还记得我们第一次见面吗？"艾欧问，"在三角议会的
+                    大厅里，你们都不相信混沌的威胁。"
+                </p>
+
+                <div class="dialogue">
+                    "是啊，"托里克笑了，"那时的我太傲慢了。是你们让我
+                    明白了力量的真正含义。"
+                </div>
+
+                <p>
+                    "我也是，"拉克长说，"我以为秩序就是一切。现在我懂了，
+                    秩序是为了保护生命，而不是束缚生命。"
+                </p>
+
+                <p>
+                    "而我，"薇拉望着星空，"一直在寻找变化的意义。现在我
+                    知道了，变化是为了守护珍视的东西。"
+                </p>
+
+                <p>
+                    塞琳长老是最年长的，她见证了太多的历史。"每一代守护者
+                    都面临着同样的选择，"她说，"但他们从未后悔过。因为
+                    守护，就是我们存在的意义。"
+                </p>
+
+                <p>
+                    黎明时分，五人走向了混沌之源。被净化的紫色水晶在晨光
+                    中闪闪发光，就像一颗紫色的太阳。
+                </p>
+
+                <p>
+                    他们围成一个圆圈，将源初形核放在中央。然后，同时将
+                    手放在水晶上。
+                </p>
+
+                <p>
+                    "开始吧，"艾欧说。
+                </p>
+
+                <p>
+                    仪式开始了。他们的生命能量开始从身体中流出，化作
+                    金色的光芒，注入源初形核。这个过程并不痛苦，反而
+                    带来一种奇特的解脱感。
+                </p>
+
+                <div class="dialogue">
+                    "我看到了..."塞琳长老的声音越来越轻，"看到了一个
+                    和谐的世界...没有混沌...没有战争..."
+                </div>
+
+                <p>
+                    "我也看到了，"托里克的声音充满了平静，"人们不再为了
+                    力量而争斗，而是为了守护彼此..."
+                </p>
+
+                <p>
+                    "完美的秩序，"拉克长的眼中倒映着数据流，"不是僵化的
+                    规则，而是动态的平衡..."
+                </p>
+
+                <div class="dialogue">
+                    "美丽的变化，"薇拉的身体开始变得透明，"每一条生命
+                    都能自由地成长..."
+                </div>
+
+                <p>
+                    最后是艾欧。作为形态协调者，她要引导所有的能量完成
+                    最后的封印。
+                </p>
+
+                <p>
+                    "再见了，我的朋友们，"艾欧微笑着，"愿我们的牺牲，
+                    能够换来看得见的未来..."
+                </p>
+
+                <p>
+                    当最后一缕能量融入源初形核时，整个世界都被金色的
+                    光芒笼罩。混沌通道开始收缩，最终完全消失。紫色水晶
+                    化作了五个光点，分别飞向几何境域的五个方位。
+                </p>
+
+                <p>
+                    在中央圆环的最高塔上，出现了一个蓝色的光点；在三角
+                    议会的圣山上，出现了一个红色的光点；在方碑盟约的
+                    数据核心中，出现了一个青色的光点；在螺旋之子的
+                    进化之源，出现了一个绿色的光点；而在静默圆湖的中央，
+                    则出现了一个紫色的光点。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-amber-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-amber-400">
+                        <i class="fas fa-star mr-2"></i>守护者的遗产
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold mb-2">五座守护之碑</h4>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• 和谐之碑（艾欧）：位于中央圆环，守护世界的平衡</li>
+                                <li>• 勇气之碑（托里克）：位于三角圣山，守护世界的勇气</li>
+                                <li>• 秩序之碑（拉克）：位于数据核心，守护世界的规则</li>
+                                <li>• 变化之碑（薇拉）：位于进化之源，守护世界的活力</li>
+                                <li>• 团结之碑（塞琳）：位于静默圆湖，守护世界的和谐</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">永恒的守护</h4>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• 五座石碑形成巨大的封印阵列</li>
+                                <li>• 完全阻断了混沌的入侵</li>
+                                <li>• 源初形核融入世界法则</li>
+                                <li>• 守护者的意识成为世界的守护神</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    战争结束了。混沌被永远地封印，几何境域恢复了和平。
+                    四大种族铭记着守护者的牺牲，他们将这一天定为"守护日"，
+                    每年都会举行盛大的纪念活动。
+                </p>
+
+                <p>
+                    世界开始重建。在守护者的指引下，四大种族学会了更好地
+                    相处。圆环族教导和谐与包容，三角议会展示力量与保护，
+                    方碑盟约提供秩序与支持，螺旋之子带来变化与创新。
+                </p>
+
+                <p>
+                    有时候，当夜幕降临，人们抬头看星星时，仿佛能看到五颗
+                    特别明亮的星星。它们就像守护者的眼睛，永远注视着
+                    这个他们用生命守护的世界。
+                </p>
+
+                <div class="dialogue">
+                    "他们并没有消失，"塞琳长老生前最后一位弟子说，
+                    "他们只是换了一种方式存在。在我们每个人的心中，
+                    在这个世界的每一个角落。"
+                </div>
+
+                <p>
+                    几何境域进入了一个新的时代。没有战争，没有仇恨，
+                    只有和平与希望。四大种族共同建设着美好的未来，
+                    每一个都贡献自己独特的力量。
+                </p>
+
+                <p>
+                    但守护者们并没有忘记历史。他们知道，和平来之不易，
+                    必须珍惜。五座守护之碑成为了圣地，每天都有人前来
+                    朝拜，感谢那些用生命换来和平的英雄。
+                </p>
+
+                <p>
+                    多年以后，一个年轻的圆环族学者站在中央圆环的最高塔上，
+                    仰望着那蓝色的光点。她的眼中闪烁着好奇和向往。
+                </p>
+
+                <div class="dialogue">
+                    "总有一天，"她对身边的导师说，"我也要像他们一样，
+                    成为守护者。"
+                </div>
+
+                <p>
+                    导师微笑着点头："我相信你会的。因为守护的精神，
+                    永远不会消失。"
+                </p>
+
+                <p>
+                    是的，守护的故事永远不会结束。只要有人需要保护，
+                    只要有世界需要守护，就会有人站出来，继承守护者
+                    的意志。
+                </p>
+
+                <p>
+                    这就是几何境域的故事。一个关于牺牲、勇气、友谊
+                    和希望的故事。也许在某个平行世界里，类似的战斗
+                    仍在继续。但在这里，在守护者的牺牲下，世界迎来
+                    了永恒的和平。
+                </p>
+
+                <p>
+                    当夕阳西下，金色的余晖洒在五座守护之碑上，仿佛
+                    五位守护者依然在守护着这个世界。他们的故事，
+                    将永远被铭记。
+                </p>
+
+                <p>
+                    因为真正的守护，从来不会结束...
+                </p>
+
+                <p class="text-center text-gray-400 mt-8 pt-8 border-t border-gray-700">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    全文完
+                </p>
+            </div>
+        </article>
+
+        <!-- 导航按钮 -->
+        <div class="mt-12 flex justify-between items-center">
+            <a href="chapter-6-section-2.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一节：终极形态</span>
+            </a>
+            <a href="epilogue-section-1.html" class="flex items-center space-x-2 px-6 py-3 bg-amber-600 rounded-lg hover:bg-amber-700 transition">
+                <span>终章：新的开始</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-3 text-amber-400"></i>
+                读者评论
+            </h3>
+            
+            <div id="commentSection" class="comment-system space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <h4 class="text-lg font-semibold mb-4">发表评论</h4>
+                <form id="commentForm" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" id="commentName" placeholder="你的名字" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="email" id="commentEmail" placeholder="邮箱（可选）" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <textarea id="commentContent" rows="4" placeholder="分享你的想法..." 
+                              class="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                    <button type="submit" class="px-6 py-2 bg-amber-600 rounded-lg hover:bg-amber-700 transition">
+                        <i class="fas fa-paper-plane mr-2"></i>发布评论
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 感谢您的阅读
+            </p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="../index.html" class="hover:text-white transition">返回主页</a>
+                <a href="index.html" class="hover:text-white transition">章节目录</a>
+                <a href="../world-lore.html" class="hover:text-white transition">世界观</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 进度条
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+        
+        window.addEventListener('scroll', updateProgressBar);
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // 字体大小调整
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const storyContent = document.getElementById('storyContent');
+        let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
+        
+        fontSizeDisplay.textContent = currentFontSize + 'px';
+        storyContent.style.fontSize = currentFontSize + 'px';
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                updateFontSize();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                updateFontSize();
+            }
+        });
+        
+        function updateFontSize() {
+            fontSizeDisplay.textContent = currentFontSize + 'px';
+            storyContent.style.fontSize = currentFontSize + 'px';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+
+        // 评论系统
+        const comments = [
+            {
+                name: '感性读者',
+                content: '哭死我了...五位守护者的牺牲太感人了！特别是最后的描写，他们化作五座石碑永远守护世界，这种结局既悲伤又温暖。',
+                time: '1小时前',
+                avatar: '😢'
+            },
+            {
+                name: '哲学思考者',
+                content: '牺牲的主题处理得很好。不是简单的死亡，而是转化为更高层次的存在。这让我想到了很多宗教和哲学中的升华概念。',
+                time: '3小时前',
+                avatar: '🤔'
+            },
+            {
+                name: '奇幻爱好者',
+                content: '完美的结局！虽然主角们都牺牲了，但他们换来了永恒的和平。而且最后年轻学者的出现，暗示着守护的精神将代代相传。',
+                time: '5小时前',
+                avatar: '📚'
+            }
+        ];
+        
+        function loadComments() {
+            const commentSection = document.getElementById('commentSection');
+            commentSection.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-lg">
+                            ${comment.avatar}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h5 class="font-semibold">${comment.name}</h5>
+                                <span class="text-sm text-gray-500">${comment.time}</span>
+                            </div>
+                            <p class="text-gray-300">${comment.content}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        loadComments();
+        
+        // 提交评论
+        document.getElementById('commentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('commentName').value;
+            const content = document.getElementById('commentContent').value;
+            
+            if (name && content) {
+                const newComment = {
+                    name: name,
+                    content: content,
+                    time: '刚刚',
+                    avatar: name.charAt(0).toUpperCase()
+                };
+                
+                comments.unshift(newComment);
+                loadComments();
+                
+                // 清空表单
+                document.getElementById('commentName').value = '';
+                document.getElementById('commentEmail').value = '';
+                document.getElementById('commentContent').value = '';
+                
+                // 显示成功提示
+                alert('评论发布成功！');
+            }
+        });
+
+        // 添加牺牲场景的特效
+        document.addEventListener('DOMContentLoaded', () => {
+            const sacrificeScene = document.querySelector('.sacrifice-scene');
+            
+            // 创建记忆闪光效果
+            setInterval(() => {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'absolute w-1 h-1 bg-amber-300 rounded-full';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animation = 'rebirth-sparkle 1.5s ease-out';
+                
+                sacrificeScene.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 1500);
+            }, 200);
+        });
+    </script>
+</body>
+</html>

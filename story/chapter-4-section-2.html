@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第四章：联盟之路 - 联合三角议会</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes triangle-rotate {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        @keyframes energy-flow {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-100px) scale(0.8); opacity: 0; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .triangle-rotate {
+            animation: triangle-rotate 20s linear infinite;
+        }
+        
+        .energy-particle {
+            animation: energy-flow 3s ease-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .battle-scene {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .battle-scene::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #f59e0b;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #d97706;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .strategy-plan {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-yellow-500 triangle-rotate"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-amber-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-yellow-600 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-red-500 rounded-lg rotate-slow" style="animation-duration: 50s;"></div>
+        <!-- 能量粒子 -->
+        <div class="absolute top-1/3 left-1/3 w-2 h-2 bg-yellow-400 rounded-full energy-particle" style="animation-delay: 0s;"></div>
+        <div class="absolute top-1/2 right-1/4 w-2 h-2 bg-amber-400 rounded-full energy-particle" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/3 left-1/2 w-2 h-2 bg-yellow-500 rounded-full energy-particle" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-yellow-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第四章：</span>
+                        <span class="font-semibold text-yellow-400">联盟之路</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-yellow-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-yellow-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-yellow-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第四章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-yellow-400">联合三角议会</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-yellow-500 to-amber-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-yellow-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第四章 · 第二节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">联合三角议会</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 12 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    离开圆环中央城后，艾欧和托里克将军踏上了前往三角要塞的旅程。与圆环族的谨慎不同，三角议会以他们的骄傲和力量著称。说服他们加入联盟，将面临完全不同的挑战。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "三角议会不会像圆环族那样容易被说服，"托里克在路上对艾欧说，"我们崇尚力量和荣誉，对我们来说，寻求他人的帮助是一种软弱的表现。"
+                </p>
+                
+                <h2>三角要塞</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    三角要塞坐落在群山之中，整座城市由无数个巨大的三角形建筑组成。这些建筑以最稳定的角度相互支撑，形成了一个坚不可摧的防御体系。据说，在三角议会成立以来的数千年间，没有任何敌人能够攻破这座要塞。
+                </p>
+                
+                <div class="dialogue">
+                    "看那里，"托里克指向远处，"那就是议会塔。三角议会的核心，也是最难攻破的地方。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    议会塔是三角要塞最高的建筑，一个完美的三角锥体，塔尖直插云霄。塔的表面刻满了三角议会的历史和荣耀，每一道刻痕都记录着一场胜利的战斗。
+                </p>
+                
+                <h3>议会的结构</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    三角议会由三个主要派系组成：军事派、学者派和工匠派。每个派系都有自己的代表和权力范围，重大决策需要三派共同通过。
+                </p>
+                
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li><strong>军事派</strong>：由托里克将军领导，负责防卫和战斗</li>
+                    <li><strong>学者派</strong>：由大祭司阿尔提亚领导，负责知识和策略</li>
+                    <li><strong>工匠派</strong>由总工程师马库斯领导，负责武器和防御工事</li>
+                </ul>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    要获得议会的支持，艾欧必须说服这三个派系。而最大的障碍，是军事派中的鹰派势力——那些极端骄傲的战士们。
+                </p>
+                
+                <h2>初次会议</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    议会大厅是一个巨大的三角形空间，三派成员分别坐在三个边的席位上。艾欧站在大厅中央，感受着来自各方的审视目光。
+                </p>
+                
+                <div class="dialogue">
+                    "托里克将军，"鹰派领袖瓦勒留斯开口了，他的声音中充满了不屑，"你带了一个圆环族人来议会，还声称需要其他种族的帮助？三角的荣耀何在？"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    托里克站了出来："瓦勒留斯，我亲眼见过混沌的力量。那不是我们能够独自对抗的威胁。"
+                </p>
+                
+                <div class="dialogue">
+                    "那就证明给我们看，"大祭司阿尔提亚说，她的声音平静而理性，"我们三角议会相信证据，而不是传言。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧知道，空口说说是无法说服三角议会的。她必须用实际行动来证明她的实力，以及联盟的价值。
+                </p>
+                
+                <h3>力量的考验</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在三角文化中，实力是获得尊重的唯一途径。瓦勒留斯提议了一场比试，如果艾欧能够证明自己的价值，议会才会考虑她的提议。
+                </p>
+                
+                <div class="battle-scene bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-red-400">三角试炼</h3>
+                    <p class="text-gray-300 mb-2">试炼分为三个部分：</p>
+                    <ol class="list-decimal list-inside ml-4 space-y-2 text-sm">
+                        <li>精准试炼：在移动的靶子上画出完美的三角形</li>
+                        <li>力量试炼：击碎被混沌侵蚀的岩石</li>
+                        <li>策略试炼：在模拟战场上击败三角精英战士</li>
+                    </ol>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这是一场不公平的比试，但艾欧没有退路。她接受了挑战。
+                </p>
+                
+                <h2>第一试炼：精准</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    精准试炼在三角训练场进行。场地上有数十个移动靶子，每个靶子上都有一个需要击中的三角标记。挑战者需要在规定时间内，用形素能量击中所有标记。
+                </p>
+                
+                <div class="dialogue">
+                    "这需要三角形的精准和稳定，"瓦勒留斯傲慢地说，"圆环族只懂得画圆，不可能通过这个试炼。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧深吸一口气，闭上眼睛。她感受着周围的形素流动，想象着完美的三角形。当她睁开眼睛时，她的手指开始发光。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    下一刻，数十道金色的能量束从她的指尖射出，每一道都精准地击中了移动靶子上的三角标记。整个过程行云流水，仿佛那些能量束早就知道要去哪里。
+                </p>
+                
+                <div class="dialogue">
+                    "不可能..."瓦勒留斯震惊地说。
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    但更让所有人震惊的是，艾欧不仅击中了标记，她还在每个靶子上画出了与靶子运动方向完美契合的辅助三角形，让靶子的移动变得更加稳定。
+                </p>
+                
+                <h3>三角的力量</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这不是圆环的力量，"艾欧说，"这是几何的力量。三角形代表着稳定和方向，但真正的稳定不是僵硬的，而是能够适应变化的。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她的话语让在场的三角战士们陷入了思考。他们一直以为力量来自于纯粹的三角形，但艾欧展示了另一种可能——力量来自于理解和适应。
+                </p>
+                
+                <h2>第二试炼：力量</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    力量试炼面对的是一块被混沌侵蚀的岩石。这块岩石原本是三角形状的，但现在边缘变得模糊，表面还长出了不规则的突起。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "混沌侵蚀了一切，"总工程师马库斯解释道，"包括我们的力量。这块岩石无法用纯粹的三角力量击碎，因为混沌已经改变了它的性质。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    瓦勒留斯上前尝试，他的三角能量击打在岩石上，只溅起了一片火花，岩石纹丝不动。
+                </p>
+                
+                <div class="dialogue">
+                    "看到了吗？"瓦勒留斯恼怒地说，"这就是混沌的力量。我们无法对抗它。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧走到岩石前，仔细观察着它的结构。她发现，虽然岩石被混沌侵蚀，但它内部仍然保持着三角的结构。混沌只是覆盖了表面。
+                </p>
+                
+                <div class="dialogue">
+                    "你们一直在试图从外部击碎它，"艾欧说，"但真正的力量来自于内部。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她将手放在岩石上，闭上眼睛。这一次，她没有使用纯粹的能量，而是将圆环的和谐、方碑的结构、螺旋的变化和三角的稳定融合在一起。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    岩石开始发光，内部的混沌能量被逐渐净化。当光芒散去时，岩石恢复了它原本的三角形状，然后在一声轻响中，自行碎成了数块完美的三角晶体。
+                </p>
+                
+                <h3>新的理解</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    议会大厅里鸦雀无声。三角战士们从未见过这样的力量。这不是征服，而是净化；不是破坏，而是恢复。
+                </p>
+                
+                <div class="dialogue">
+                    "你...你是怎么做到的？"马库斯问，他的声音中充满了好奇。
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "我没有对抗混沌，"艾欧解释道，"我帮助岩石找回了自己的本质。这就是联盟的力量——不是要消灭什么，而是要让一切回归本源。"
+                </div>
+                
+                <h2>第三试炼：策略</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    策略试炼在模拟战场上进行。艾欧需要面对三角议会最精锐的三名战士。这不是力量的较量，而是智慧的比拼。
+                </p>
+                
+                <div class="strategy-plan bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-red-400">战术分析</h3>
+                    <p class="text-gray-300 mb-2">面对三名三角战士的包围，艾欧分析道：</p>
+                    <ul class="list-disc list-inside ml-4 space-y-1 text-sm">
+                        <li>三角阵型虽然强大，但中心是最脆弱的</li>
+                        <li>战士们的配合默契，但也意味着相互依赖</li>
+                        <li>真正的胜利不是击败对手，而是让他们理解</li>
+                    </ul>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    战斗开始了。三名战士组成了完美的三角阵型，他们的配合天衣无缝，攻击如潮水般涌来。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    但艾欧没有硬拼。她利用地形和战士们的配合特点，不断改变自己的位置，破坏他们的阵型平衡。她没有攻击任何一人，而是让他们在追击中相互阻碍。
+                </p>
+                
+                <div class="dialogue">
+                    "她在教我们战术，"一个战士突然意识到，"她在展示三角阵型的弱点。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    最终，三名战士因为配合失误而撞在了一起。艾欧站在他们面前，没有发动任何攻击。
+                </p>
+                
+                <h3>尊重的获得</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "你赢了，"瓦勒留斯承认道，他的语气中第一次有了尊重，"但我想知道，为什么最后一刻你没有攻击？"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧微笑着说："因为我们的目标不是相互击败，而是共同对抗混沌。如果联盟一开始就内斗，我们还如何面对真正的敌人？"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这句话让在场的所有三角战士都陷入了沉思。他们一直以为力量来自于征服，但艾欧展示了另一种力量——来自于理解和合作的力量。
+                </p>
+                
+                <h2>议会的决定</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    三天的试炼结束后，三角议会再次召开会议。这一次，气氛完全不同了。
+                </p>
+                
+                <div class="dialogue">
+                    "我改变了主意，"瓦勒留斯站起来说，"艾欧证明了真正的力量不是来自于孤傲，而是来自于理解。三角议会应该加入这个联盟。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    大祭司阿尔提亚和总工程师马库斯也表示同意。三派达成了一致：三角议会将全力支持几何守护者联盟，并提供军事支持。
+                </p>
+                
+                <div class="dialogue">
+                    "但我们有一个条件，"阿尔提亚说，"联盟必须有一个统一的指挥系统。面对混沌这样的敌人，我们不能各自为战。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧点头同意。这正是她一直在思考的问题。联盟不仅需要力量，还需要统一的领导和策略。
+                </p>
+                
+                <h3>三角的贡献</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在加入联盟后，三角议会立即展现了他们的价值。托里克将军制定了详细的防御计划，马库斯的工匠们开始研发专门对抗混沌的武器，而阿尔提亚的学者们则负责研究混沌的弱点。
+                </p>
+                
+                <div class="battle-scene bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-yellow-400">三角防御计划</h3>
+                    <ol class="list-decimal list-inside ml-4 space-y-2 text-sm">
+                        <li>建立三角防御网，覆盖整个几何境域</li>
+                        <li>研发形素净化武器，专门对付混沌侵蚀</li>
+                        <li>组建快速反应部队，应对突发情况</li>
+                        <li>建立情报网络，监控混沌的动向</li>
+                    </ol>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    更重要的是，三角议会的加入给了联盟一个重要的东西：信心。如果连最骄傲的三角战士们都愿意与其他种族合作，那么这个联盟一定有成功的希望。
+                </p>
+                
+                <h2>新的盟友</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在离开三角要塞前，瓦勒留斯亲自找到艾欧。
+                </p>
+                
+                <div class="dialogue">
+                    "我欠你一个道歉，"他说，"我一直以为力量来自于孤傲，但现在我明白了，真正的力量来自于团结。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧摇了摇头："你不需要道歉。每个种族都有自己的骄傲，这也是我们的一部分。重要的是，我们愿意为了更大的目标放下这份骄傲。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    瓦勒留斯伸出了手："三角议会已经选举我作为他们在联盟的代表。我会和你一起，为了这个世界的未来而战。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧握住了他的手。她又获得了一个强大的盟友，一个曾经的对手现在变成了最坚定的支持者。
+                </p>
+                
+                <h3>前进的道路</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    现在已经有了圆环族和三角议会的支持，联盟的力量正在壮大。但艾欧知道，这还不够。方碑盟约和螺旋之子还没有完全加入，而混沌的威胁正在逼近。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "下一步是方碑盟约，"艾欧对托里克和瓦勒留斯说，"他们的秩序和结构对于联盟来说至关重要。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    托里克点头："方碑盟约的拉克是我们的盟友，说服他们应该不会太难。真正的挑战是让他们的传统派接受改变。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧望向远方。联盟之路虽然艰难，但每一步都让她更加坚定。只要四大种族能够团结一心，就没有什么是不可能的。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    而现在，她要去面对下一个挑战了。
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-4-section-1.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：说服圆环族</span>
+                    </a>
+                    <a href="chapter-4-section-3.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg font-semibold hover:from-yellow-700 hover:to-amber-700 transition">
+                        <span>下一节：争取方碑盟约</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-yellow-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-yellow-600 rounded-lg hover:bg-yellow-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader11/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">战术大师</span>
+                                <span class="text-sm text-gray-500">2小时前</span>
+                            </div>
+                            <p class="text-gray-300">三角试炼的设计太棒了！三场试炼分别展示了精准、力量和策略，完美体现了三角文化的精髓。艾欧的应对方式更是精彩，她不是用蛮力，而是用智慧取胜。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 73
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader12/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">瓦勒留斯粉丝</span>
+                                <span class="text-sm text-gray-500">4小时前</span>
+                            </div>
+                            <p class="text-gray-300">最喜欢瓦勒留斯的转变！从最初的傲慢到最后的尊重，这个角色塑造得很立体。骄傲不是缺点，关键是要懂得什么时候该放下骄傲。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 58
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader13/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">战略分析师</span>
+                                <span class="text-sm text-gray-500">6小时前</span>
+                            </div>
+                            <p class="text-gray-300">三角防御计划的制定很有专业水准！建立防御网、研发专门武器、快速反应部队、情报网络——这四个方面构成了完整的防御体系。作者对军事策略的理解很深入。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 45
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 下一节更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

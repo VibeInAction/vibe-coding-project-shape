@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章：终极对决 - 终极形态 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes ultimate-transformation {
+            0% { 
+                transform: scale(1) rotate(0deg);
+                filter: brightness(1);
+            }
+            25% { 
+                transform: scale(1.2) rotate(90deg);
+                filter: brightness(1.5) hue-rotate(45deg);
+            }
+            50% { 
+                transform: scale(1.5) rotate(180deg);
+                filter: brightness(2) hue-rotate(90deg);
+            }
+            75% { 
+                transform: scale(1.2) rotate(270deg);
+                filter: brightness(1.5) hue-rotate(135deg);
+            }
+            100% { 
+                transform: scale(1) rotate(360deg);
+                filter: brightness(1);
+            }
+        }
+        
+        @keyframes power-merge {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+            50% { transform: translate(var(--tx), var(--ty)) scale(1.5); opacity: 1; }
+            100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+        }
+        
+        @keyforms ultimate-glow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                           0 0 60px rgba(168, 85, 247, 0.5),
+                           0 0 90px rgba(168, 85, 247, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(168, 85, 247, 1),
+                           0 0 100px rgba(168, 85, 247, 0.8),
+                           0 0 150px rgba(168, 85, 247, 0.5);
+            }
+        }
+        
+        @keyframes dimension-crack {
+            0% { transform: scaleY(0); opacity: 0; }
+            50% { transform: scaleY(1); opacity: 1; }
+            100% { transform: scaleY(0); opacity: 0; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .ultimate-transformation {
+            animation: ultimate-transformation 5s ease-in-out infinite;
+        }
+        
+        .power-merge {
+            animation: power-merge 3s ease-in-out infinite;
+        }
+        
+        .ultimate-glow {
+            animation: ultimate-glow 2s ease-in-out infinite;
+        }
+        
+        .dimension-crack {
+            animation: dimension-crack 2s ease-out;
+            transform-origin: center;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(168, 85, 247, 0.1);
+            border-left: 4px solid #a855f7;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .transformation-scene {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #a855f7, #7c3aed);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        .comment-system {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .comment-system::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comment-system::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .comment-system::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 3px;
+        }
+        
+        /* 深色模式样式 */
+        .dark {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-gray-900 {
+            background-color: #020617;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #1e293b;
+        }
+        
+        .dark .text-gray-700 {
+            color: #cbd5e1;
+        }
+        
+        .dark .border-gray-700 {
+            border-color: #334155;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .transformation-scene {
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-purple-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-purple-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-purple-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回章节目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第六章</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button id="fontSizeDecrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="fontSizeDisplay" class="text-sm">16px</span>
+                        <button id="fontSizeIncrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container mx-auto px-6 py-4">
+        <nav class="flex items-center space-x-2 text-sm text-gray-400">
+            <a href="../index.html" class="hover:text-white transition">游戏主页</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html" class="hover:text-white transition">故事</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">章节目录</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">第六章</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-purple-400">终极形态</span>
+        </nav>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">终极形态</span>
+            </h1>
+            <p class="text-xl text-gray-400">第六章 · 第二节</p>
+            <div class="mt-6 flex justify-center items-center space-x-8 text-sm text-gray-500">
+                <span><i class="far fa-calendar-alt mr-1"></i>发布于 2024年</span>
+                <span><i class="far fa-clock mr-1"></i>阅读时间约 18 分钟</span>
+                <span><i class="far fa-eye mr-1"></i>5,678 次阅读</span>
+            </div>
+        </header>
+
+        <!-- 章节内容 -->
+        <article id="storyContent" class="story-content text-lg">
+            <p class="text-center text-gray-400 mb-8">
+                <i class="fas fa-quote-left mr-2"></i>
+                当四种力量完美融合，超越形态的界限，真正的守护者诞生了
+                <i class="fas fa-quote-right ml-2"></i>
+            </p>
+
+            <div class="prose prose-lg max-w-none">
+                <p>
+                    面对混沌之源的威压，艾欧知道普通的战斗方式已经无法取胜。
+                    混沌正在不断进化，它的力量越来越强大，甚至开始模仿守护者
+                    的战术和技巧。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-dna mr-2"></i>形态进化理论
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">混沌的进化</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 吸收对手的能力和特征</li>
+                                <li>• 适应各种攻击模式</li>
+                                <li>• 突破物理法则的限制</li>
+                                <li>• 不断自我完善和强化</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">守护者的对策</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 超越现有形态的界限</li>
+                                <li>• 创造混沌无法理解的力量</li>
+                                <li>• 达到形素的最高境界</li>
+                                <li>• 实现四种形态的完美融合</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "我们必须进化，"艾欧对同伴们说，"否则就会被淘汰。"
+                </p>
+
+                <div class="dialogue">
+                    "但是怎么进化？"托里克将军困惑地问，"我们已经达到了
+                    各自种族的极限。"
+                </div>
+
+                <p>
+                    艾欧看向源初形核，它正在她的手中发光。突然，一个灵感
+                    闪过她的脑海。也许，真正的进化不是变得更强，而是超越
+                    形态本身的限制。
+                </p>
+
+                <p>
+                    "我有个想法，"艾欧说道，"源初形核的力量在于融合。如果我们
+                    能够暂时突破种族的界限，将四种形态合而为一..."
+                </p>
+
+                <!-- 变身场景 -->
+                <div class="my-12">
+                    <div class="transformation-scene">
+                        <!-- 背景效果 -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-gray-900"></div>
+                        
+                        <!-- 四种形态的力量 -->
+                        <div class="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="w-16 h-16 bg-blue-500 rounded-full power-merge" style="--tx: 100px; --ty: 100px;"></div>
+                        </div>
+                        <div class="absolute top-1/4 right-1/4 transform translate-x-1/2 -translate-y-1/2">
+                            <div class="w-16 h-16 bg-red-500 transform rotate-180 power-merge" style="--tx: -100px; --ty: 100px;"></div>
+                        </div>
+                        <div class="absolute bottom-1/4 left-1/4 transform -translate-x-1/2 translate-y-1/2">
+                            <div class="w-16 h-16 bg-cyan-500 power-merge" style="--tx: 100px; --ty: -100px;"></div>
+                        </div>
+                        <div class="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2">
+                            <div class="w-16 h-16 bg-teal-500 rounded-full power-merge" style="--tx: -100px; --ty: -100px;"></div>
+                        </div>
+                        
+                        <!-- 中央融合 -->
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full ultimate-glow ultimate-transformation flex items-center justify-center">
+                                <i class="fas fa-infinity text-white text-4xl"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 次元裂缝 -->
+                        <div class="absolute top-10 left-1/2 w-1 h-20 bg-purple-500/50 dimension-crack"></div>
+                        <div class="absolute top-20 right-20 w-1 h-16 bg-purple-500/50 dimension-crack" style="animation-delay: 0.3s;"></div>
+                        <div class="absolute bottom-20 left-20 w-1 h-24 bg-purple-500/50 dimension-crack" style="animation-delay: 0.6s;"></div>
+                    </div>
+                </div>
+
+                <p>
+                    这是一个疯狂的想法，但也是唯一的机会。要将四种完全不同
+                    的形态合而为一，需要极致的信任和默契。任何一点杂念都
+                    会导致融合失败。
+                </p>
+
+                <p>
+                    "我愿意尝试，"塞琳长老第一个表态，"圆环的本质就是
+                    包容和融合。"
+                </p>
+
+                <p>
+                    "三角的勇气将指引道路，"托里克将手放在源初形核上，
+                    "我加入。"
+                </p>
+
+                <p>
+                    "方碑的秩序将维护平衡，"拉克长推了推眼镜，"我也加入。"
+                </p>
+
+                <div class="dialogue">
+                    "螺旋的变化将创造可能，"薇拉微笑着说，"让我们一起
+                    创造奇迹吧。"
+                </div>
+
+                <p>
+                    五人围成一个圆圈，将手都放在源初形核上。艾欧开始引导
+                    形素的流动，将四种不同的力量汇聚在一起。
+                </p>
+
+                <p>
+                    一开始，四种力量相互排斥。圆环的和谐与三角的力量、
+                    方碑的秩序与螺旋的变化，它们就像是天生的对立面。
+                </p>
+
+                <p>
+                    "放松，"艾欧轻声说，"感受彼此，理解彼此。记住，我们
+                    不是要消除差异，而是在差异中找到和谐。"
+                </p>
+
+                <p>
+                    慢慢地，四种力量开始相互理解。圆环学会了如何容纳
+                    变化，三角明白了力量的真正含义，方碑理解了秩序需要
+                    灵活，螺旋领悟了变化需要方向。
+                </p>
+
+                <div class="dialogue">
+                    "这就是...融合的真谛，"塞琳长老感叹道，"不是消除
+                    不同，而是让不同共存。"
+                </div>
+
+                <p>
+                    当四种力量完全融合时，一道耀眼的光芒从源初形核中
+                    爆发出来。光芒中，五个人的身体开始发生变化。
+                </p>
+
+                <p>
+                    他们不再是单独的个体，而是成了一个整体。同时拥有圆环
+                    的包容、三角的力量、方碑的稳定、螺旋的变化。这是一种
+                    前所未有的存在形态——超越几何的终极形态。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-purple-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-star mr-2"></i>终极形态特征
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold mb-2">能力特征</h4>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• 形态自由转换：可以在四种基础形态间瞬间切换</li>
+                                <li>• 形素完美操控：能够精确控制每一种形素</li>
+                                <li>• 超越物理法则：部分突破时间和空间的限制</li>
+                                <li>• 集体意识共享：五个人的思维完全融合</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">外在表现</h4>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• 身体呈现半透明的能量状态</li>
+                                <li>• 周身环绕着四种颜色的光环</li>
+                                <li>• 可以同时展现出多种几何特征</li>
+                                <li>• 散发出温和而强大的形素波动</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "这感觉..."托里克斯的声音同时从五个人的口中发出，"我们
+                    成为一体了。"
+                </p>
+
+                <p>
+                    混沌之源感受到了威胁。它猛地爆发能量，试图将这个新生的
+                    存在撕碎。但终极形态的力量远超它的想象。
+                </p>
+
+                <p>
+                    "现在，让我们结束这场战斗，"融合体向前迈出一步。
+                </p>
+
+                <p>
+                    终极形态展现出了前所未有的力量。它不需要复杂的战术，
+                    不需要精密的计算。每一个动作都自然而然地包含了最完美
+                    的解决方案。
+                </p>
+
+                <p>
+                    当混沌之源释放出扭曲现实的攻击时，终极形态 simply
+                    用圆环的和谐将其化解；当混沌创造出新的实体时，终极
+                    形态用方碑的秩序将其重新构建；当混沌试图逃避时，
+                    终极形态用三角的力量将其锁定；当混沌变得僵化时，
+                    终极形态用螺旋的变化找到突破口。
+                </p>
+
+                <div class="dialogue">
+                    "不可能..."混沌的意识中充满了震惊，"你们怎么可能
+                    达到这种境界？"
+                </div>
+
+                <p>
+                    "因为你们始终认为对立是必然的，"融合体的声音中同时
+                    包含着五个人的特质，"但我们学会了在对立中找到统一。"
+                </p>
+
+                <p>
+                    战斗的局势彻底逆转。混沌之源第一次感到了恐惧。它发现，
+                    这个新生的存在已经超出了它的理解范畴。混沌的本质是
+                    变化，但终极形态包含了所有可能的变化。
+                </p>
+
+                <p>
+                    "你们...你们将成为新的混沌..."混沌之源试图说服他们。
+                </p>
+
+                <div class="dialogue">
+                    "不，"融合体摇头，"我们既不是秩序，也不是混沌。我们
+                    是超越这两者的存在。是平衡的守护者。"
+                </div>
+
+                <p>
+                    终极形态继续前进，每一步都让混沌之源的力量减弱一分。
+                    这个过程不是战斗，而是自然的法则。就像光明驱散黑暗，
+                    就像秩序整理混乱。
+                </p>
+
+                <p>
+                    "停下来！"混沌之源发出了最后的挣扎，"如果我被消灭，
+                    整个多元宇宙都会崩塌！"
+                </p>
+
+                <p>
+                    终极形态停下脚步，似乎在考虑这个警告。但很快，它就
+                    识破了这个谎言。
+                </p>
+
+                <p>
+                    "你只是在害怕消失，"融合体说，"但你忘记了，即使你
+                    消失了，变化依然存在。只是变化需要有方向，需要有
+                    意义。"
+                </p>
+
+                <p>
+                    终极形态伸出手，触碰到混沌之源的表面。刹那间，整个
+                    空间都被紫色的光芒填满。
+                </p>
+
+                <p>
+                    "这不是消灭，"融合体轻声说，"是转化。将无序的变化
+                    转化为有意义的进化。"
+                </p>
+
+                <p>
+                    混沌之源开始发生变化。它的黑色球体慢慢变得透明，
+                    紫色的能量变得越来越温和。最终，它不再是一个吞噬
+                    一切的黑洞，而是一个散发着柔和光芒的紫色水晶。
+                </p>
+
+                <p>
+                    "完成了..."融合体的声音中带着一丝疲惫，"混沌之源
+                    已经被净化。"
+                </p>
+
+                <p>
+                    但就在这时，融合体开始变得不稳定。四种力量虽然强大，
+                    但维持这种状态需要消耗巨大的能量。而他们的能量已经
+                    快要耗尽了。
+                </p>
+
+                <div class="dialogue">
+                    "我们必须分开了，"艾欧的意识在融合体中说道，"否则
+                    我们会一起消失。"
+                </div>
+
+                <p>
+                    分离的过程比融合更加痛苦。他们已经体验过完美的和谐，
+                    现在要重新变成独立的个体，每一个都像是在撕扯自己
+                    的一部分。
+                </p>
+
+                <p>
+                    最终，在一声巨响中，融合体解体了。五个人被震飞到
+                    不同的方向，每个人都受了重伤。源初形核也因为耗尽
+                    了所有能量而变得黯淡无光。
+                </p>
+
+                <p>
+                    但混沌之源已经被净化了。虽然通道还没有完全关闭，
+                    但混沌已经无法再通过它入侵这个世界。
+                </p>
+
+                <p>
+                    "我们...成功了..."塞琳长老虚弱地笑了。
+                </p>
+
+                <p>
+                    是的，他们成功了。但代价是什么？每个人都失去了大部分
+                    力量，源初形核也几乎被毁掉。更重要的是，他们体验过
+                    完美的融合后，重新变回独立的个体，这种感觉就像
+                    失去了什么重要的东西。
+                </p>
+
+                <div class="dialogue">
+                    "值得吗？"托里克问出了每个人都在想的问题。
+                </div>
+
+                <p>
+                    艾欧看着手中的源初形核，它虽然黯淡，但依然在微微
+                    发光。
+                </p>
+
+                <p>
+                    "值得，"她坚定地说，"因为我们保护了这个世界，保护了
+                    我们珍视的一切。"
+                </p>
+
+                <p>
+                    但他们都明白，真正的挑战可能才刚刚开始。虽然混沌
+                    之源被净化了，但通道依然存在。而且，他们失去了最强
+                    大的武器。
+                </p>
+
+                <p>
+                    远处，主力部队的支援终于到达了。他们看到的是五个
+                    重伤的守护者，和一个被净化的混沌之源。
+                </p>
+
+                <p>
+                    战斗结束了，但战争还没有结束。他们赢得了这场战斗，
+                    但代价是失去了力量。而混沌，虽然暂时被遏制，但
+                    终有一天会卷土重来。
+                </p>
+
+                <p>
+                    当守护者们被抬上担架时，艾欧回头看了那紫色的水晶
+                    一眼。它看起来很美，就像一颗星星。但谁知道呢？
+                    也许在某个遥远的地方，新的混沌正在诞生。
+                </p>
+
+                <p>
+                    这就是永恒的循环。秩序与混沌，守护与变化，永远在
+                    对抗，永远在平衡。而他们的使命，就是守护这个平衡。
+                </p>
+
+                <p class="text-center text-gray-400 mt-8 pt-8 border-t border-gray-700">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    本节完
+                </p>
+            </div>
+        </article>
+
+        <!-- 导航按钮 -->
+        <div class="mt-12 flex justify-between items-center">
+            <a href="chapter-6-section-1.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一节：混沌之源</span>
+            </a>
+            <a href="chapter-6-section-3.html" class="flex items-center space-x-2 px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                <span>下一节：牺牲与重生</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-3 text-purple-400"></i>
+                读者评论
+            </h3>
+            
+            <div id="commentSection" class="comment-system space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <h4 class="text-lg font-semibold mb-4">发表评论</h4>
+                <form id="commentForm" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" id="commentName" placeholder="你的名字" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" id="commentEmail" placeholder="邮箱（可选）" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <textarea id="commentContent" rows="4" placeholder="分享你的想法..." 
+                              class="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                    <button type="submit" class="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-paper-plane mr-2"></i>发布评论
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 故事即将完结
+            </p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="../index.html" class="hover:text-white transition">返回主页</a>
+                <a href="index.html" class="hover:text-white transition">章节目录</a>
+                <a href="../world-lore.html" class="hover:text-white transition">世界观</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 进度条
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+        
+        window.addEventListener('scroll', updateProgressBar);
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // 字体大小调整
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const storyContent = document.getElementById('storyContent');
+        let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
+        
+        fontSizeDisplay.textContent = currentFontSize + 'px';
+        storyContent.style.fontSize = currentFontSize + 'px';
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                updateFontSize();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                updateFontSize();
+            }
+        });
+        
+        function updateFontSize() {
+            fontSizeDisplay.textContent = currentFontSize + 'px';
+            storyContent.style.fontSize = currentFontSize + 'px';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+
+        // 评论系统
+        const comments = [
+            {
+                name: '哲学爱好者',
+                content: '终极形态的设定太震撼了！不是简单的合体，而是真正的哲学升华——在对立中找到统一，这才是进化的真谛。',
+                time: '3小时前',
+                avatar: '🧠'
+            },
+            {
+                name: '动漫迷',
+                content: '这种融合变身的感觉让我想起了很多经典作品，但这里的处理更加深刻。力量带来的代价也很真实。',
+                time: '6小时前',
+                avatar: '🎌'
+            },
+            {
+                name: '物理学生',
+                content: '超越物理法则的设定很有意思！虽然知道是幻想，但作者对四种力量特性的描述很符合各自的特点。',
+                time: '9小时前',
+                avatar: '⚛️'
+            }
+        ];
+        
+        function loadComments() {
+            const commentSection = document.getElementById('commentSection');
+            commentSection.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-lg">
+                            ${comment.avatar}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h5 class="font-semibold">${comment.name}</h5>
+                                <span class="text-sm text-gray-500">${comment.time}</span>
+                            </div>
+                            <p class="text-gray-300">${comment.content}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        loadComments();
+        
+        // 提交评论
+        document.getElementById('commentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('commentName').value;
+            const content = document.getElementById('commentContent').value;
+            
+            if (name && content) {
+                const newComment = {
+                    name: name,
+                    content: content,
+                    time: '刚刚',
+                    avatar: name.charAt(0).toUpperCase()
+                };
+                
+                comments.unshift(newComment);
+                loadComments();
+                
+                // 清空表单
+                document.getElementById('commentName').value = '';
+                document.getElementById('commentEmail').value = '';
+                document.getElementById('commentContent').value = '';
+                
+                // 显示成功提示
+                alert('评论发布成功！');
+            }
+        });
+
+        // 添加终极形态的视觉效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const transformationScene = document.querySelector('.transformation-scene');
+            
+            // 创建能量粒子效果
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'absolute w-2 h-2 bg-purple-400 rounded-full';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.opacity = '0';
+                particle.style.transition = 'all 2s ease-out';
+                
+                transformationScene.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.style.opacity = '0.8';
+                    particle.style.transform = `translate(${(Math.random() - 0.5) * 100}px, ${(Math.random() - 0.5) * 100}px)`;
+                }, 10);
+                
+                setTimeout(() => {
+                    particle.style.opacity = '0';
+                }, 1000);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 2000);
+            }, 300);
+        });
+    </script>
+</body>
+</html>

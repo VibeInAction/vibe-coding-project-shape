@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：真相 - 源初形核的呼唤</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 3s infinite;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .core-glow {
+            box-shadow: 0 0 50px rgba(16, 185, 129, 0.5),
+                        0 0 100px rgba(16, 185, 129, 0.3),
+                        0 0 200px rgba(16, 185, 129, 0.1);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #10b981;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #059669;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-green-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-emerald-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-teal-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-green-600 rounded-lg rotate-slow" style="animation-duration: 50s;"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-green-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第三章：</span>
+                        <span class="font-semibold text-green-400">真相</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-green-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-green-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-green-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第三章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-green-400">源初形核的呼唤</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-green-500 to-emerald-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-green-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第三章 · 第一节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">源初形核的呼唤</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 8 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    静默圆湖位于几何境域的中心，这里曾经是四大种族汇聚的圣地。如今，湖水依然清澈，倒映着天空的几何云朵，但岸边早已无人问津。艾欧站在湖边，感受着水面下涌动的形素波动。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这就是你感知到的地方？"拉克的声音从身后传来，她刚刚从方碑城赶来，带来了方碑盟约的最新消息。"方碑的记录显示，这里在上一次混沌战争后就被封锁了。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧点点头，她的双眼已经能够清晰地看到形素的流动。在湖水中，一股强大的绿色能量正在脉动，与她的心跳同步。"没错，我能感觉到。就在湖底，有一个东西在呼唤我。"
+                </p>
+                
+                <h2>湖底的秘密</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    随着艾欧的深入探索，湖底的景象逐渐展现在他们面前。一个巨大的绿色水晶核心悬浮在湖心，周围环绕着四道能量流，分别对应着四大种族的形素特性。这就是传说中的源初形核——创造整个几何境域的起源。
+                </p>
+                
+                <div class="dialogue">
+                    "不可能，"拉克震惊地说，"源初形核在上次战争后就消失了。所有记载都表明它已经被摧毁。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧轻轻伸手触摸水晶表面，一股强大的记忆洪流瞬间涌入她的脑海。她看到了世界的起源，看到了四族祖先如何共同守护着这个核心，看到了混沌第一次入侵时的惨烈战争，更看到了最后的真相——
+                </p>
+                
+                <h3>分裂的代价</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "源初形核并没有被摧毁，"艾欧的声音带着颤抖，"它只是被分割了。为了阻止混沌的侵蚀，四族的祖先各自带走了一部分核心的力量，这就是为什么每个种族都有独特的形素特性。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她的记忆继续流动，她看到了混沌的真正目的——不是毁灭，而是同化。混沌想要将所有的几何形态都变成它的样子，消除所有的规则和秩序。而源初形核的完整，是抵抗混沌的唯一希望。
+                </p>
+                
+                <div class="dialogue">
+                    "所以，我们必须要重新集合四族的力量，"拉克若有所思，"但这几乎不可能。经过这么多年的分裂，每个种族都已经习惯了各自的生活方式。"
+                </div>
+                
+                <h3>先知的预言</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在这时，螺旋先知薇拉突然出现在湖边。她的眼中闪烁着智慧的光芒，仿佛早已知道这一切会发生。"时候到了，"她说，"混沌的阴影已经开始蔓延。如果现在不行动，整个几何境域将在三个月内完全被侵蚀。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    薇拉展开了一幅古老的星图，上面标注着混沌入侵的路径。"看这里，混沌已经从边缘开始向中心侵蚀。三角边境的村庄已经出现了不规则形态的生命，方碑的矩阵也开始出现混乱，螺旋的进化树正在枯萎，就连圆环的和谐圆环也开始变形。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧看着星图，心中涌起一股责任感。她明白了为什么自己会被选为守护者，不是因为她是圆环族，而是因为她能够看到所有形素的流动，能够理解四大种族之间的联系。
+                </p>
+                
+                <h2>觉醒的使命</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "我必须说服所有人，"艾欧坚定地说，"不管有多么困难，我们必须重新组建几何守护者联盟。这不是为了某个种族，而是为了整个世界的生存。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    源初形核突然发出耀眼的光芒，一道绿色的能量束射向天空。在云层中，一个古老的符号显现出来——那是几何守护者联盟的徽记，四大几何形态完美融合的图案。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个征象被所有种族都看到了。圆环中央城、三角议会、方碑盟约总部、螺旋进化基地，所有的目光都聚集到了静默圆湖。争论声开始响起，有人认为是古老的传说再现，有人则认为是某种阴谋。
+                </p>
+                
+                <h3>第一步</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "第一步，我们必须找到各族的支持者，"拉克分析道，"方碑盟约中还有许多像我一样的改革派，我们相信古老的传说。三角议会中，托里克将军一直保持着警惕，他可能会相信你。螺旋之子中有薇拉先知，她的影响力很大。至于圆环族...塞琳长老应该会支持你。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧点点头，她知道自己面临的挑战有多大。数百年的分裂不是一朝一夕能够弥合的，但如果她不成功，整个世界都将面临混沌的侵蚀。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    源初形核的光芒渐渐暗淡下来，但它的呼唤声在艾欧心中越来越清晰。这不仅仅是一个使命，更是她的命运。作为一个能够看到所有形素流动的人，她是唯一能够理解这个世界真正平衡的存在。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "让我们开始吧，"艾欧说，她的声音中充满了决心，"从圆环族开始，然后是三角议会、方碑盟约，最后是螺旋之子。我们必须赶在混沌完全入侵之前，重新点燃联盟的火焰。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    湖水依然平静，但所有人都知道，一场关乎世界命运的旅程即将开始。混沌的阴影正在逼近，而希望的火种，已经在静默圆湖重新燃起。
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-2-section-3.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：螺旋的进化</span>
+                    </a>
+                    <a href="chapter-3-section-2.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition">
+                        <span>下一节：混沌的入侵</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-green-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader1/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">几何爱好者</span>
+                                <span class="text-sm text-gray-500">2小时前</span>
+                            </div>
+                            <p class="text-gray-300">终于等到第三章了！源初形核的设定太棒了，期待看到四族如何重新联合！</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 23
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader2/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">世界构建者</span>
+                                <span class="text-sm text-gray-500">5小时前</span>
+                            </div>
+                            <p class="text-gray-300">混沌的设定很有意思，不是简单的邪恶，而是一种想要同化的力量。这让故事的冲突更有深度了。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 15
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 下一节更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

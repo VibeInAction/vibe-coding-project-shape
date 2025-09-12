@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章：分裂的世界 - 第二节：方碑的秩序 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes cube-rotate {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .cube-animation {
+            animation: cube-rotate 20s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .dialogue.bg-red-900\/20 {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #ef4444;
+        }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6);
+            z-index: 30;
+            transition: width 0.3s ease;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .chapter-nav {
+                position: static;
+                transform: none;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-cyan-500 rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-blue-500 transform cube-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-cyan-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第二章：分裂的世界</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fontSizeDecrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="fontSizeDisplay" class="text-sm">标准</span>
+                    <button id="fontSizeIncrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="themeToggle" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 章节标题 -->
+    <header class="relative py-12 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">第二节：方碑的秩序</span>
+            </h1>
+            <div class="flex items-center justify-center space-x-6 text-gray-400">
+                <span><i class="fas fa-clock mr-2"></i>阅读时长：约16分钟</span>
+                <span><i class="fas fa-file-word mr-2"></i>约4,500字</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="relative pb-20">
+        <div class="container mx-auto max-w-4xl px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- 侧边栏导航 -->
+                <aside class="md:col-span-1">
+                    <div class="sticky top-24 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <h3 class="font-bold mb-4 text-cyan-400">章节导航</h3>
+                        <nav class="space-y-2">
+                            <a href="#section-1" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-cube text-xs mr-2 text-cyan-400"></i>矩阵城邦
+                            </a>
+                            <a href="#section-2" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-cube text-xs mr-2 text-cyan-400"></i>秩序管理局
+                            </a>
+                            <a href="#section-3" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-cube text-xs mr-2 text-cyan-400"></i>秩序立方体
+                            </a>
+                            <a href="#section-4" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-cube text-xs mr-2 text-cyan-400"></i>秩序的崩溃
+                            </a>
+                            <a href="#section-5" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-cube text-xs mr-2 text-cyan-400"></i>新的理解
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- 故事内容 -->
+                <div class="md:col-span-3">
+                    <article id="storyContent" class="story-content bg-gray-800/30 rounded-xl p-8 border border-gray-700">
+                        <section id="section-1">
+                            <p>矩阵城邦比艾欧想象的还要壮观。整座城市由巨大的立方体建筑组成，排列成完美的网格图案。街道笔直如尺，每个转角都是精确的90度。天空被无数悬浮的方块切割，形成了一种压抑的美感。</p>
+                            
+                            <div class="dialogue">
+                                "这真是...令人印象深刻。"<br>
+                                艾欧说，虽然他感到一种莫名的不适。这里的一切都太过规整，太过死板。
+                            </div>
+                            
+                            <p>维克多点点头："方碑盟约相信秩序是一切的基础。在他们看来，任何不规则都是混乱的表现。"</p>
+                            
+                            <p>他们走进城市，立刻感受到了不同的氛围。这里的居民行动整齐划一，连步伐都保持着一致。没有人随意交谈，所有人都专注于自己的任务。</p>
+                            
+                            <div class="dialogue">
+                                "证件。"<br>
+                                一个守卫拦住了他们。守卫的盔甲也是标准的立方体造型，没有任何装饰。
+                            </div>
+                            
+                            <p>艾欧递上三角议会的水晶徽章。守卫仔细检查后，眼中闪过一丝不易察觉的轻蔑。</p>
+                            
+                            <div class="dialogue">
+                                "三角议会的人。你们有预约吗？"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "我们需要见矩阵长。"<br>
+                                艾欧直接说，"有重要的事情要报告。"
+                            </div>
+                            
+                            <p>守卫冷冷地看着他们："矩阵长不会见没有预约的访客。特别是来自...不那么有序的种族。"</p>
+                            
+                            <p>维克多想要争辩，但艾欧拦住了他。他能感觉到，在这个城市里，任何激烈的情感都可能引起不必要的注意。</p>
+                            
+                            <div class="dialogue">
+                                "那么，我们该怎么才能获得预约？"
+                            </div>
+                            
+                            <p>守卫指向城市中心："去秩序管理局。他们会评估你们的请求价值。"</p>
+                        </section>
+
+                        <section id="section-2">
+                            <p>秩序管理局是矩阵城邦最大的建筑之一。它由无数个小立方体组成，形成了一个巨大的立方体矩阵。走进大厅，艾欧看到了令人震惊的景象——无数的工作人员在各自的格子里工作，所有人都在做完全相同的事情，节奏完全一致。</p>
+                            
+                            <div class="dialogue">
+                                "这就像一个巨大的机器。"<br>
+                                维克多低声说。
+                            </div>
+                            
+                            <div class="dialogue">
+                                "在他们看来，这就是理想的社会。"<br>
+                                艾欧回应道。
+                            </div>
+                            
+                            <p>他们排队等候，终于见到了一个评估官。那是一个表情僵硬的女人，她的动作精确到了毫米级别。</p>
+                            
+                            <div class="dialogue">
+                                "姓名，种族，来访目的。"<br>
+                                评估官连头都没有抬。
+                            </div>
+                            
+                            <div class="dialogue">
+                                "艾欧，圆环族。维克多，三角议会。我们带来了关于世界威胁的情报。"
+                            </div>
+                            
+                            <p>评估官终于抬起了头，她的眼神空洞："威胁？什么样的威胁？"</p>
+                            
+                            <div class="dialogue">
+                                "混沌正在入侵这个世界。"<br>
+                                艾欧直接说。
+                            </div>
+                            
+                            <p>评估官的表情没有丝毫变化："混沌？这是不存在的概念。在我们的分类系统中，只有'有序'和'无序'。你所说的'混沌'应该归类为'无序'。"</p>
+                            
+                            <div class="dialogue">
+                                "但这不是普通的无序！"<br>
+                                艾欧激动地说，"它在侵蚀世界的根基，破坏几何法则本身！"
+                            </div>
+                            
+                            <p>评估官按下桌上的按钮，两个守卫立即走了进来。</p>
+                            
+                            <div class="dialogue">
+                                "这位访客表现出情绪不稳定，"<br>
+                                评估官平淡地说，"带他去情绪调节中心。"
+                            </div>
+                            
+                            <p>就在这时，艾欧感受到了熟悉的混沌形素。不是来自守卫或评估官，而是来自这栋建筑本身。在他的视野中，他看到了黑色的形素像藤蔓一样缠绕在建筑的结构上。</p>
+                        </section>
+
+                        <section id="section-3">
+                            <div class="dialogue">
+                                "这里已经被污染了，"<br>
+                                艾欧突然明白了，"混沌已经渗透到了方碑盟约的核心！"
+                            </div>
+                            
+                            <p>评估官终于露出了表情，那是厌恶和不耐烦："又一个宣扬'混沌'的疯子。带走他。"</p>
+                            
+                            <p>但艾欧没有抵抗。相反，他集中精神，让自己的形素流动变得更加明显。蓝色的圆环形素从他体内散发出来，与建筑中的黑色混沌形素形成鲜明对比。</p>
+                            
+                            <p>评估官和守卫都愣住了。他们虽然看不见形素，但能感受到那股能量。</p>
+                            
+                            <div class="dialogue">
+                                "你...你在做什么？"<br>
+                                评估官紧张地问。
+                            </div>
+                            
+                            <div class="dialogue">
+                                "证明给你们看，"<br>
+                                艾欧说，"你们的城市正在被一种看不见的力量侵蚀。你们追求的完美秩序，正在成为混沌的温床。"
+                            </div>
+                            
+                            <p>他们被带到了一个更大的房间。房间的中央是一个巨大的立方体装置，不断地发出嗡嗡声。矩阵长拉克就在那里，他正在观察装置的运行。</p>
+                            
+                            <p>拉克是个严肃的中年人，他的举止优雅而精确，就像他的建筑一样。</p>
+                            
+                            <div class="dialogue">
+                                "听说你们对混沌很感兴趣，"<br>
+                                拉克说，没有看他们，"在我们的社会中，我们不需要这样的概念。"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "但你们需要面对现实，"<br>
+                                艾欧说，"这个装置...它在做什么？"
+                            </div>
+                            
+                            <p>拉克终于转向他们："这是'秩序立方体'。它正在将周围区域的形素标准化，消除所有不规则性。"</p>
+                            
+                            <p>艾欧感到了强烈的混沌形素从装置中散发出来："但你们知道它真正在做什么吗？它在吸收生命力，将一切都变成死板的秩序！"</p>
+                            
+                            <div class="dialogue">
+                                "秩序高于一切。"<br>
+                                拉克冷静地说，"混乱和变化只会带来痛苦。"
+                            </div>
+                            
+                            <p>维克多忍不住了："但生命本身就需要变化！没有变化，就没有进化！"</p>
+                            
+                            <p>拉克看着维克多，就像在看一个不懂事的孩子："进化？方碑盟约在数千年前就达到了完美。我们不需要进化。"</p>
+                            
+                            <p>艾欧走近装置，仔细观察。他看到了装置内部的情况——混沌形素正在被转化，但不是被消除，而是被伪装成了"秩序"。更可怕的是，这种虚假的秩序正在传播，影响越来越多的人。</p>
+                            
+                            <div class="dialogue">
+                                "你们被骗了，"<br>
+                                艾欧轻声说，"混沌很聪明。它知道无法直接攻击你们，所以它利用了你们对秩序的执着。"
+                            </div>
+                        </section>
+
+                        <section id="section-4">
+                            <div class="dialogue">
+                                "荒谬。"<br>
+                                拉克转身离开，"把客人带到休息室。明天送他们离开。"
+                            </div>
+                            
+                            <p>但就在这时，装置突然剧烈震动起来。警报声响彻整个房间。</p>
+                            
+                            <div class="dialogue bg-red-900/20 border-red-500">
+                                "警告！秩序场不稳定！"<br>
+                                一个技术人员喊道。
+                            </div>
+                            
+                            <p>拉克皱起眉头："不可能。系统刚刚检查过。"</p>
+                            
+                            <p>艾欧看到了真相。混沌形素在装置内部积聚，已经到了临界点。它要爆发了。</p>
+                            
+                            <div class="dialogue bg-red-900/20 border-red-500">
+                                " evacuate！"<br>
+                                艾欧大喊，"马上离开这里！"
+                            </div>
+                            
+                            <p>但已经太迟了。装置爆炸了，黑色的能量如潮水般涌出。但奇怪的是，这些能量并没有表现出混乱的形态，而是形成了无数个完美的立方体，每一个都散发着不祥的光芒。</p>
+                            
+                            <div class="dialogue">
+                                "这是什么？"<br>
+                                维克多惊讶地问。
+                            </div>
+                            
+                            <div class="dialogue">
+                                "秩序化的混沌，"<br>
+                                艾欧颤抖着说，"最危险的形态。因为它看起来如此'正确'，没有人会怀疑它。"
+                            </div>
+                            
+                            <p>那些立方体开始移动，它们撞向墙壁，墙壁不是被破坏，而是被同化——变成了更多的立方体。整个建筑都在被这种可怕的秩序所吞噬。</p>
+                            
+                            <p>拉克终于意识到了问题的严重性："这...这不是我们的秩序。这是...某种模仿。"</p>
+                            
+                            <div class="dialogue">
+                                "是的，"<br>
+                                艾欧说，"混沌在模仿你们，利用你们的理念来摧毁你们。"
+                            </div>
+                        </section>
+
+                        <section id="section-5">
+                            <p>他们逃出了秩序管理局，但整个城市已经陷入了混乱。那些秩序化的混沌立方体正在扩散，将一切都变成它们的样子。</p>
+                            
+                            <div class="dialogue">
+                                "我们必须阻止它，"<br>
+                                拉克说，他的声音中第一次出现了动摇，"但我们的武器对它们无效。它们太'有序'了。"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "那就用无序来对抗它，"<br>
+                                艾欧说，"不是混乱，而是变化和多样性。"
+                            </div>
+                            
+                            <p>维克多明白了："你的意思是..."</p>
+                            
+                            <p>艾欧点点头："我们需要将三角、圆形、螺旋的能量结合起来。单一的几何形态无法对抗这种秩序化的混沌。"</p>
+                            
+                            <p>但问题是如何说服方碑盟约的人民接受其他几何形状。对他们来说，任何不是立方体的东西都是"无序"的。</p>
+                            
+                            <p>拉克看着被立方体吞噬的建筑，眼中闪过痛苦："我们...我们错了。我们的执着变成了弱点。"</p>
+                            
+                            <div class="dialogue">
+                                "现在明白还不晚，"<br>
+                                艾欧说，"召集你们的人民。告诉他们真相。"
+                            </div>
+                            
+                            <p>拉克犹豫了一下，然后点头。他走向一个公共广播系统，他的声音通过扩音器传遍全城。</p>
+                            
+                            <div class="dialogue">
+                                "注意，所有市民注意。"<br>
+                                拉克的声音不再像平时那样平淡，而是带着急切，"我们面临着一个前所未有的威胁。这不是外部的攻击，而是来自我们内部的...理念错误。"
+                            </div>
+                            
+                            <p>他停顿了一下，似乎在挣扎该如何表达。</p>
+                            
+                            <div class="dialogue">
+                                "我们一直认为完美的秩序是答案。但我们错了。真正的秩序应该包含变化，就像宇宙本身一样。现在，我们需要...需要接受其他可能性。"
+                            </div>
+                            
+                            <p>这番话在城市中引起了轩然大波。许多市民无法接受这种"异端"思想。</p>
+                            
+                            <p>但也有人开始理解。一个年轻的工程师跑了过来："矩阵长，也许我们可以利用城市本身的能量系统。如果重新编程，让它接受不同的几何频率..."</p>
+                            
+                            <p>拉克看着这个年轻人，眼中闪过一丝希望："值得一试。"</p>
+                            
+                            <p>在艾欧的指导下，他们开始了一个大胆的计划。他们要利用整个矩阵城邦的能量网络，创造一个包含所有几何形态的和谐场域。</p>
+                            
+                            <div class="dialogue">
+                                "但这需要时间，"<br>
+                                维克多说，"而那些东西正在快速扩散。"
+                            </div>
+                            
+                            <p>艾欧望向城市中心，那里有一个最大的秩序立方体，正在不断地产生更多的同类。</p>
+                            
+                            <div class="dialogue">
+                                "我去拖住它，"<br>
+                                艾欧说，"你们完成准备工作。"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "你一个人怎么对抗它？"<br>
+                                拉克问。
+                            </div>
+                            
+                            <p>艾欧微微一笑："我不是一个人。整个世界的形素都在我这边。"</p>
+                            
+                            <p>他向城市中心跑去，留下了决心坚定的背影。</p>
+                        </section>
+                    </article>
+
+                    <!-- 章节导航 -->
+                    <div class="mt-8 flex justify-between items-center">
+                        <div class="text-gray-400">
+                            <a href="chapter-2-section-1.html" class="hover:text-cyan-400 transition">
+                                <i class="fas fa-chevron-left mr-2"></i>第一节：三角的傲慢
+                            </a>
+                        </div>
+                        <div class="flex space-x-4">
+                            <a href="chapter-2-section-3.html" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                                第三节：螺旋的进化
+                                <i class="fas fa-chevron-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="mt-12 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                        <h3 class="text-xl font-bold mb-4">
+                            <i class="fas fa-comments mr-2"></i>读者评论
+                        </h3>
+                        <div class="space-y-4" id="comments">
+                            <div class="bg-gray-700/50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-cyan-500 rounded-full mr-3 flex items-center justify-center">
+                                        <i class="fas fa-cube text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold">秩序思考者</div>
+                                        <div class="text-xs text-gray-400">1小时前</div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-300">秩序化的混沌这个概念太震撼了！最危险的敌人就是看起来最像朋友的那个。</p>
+                            </div>
+                            <div class="bg-gray-700/50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex items-center justify-center">
+                                        <i class="fas fa-lightbulb text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold">哲学爱好者</div>
+                                        <div class="text-xs text-gray-400">3小时前</div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-300">拉克的转变很真实，从固执的秩序维护者到接受变化，这种角色成长很打动人。</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <textarea id="commentInput" class="w-full bg-gray-700 rounded-lg p-3 text-white resize-none" rows="3" placeholder="写下你的想法..."></textarea>
+                            <button id="submitComment" class="mt-2 px-4 py-2 bg-cyan-500 rounded-lg hover:bg-cyan-600 transition">
+                                发表评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 最后更新：2024年
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 阅读进度
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('readingProgress').style.width = scrollPercent + '%';
+        });
+
+        // 字体大小调整
+        let fontSize = 16;
+        const content = document.getElementById('storyContent');
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (fontSize > 12) {
+                fontSize -= 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        function updateFontSizeDisplay() {
+            const display = document.getElementById('fontSizeDisplay');
+            if (fontSize <= 16) display.textContent = '标准';
+            else if (fontSize <= 20) display.textContent = '较大';
+            else display.textContent = '最大';
+        }
+
+        // 主题切换
+        let isDarkTheme = true;
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('bg-gray-900');
+            document.body.classList.toggle('bg-gray-100');
+            document.body.classList.toggle('text-gray-100');
+            document.body.classList.toggle('text-gray-900');
+            document.body.querySelectorAll('.bg-gray-800, .bg-gray-700, .bg-gray-900').forEach(el => {
+                el.classList.toggle('bg-gray-100');
+                el.classList.toggle('bg-gray-200');
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 评论功能
+        document.getElementById('submitComment').addEventListener('click', function() {
+            const input = document.getElementById('commentInput');
+            const comment = input.value.trim();
+            
+            if (comment) {
+                addComment({
+                    author: '匿名读者',
+                    avatar: 'fa-user',
+                    time: '刚刚',
+                    content: comment
+                });
+                input.value = '';
+            }
+        });
+
+        function addComment(comment) {
+            const commentsContainer = document.getElementById('comments');
+            const commentEl = document.createElement('div');
+            commentEl.className = 'bg-gray-700/50 rounded-lg p-4';
+            commentEl.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex items-center justify-center">
+                        <i class="fas ${comment.avatar} text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold">${comment.author}</div>
+                        <div class="text-xs text-gray-400">${comment.time}</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-300">${comment.content}</p>
+            `;
+            commentsContainer.insertBefore(commentEl, commentsContainer.firstChild);
+        }
+    </script>
+</body>
+</html>

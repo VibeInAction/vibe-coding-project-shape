@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>终章：新的开始 - 均衡时代 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes harmony-glow {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(6, 182, 212, 0.5),
+                           0 0 60px rgba(6, 182, 212, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(6, 182, 212, 0.8),
+                           0 0 100px rgba(6, 182, 212, 0.5);
+            }
+        }
+        
+        @keyframes balance-shift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(90deg); }
+            50% { transform: scale(1) rotate(180deg); }
+            75% { transform: scale(1.1) rotate(270deg); }
+        }
+        
+        @keyforms rebirth-light {
+            0% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .harmony-effect {
+            animation: harmony-glow 3s ease-in-out infinite;
+        }
+        
+        .balance-effect {
+            animation: balance-shift 20s linear infinite;
+        }
+        
+        .rebirth-effect {
+            animation: rebirth-light 2s ease-out forwards;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+        
+        .theme-transition * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-cyan-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-blue-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-32 h-32 border-2 border-blue-500 rounded-lg balance-effect"></div>
+    </div>
+
+    <!-- 导航 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-cyan-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">终章：新的开始</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fontDecrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="fontSize" class="text-sm">16px</span>
+                    <button id="fontIncrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="themeToggle" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="relative z-10 bg-gray-800/50 border-b border-gray-700 px-6 py-2">
+        <div class="container mx-auto">
+            <div class="flex items-center space-x-2 text-sm">
+                <a href="index.html" class="text-gray-400 hover:text-white transition">故事目录</a>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <a href="index.html#chapters" class="text-gray-400 hover:text-white transition">章节</a>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <span class="text-cyan-400">终章：新的开始</span>
+                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                <span class="text-gray-300">均衡时代</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <!-- 章节标题 -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">第一节：均衡时代</span>
+            </h1>
+            <div class="w-32 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 mx-auto mb-6"></div>
+            <p class="text-gray-400 text-lg">混沌消散后，几何境域迎来了前所未有的和谐</p>
+        </header>
+
+        <!-- 章节内容 -->
+        <div class="story-content text-lg" id="storyContent">
+            <p>
+                混沌之源被封印后的第三年，几何境域发生了翻天覆地的变化。曾经分裂的四大种族如今真正实现了团结，
+                新的建筑拔地而起，融合了圆环的和谐、三角的力量、方碑的秩序和螺旋的变化。
+            </p>
+            
+            <p>
+                在新建造的"和谐之城"中央，一座宏伟的四重几何神殿矗立着。神殿的主体是一个巨大的圆环，
+                内部由三角结构支撑，四周环绕着方碑般的廊柱，而整个建筑则呈现出螺旋上升的态势。
+                这座建筑成为了新时代的象征——四种形态的完美融合。
+            </p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30 my-8">
+                <h3 class="text-xl font-bold mb-4 text-cyan-400">
+                    <i class="fas fa-landmark mr-2"></i>和谐之城
+                </h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li><i class="fas fa-circle text-blue-400 mr-2"></i>中央广场：形素能量的汇聚点</li>
+                    <li><i class="fas fa-play text-red-400 mr-2"></i>学院区：融合各族智慧的学府</li>
+                    <li><i class="fas fa-square text-cyan-400 mr-2"></i>居住区：适应不同形态需求的设计</li>
+                    <li><i class="fas fa-sync text-green-400 mr-2"></i>花园：展现自然与几何的和谐</li>
+                </ul>
+            </div>
+            
+            <p>
+                艾欧站在神殿的最高处，俯瞰着这座新城。她不再是那个单纯的圆环族学者，
+                而成为了四大种族共同推选的"形素守护者"。这个职位并不凌驾于任何种族之上，
+                而是作为协调者，确保所有种族的权益得到平衡。
+            </p>
+            
+            <div class="dialogue">
+                "看，"托里克站在她身边，指向远方，"三角议会正在与方碑盟约合作建造新的防御设施。
+                三年前，这简直是不可想象的。"
+            </div>
+            
+            <p>
+                艾欧微笑着点头。战争的洗礼让所有人都明白了一个真理：只有团结才能带来真正的力量。
+                混沌虽然被击败，但它的阴影永远不会完全消失。保持警惕，维护平衡，
+                这才是守护者们的使命。
+            </p>
+            
+            <p>
+                塞琳缓步走来，她的白发在阳光下闪耀着智慧的光芒。
+                "混沌教会了我们最重要的一课，"这位圆环族长老说道，
+                "纯粹的秩序和纯粹的混沌都不可取。真正的和谐来自于动态的平衡，
+                来自于不断的变化和适应。"
+            </p>
+            
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-blue-500/30 my-8">
+                <h3 class="text-xl font-bold mb-4 text-blue-400">
+                    <i class="fas fa-balance-scale mr-2"></i>新秩序的特点
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold mb-2 text-cyan-400">形素共享</h4>
+                        <p class="text-sm text-gray-400">各族可以自由学习和使用其他种族的形素技术</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-purple-400">轮值议会</h4>
+                        <p class="text-sm text-gray-400">最高决策机构由四大种族轮流主持</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-green-400">文化融合</h4>
+                        <p class="text-sm text-gray-400">艺术、建筑、科技都在相互影响中发展</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-yellow-400">共同教育</h4>
+                        <p class="text-sm text-gray-400">年轻一代从小就学习所有种族的历史和智慧</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>
+                拉克和薇拉也加入了他们的谈话。方碑盟约的矩阵长现在致力于将古老的规则现代化，
+                使其更加灵活和包容。而螺旋先知则在探索形素能量的新可能性，
+                她发现了一些有趣的现象——被净化的混沌形素似乎蕴含着某种创造的潜力。
+            </p>
+            
+            <div class="dialogue">
+                "也许混沌并不完全是邪恶的，"薇拉若有所思地说，
+                "就像火可以带来温暖也可以造成破坏一样。关键在于我们如何理解和运用它。"
+            </div>
+            
+            <p>
+                这个想法在和谐之城引起了热烈的讨论。如果能够真正理解和掌控混沌的本质，
+                那么几何境域将迎来更大的飞跃。但所有人都明白，这需要极其谨慎的态度。
+                毕竟，他们刚刚经历了混沌带来的灾难。
+            </p>
+            
+            <p>
+                黄昏时分，五位守护者站在神殿的露台上。夕阳的余晖洒在城市的每个角落，
+                将不同的几何形态染成了金色。远处，孩子们在广场上玩耍，
+                他们的笑声中不再有种族的隔阂。一个新的时代真正开始了。
+            </p>
+            
+            <div class="mt-12 p-6 bg-gradient-to-r from-cyan-900/30 to-blue-900/30 rounded-xl border border-cyan-500/50 harmony-effect">
+                <h3 class="text-2xl font-bold mb-4 text-center">形素守护者的誓言</h3>
+                <p class="text-center italic text-gray-300">
+                    "我们守护圆环的和谐，<br>
+                    我们尊崇三角的力量，<br>
+                    我们维护方碑的秩序，<br>
+                    我们拥抱螺旋的变化。<br>
+                    在平衡中寻找真理，<br>
+                    在团结中获得力量，<br>
+                    永远守护这个美丽的几何世界。"
+                </p>
+            </div>
+            
+            <p class="mt-8">
+                均衡时代的到来并不意味着挑战的结束。相反，它标志着一个新的开始——
+                一个需要持续努力、不断适应的时代。但这一次，几何境域的居民们已经学会了
+                最重要的课程：只有团结一致，他们才能创造更美好的未来。
+            </p>
+            
+            <p>
+                夜幕降临，和谐之城的灯光逐一亮起。在城市的每个角落，
+                形素能量温柔地流动着，仿佛在诉说着一个关于重生与希望的故事。
+                而这个故事，才刚刚开始...
+            </p>
+        </div>
+
+        <!-- 章节导航 -->
+        <div class="mt-16 flex justify-between items-center">
+            <a href="chapter-6-section-3.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一章：牺牲与重生</span>
+            </a>
+            <a href="epilogue-section-2.html" class="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg transition">
+                <span>下一节：新的威胁</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-comments mr-2 text-cyan-400"></i>
+                读者评论
+            </h3>
+            <div id="comments" class="space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            <div class="mt-6">
+                <textarea id="commentInput" class="w-full bg-gray-700 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500" rows="3" placeholder="分享你的想法..."></textarea>
+                <button id="submitComment" class="mt-3 px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg hover:from-cyan-600 hover:to-blue-700 transition">
+                    发表评论
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-16">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 终章：新的开始
+            </p>
+            <div class="mt-4 flex justify-center space-x-6">
+                <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-home mr-1"></i>返回主页
+                </a>
+                <a href="../world-lore.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-book mr-1"></i>世界观
+                </a>
+                <a href="index.html" class="text-gray-400 hover:text-white transition">
+                    <i class="fas fa-list mr-1"></i>故事目录
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 阅读进度
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('readingProgress').style.width = scrolled + '%';
+        });
+
+        // 字体大小调整
+        let fontSize = 16;
+        const content = document.getElementById('storyContent');
+        
+        document.getElementById('fontIncrease').addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                content.style.fontSize = fontSize + 'px';
+                document.getElementById('fontSize').textContent = fontSize + 'px';
+            }
+        });
+        
+        document.getElementById('fontDecrease').addEventListener('click', () => {
+            if (fontSize > 12) {
+                fontSize -= 2;
+                content.style.fontSize = fontSize + 'px';
+                document.getElementById('fontSize').textContent = fontSize + 'px';
+            }
+        });
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        let isDarkTheme = true;
+        
+        themeToggle.addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            body.classList.add('theme-transition');
+            
+            if (isDarkTheme) {
+                body.className = body.className.replace('bg-gray-100 text-gray-900', 'bg-gray-900 text-white');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                body.className = body.className.replace('bg-gray-900 text-white', 'bg-gray-100 text-gray-900');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            setTimeout(() => {
+                body.classList.remove('theme-transition');
+            }, 300);
+        });
+
+        // 评论系统
+        const comments = [
+            {
+                author: "几何爱好者",
+                content: "终于迎来了和平的时代！四种形态的融合太美好了！",
+                time: "2小时前"
+            },
+            {
+                author: "形素研究者",
+                content: "薇拉的想法很有意思，混沌真的可以被善用吗？期待下一节的解答！",
+                time: "5小时前"
+            }
+        ];
+
+        function renderComments() {
+            const commentsContainer = document.getElementById('comments');
+            commentsContainer.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold text-cyan-400">${comment.author}</span>
+                        <span class="text-xs text-gray-400">${comment.time}</span>
+                    </div>
+                    <p class="text-gray-300">${comment.content}</p>
+                </div>
+            `).join('');
+        }
+
+        renderComments();
+
+        document.getElementById('submitComment').addEventListener('click', () => {
+            const input = document.getElementById('commentInput');
+            const content = input.value.trim();
+            
+            if (content) {
+                comments.unshift({
+                    author: "读者",
+                    content: content,
+                    time: "刚刚"
+                });
+                renderComments();
+                input.value = '';
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

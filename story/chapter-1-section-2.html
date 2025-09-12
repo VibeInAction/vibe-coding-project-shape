@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一章：觉醒 - 第一节：预言之梦 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            z-index: 30;
+            transition: width 0.3s ease;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .chapter-nav {
+                position: static;
+                transform: none;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第一章：觉醒</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fontSizeDecrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="fontSizeDisplay" class="text-sm">标准</span>
+                    <button id="fontSizeIncrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="themeToggle" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 章节标题 -->
+    <header class="relative py-12 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">第一节：预言之梦</span>
+            </h1>
+            <div class="flex items-center justify-center space-x-6 text-gray-400">
+                <span><i class="fas fa-clock mr-2"></i>阅读时长：约12分钟</span>
+                <span><i class="fas fa-file-word mr-2"></i>约3,500字</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="relative pb-20">
+        <div class="container mx-auto max-w-4xl px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- 侧边栏导航 -->
+                <aside class="md:col-span-1">
+                    <div class="sticky top-24 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <h3 class="font-bold mb-4 text-blue-400">章节导航</h3>
+                        <nav class="space-y-2">
+                            <a href="#section-1" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-circle text-xs mr-2 text-blue-400"></i>边境检查站
+                            </a>
+                            <a href="#section-2" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-circle text-xs mr-2 text-blue-400"></i>三角议会领地
+                            </a>
+                            <a href="#section-3" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-circle text-xs mr-2 text-blue-400"></i>预言之梦
+                            </a>
+                            <a href="#section-4" class="block py-2 px-3 rounded hover:bg-gray-700 transition text-sm">
+                                <i class="fas fa-circle text-xs mr-2 text-blue-400"></i>混沌的痕迹
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- 故事内容 -->
+                <div class="md:col-span-3">
+                    <article id="storyContent" class="story-content bg-gray-800/30 rounded-xl p-8 border border-gray-700">
+                        <section id="section-1">
+                            <p>艾欧离开中央圆环已经三天了。他站在通往三角议会的边境检查站，望着远处起伏的三角形山脉，心中充满了不安。</p>
+                            
+                            <div class="dialogue">
+                                "请出示通行证。"<br>
+                                守卫的声音打断了艾欧的思绪。
+                            </div>
+                            
+                            <p>艾欧递上塞琳长老给他的水晶徽章。守卫检查后，眼中闪过一丝惊讶。</p>
+                            
+                            <div class="dialogue">
+                                "圆环族的使者？已经有二十年没有你们的人来过顶点要塞了。"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "我是来见议会主席的。"<br>
+                                艾欧尽量让自己的声音听起来坚定。
+                            </div>
+                            
+                            <p>守卫示意他通过。穿过检查站，艾欧踏上了三角议会的领地。这里的建筑和他熟悉的圆环族风格截然不同——所有建筑都是尖锐的三角形，棱角分明，给人一种咄咄逼人的感觉。</p>
+                            
+                            <p>道路两旁矗立着巨大的三角锥雕塑，每个都指向天空，仿佛要刺破云层。艾欧能感觉到这里的形素流动也很不寻常，带着一种强烈的进取心和竞争意识。</p>
+                        </section>
+
+                        <section id="section-2">
+                            <p>夜幕降临时，艾欧在边境小镇的旅馆住下。他躺在床上，却怎么也睡不着。白天看到的景象不断在脑海中重现，尤其是那些棱角分明的建筑，让他感到一种莫名的压力。</p>
+                            
+                            <p>渐渐地，他陷入了梦境。</p>
+                            
+                            <p>梦中，艾欧站在一个巨大的圆形广场上。广场中央有一个巨大的水晶球，散发着柔和的光芒。突然，水晶球开始出现裂痕，黑色的物质从裂缝中渗出。</p>
+                            
+                            <div class="dialogue">
+                                "不！"<br>
+                                艾欧想要冲过去，但发现自己的腿无法移动。
+                            </div>
+                            
+                            <p>水晶球完全碎裂，黑色的物质像潮水般涌出。艾欧看到圆环族的建筑开始崩塌，完美的圆形变得扭曲变形。接着，他看到了三角议会的要塞——那些尖锐的三角形开始相互攻击，就像在自相残杀。</p>
+                        </section>
+
+                        <section id="section-3">
+                            <p>画面再次转换，方碑盟约的矩阵城邦出现了。巨大的立方体建筑开始坍塌，方块们像多米诺骨牌一样倒下。最后，螺旋之子的生命之巢出现在视野中，那些优美的螺旋结构变得混乱不堪，就像被剪断的DNA链。</p>
+                            
+                            <p>在所有这些毁灭的景象中，艾欧看到了一个共同的元素——黑色的、不断扭曲的几何形态。它们像病毒一样侵蚀着一切有序的结构。</p>
+                            
+                            <div class="dialogue">
+                                "混沌..."<br>
+                                艾欧在梦中喃喃自语。
+                            </div>
+                            
+                            <p>突然，一个声音在他脑海中响起：</p>
+                            
+                            <div class="dialogue text-center text-lg font-bold">
+                                "当圆不再圆，三角不再稳定，方块不再有序，螺旋不再进化时，混沌将吞噬一切。唯有团结的几何，才能重建均衡。"
+                            </div>
+                            
+                            <p>艾欧猛然惊醒，浑身冷汗。窗外，第一缕阳光已经照了进来。</p>
+                            
+                            <p>他坐起来，努力回忆梦中的细节。那个声音...塞琳长老提到过古老的预言，难道这就是其中之一？</p>
+                            
+                            <p>更让艾欧担心的是，他不仅仅是在做梦。在梦中，他再次看到了形素的流动——那些黑色混沌形素正在缓慢地侵蚀这个世界。</p>
+                        </section>
+
+                        <section id="section-4">
+                            <p>第二天清晨，艾欧继续赶路。随着距离顶点要塞越来越近，他发现了一个奇怪的现象：这里的几何畸变比圆环族领地更加严重。</p>
+                            
+                            <p>路边的小型三角锥雕塑出现了不自然的弯曲，一些本该直线的边缘变成了波浪形。艾欧停下脚步，集中精神，试图用新获得的能力观察。</p>
+                            
+                            <p>果然，他看到了形素的流动。在三角议会这里，形素呈现出强烈的紫色和红色，充满了攻击性和竞争性。但在这正常的形素流动中，他看到了黑色的丝线——混沌形素正在悄悄地改变这里的几何法则。</p>
+                            
+                            <div class="dialogue">
+                                "看来我来对了。"<br>
+                                艾欧自言自语，"畸变已经蔓延到了这里。"
+                            </div>
+                            
+                            <p>中午时分，艾欧遇到了一支三角议会的巡逻队。队长是个身材高大的三角战士，脸上有一道三角形的伤疤。</p>
+                            
+                            <div class="dialogue">
+                                "圆环族的人？"<br>
+                                队长上下打量着艾欧，"你来这里做什么？"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "我有重要的事情要报告给议会。"<br>
+                                艾欧说，"关于几何畸变的事情。"
+                            </div>
+                            
+                            <p>队长嗤笑一声："几何畸变？我们三角议会不需要圆环族的关心。我们的建筑是最稳定的结构。"</p>
+                            
+                            <div class="dialogue">
+                                "但是你难道没有发现吗？"<br>
+                                艾欧指着路边一个扭曲的三角锥，"你们的建筑正在失去完美的三角形形态。"
+                            </div>
+                            
+                            <p>队长的笑容消失了。他走到那个雕塑前，仔细检查。</p>
+                            
+                            <div class="dialogue">
+                                "这...这不正常。"<br>
+                                他皱着眉头，"昨天这里还好好的。"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "这就是我要报告的事情。"<br>
+                                艾欧说，"这种畸变正在影响整个世界。圆环族、三角议会、方碑盟约、螺旋之子...没有一个种族能够幸免。"
+                            </div>
+                            
+                            <p>队长沉默了片刻，然后说："我叫维克多。如果你说的是真的，议会需要知道这个情况。我护送你去顶点要塞。"</p>
+                            
+                            <p>维克多带着艾欧穿过一片三角形的森林。这里的树木都是自然生长的三角形，艾欧还是第一次见到。</p>
+                            
+                            <div class="dialogue">
+                                "这些都是三角树种。"<br>
+                                维克多解释道，"它们天生就是三角形，是我们力量的象征。"
+                            </div>
+                            
+                            <p>但艾欧注意到，即使是这些天然的三角形也出现了畸变。一些树的边缘变得模糊，三角形的角度也不再是标准的60度。</p>
+                            
+                            <div class="dialogue">
+                                "你们没有发现这些变化吗？"<br>
+                                艾欧问。
+                            </div>
+                            
+                            <p>维克多摇摇头："说实话，我们太专注于内部的竞争了。三角议会分为三大派系——军事派、科技派和传统派。他们每天都在争论谁是三角的真正继承者。"</p>
+                            
+                            <div class="dialogue">
+                                "没有人在意外部威胁？"
+                            </div>
+                            
+                            <div class="dialogue">
+                                "在三角议会，我们相信只有强者才能生存。"<br>
+                                维克多苦笑道，"每个派系都想证明自己的三角形理念最优越，没人会相信有什么能够威胁到我们。"
+                            </div>
+                            
+                            <p>他们继续前进，很快就看到了顶点要塞。那是一座巨大的金字塔形建筑，耸立在群山之巅，气势恢宏。</p>
+                            
+                            <div class="dialogue">
+                                "那就是议会大厅。"<br>
+                                维克多指着要塞的顶端，"三大派系的领袖在那里开会。希望他们能听你说完。"
+                            </div>
+                            
+                            <p>艾欧望着远处的要塞，心中涌起一股不安。他知道，要说服这些骄傲的三角战士相信混沌的威胁，将是一件非常困难的事情。</p>
+                            
+                            <p>但他必须尝试。</p>
+                            
+                            <p>因为梦中看到的景象还历历在目——如果他们不能团结起来，整个世界都将被混沌吞噬。</p>
+                        </section>
+                    </article>
+
+                    <!-- 章节导航 -->
+                    <div class="mt-8 flex justify-between items-center">
+                        <div class="text-gray-400">
+                            <a href="chapter-1-prologue.html" class="hover:text-blue-400 transition">
+                                <i class="fas fa-chevron-left mr-2"></i>序章：破碎的圆环
+                            </a>
+                        </div>
+                        <div class="flex space-x-4">
+                            <a href="chapter-1-section-3.html" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                                第二节：三角之旅
+                                <i class="fas fa-chevron-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="mt-12 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                        <h3 class="text-xl font-bold mb-4">
+                            <i class="fas fa-comments mr-2"></i>读者评论
+                        </h3>
+                        <div class="space-y-4" id="comments">
+                            <div class="bg-gray-700/50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-purple-500 rounded-full mr-3 flex items-center justify-center">
+                                        <i class="fas fa-user-astronaut text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold">三角学者</div>
+                                        <div class="text-xs text-gray-400">1小时前</div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-300">预言写得很有深度！混沌的威胁感越来越强烈了。</p>
+                            </div>
+                            <div class="bg-gray-700/50 rounded-lg p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex items-center justify-center">
+                                        <i class="fas fa-user text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold">几何爱好者</div>
+                                        <div class="text-xs text-gray-400">3小时前</div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-300">三角议会内部的描写很真实，展现了他们骄傲但也有脆弱的一面。</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <textarea id="commentInput" class="w-full bg-gray-700 rounded-lg p-3 text-white resize-none" rows="3" placeholder="写下你的想法..."></textarea>
+                            <button id="submitComment" class="mt-2 px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+                                发表评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 最后更新：2024年
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 阅读进度
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('readingProgress').style.width = scrollPercent + '%';
+        });
+
+        // 字体大小调整
+        let fontSize = 16;
+        const content = document.getElementById('storyContent');
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (fontSize > 12) {
+                fontSize -= 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        function updateFontSizeDisplay() {
+            const display = document.getElementById('fontSizeDisplay');
+            if (fontSize <= 16) display.textContent = '标准';
+            else if (fontSize <= 20) display.textContent = '较大';
+            else display.textContent = '最大';
+        }
+
+        // 主题切换
+        let isDarkTheme = true;
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('bg-gray-900');
+            document.body.classList.toggle('bg-gray-100');
+            document.body.classList.toggle('text-gray-100');
+            document.body.classList.toggle('text-gray-900');
+            document.body.querySelectorAll('.bg-gray-800, .bg-gray-700, .bg-gray-900').forEach(el => {
+                el.classList.toggle('bg-gray-100');
+                el.classList.toggle('bg-gray-200');
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 评论功能
+        document.getElementById('submitComment').addEventListener('click', function() {
+            const input = document.getElementById('commentInput');
+            const comment = input.value.trim();
+            
+            if (comment) {
+                addComment({
+                    author: '匿名读者',
+                    avatar: 'fa-user',
+                    time: '刚刚',
+                    content: comment
+                });
+                input.value = '';
+            }
+        });
+
+        function addComment(comment) {
+            const commentsContainer = document.getElementById('comments');
+            const commentEl = document.createElement('div');
+            commentEl.className = 'bg-gray-700/50 rounded-lg p-4';
+            commentEl.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex items-center justify-center">
+                        <i class="fas ${comment.avatar} text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold">${comment.author}</div>
+                        <div class="text-xs text-gray-400">${comment.time}</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-300">${comment.content}</p>
+            `;
+            commentsContainer.insertBefore(commentEl, commentsContainer.firstChild);
+        }
+    </script>
+</body>
+</html>

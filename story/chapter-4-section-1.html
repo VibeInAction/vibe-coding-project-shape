@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第四章：联盟之路 - 说服圆环族</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes shield-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.5),
+                           inset 0 0 20px rgba(245, 158, 11, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(245, 158, 11, 0.8),
+                           inset 0 0 30px rgba(245, 158, 11, 0.3);
+            }
+        }
+        
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .shield-glow {
+            animation: shield-glow 3s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .alliance-shield {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alliance-shield::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            animation: ripple 2s ease-out infinite;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #f59e0b;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #d97706;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .council-debate {
+            background: rgba(139, 69, 19, 0.1);
+            border-left: 4px solid #8b4513;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-yellow-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-amber-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-yellow-600 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-amber-600 rounded-lg rotate-slow" style="animation-duration: 50s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-32 h-32 border-2 border-yellow-500 transform rotate-12 shield-glow"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-yellow-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第四章：</span>
+                        <span class="font-semibold text-yellow-400">联盟之路</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-yellow-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-yellow-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-yellow-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第四章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-yellow-400">说服圆环族</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-yellow-500 to-amber-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-yellow-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第四章 · 第一节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">说服圆环族</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 10 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    盟誓仪式的成功让几何守护者联盟重新燃起了希望，但艾欧知道，真正的挑战才刚刚开始。虽然四大种族的代表已经立下誓言，但要动员整个种族的力量对抗混沌，还需要获得更多人的支持。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    而第一站，也是最难的一站，就是她的家乡——圆环中央城。
+                </p>
+                
+                <h2>归乡之路</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    当艾欧和塞琳长老回到圆环中央城时，迎接她们的并非欢呼，而是质疑的目光。和谐圆环的裂缝虽然已经稳定，但依然是族人心中的一根刺。
+                </p>
+                
+                <div class="dialogue">
+                    "看看，这就是所谓的守护者带回来的，"一个年轻的圆环族学者低声对同伴说，"一个破损的圣物。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧没有理会这些议论。她知道，要说服圆环族，必须先让他们理解真相。但问题是，圆环族数百年来一直秉持着和谐与平衡的理念，任何改变都被视为对这种平衡的破坏。
+                </p>
+                
+                <h3>长老议会</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    圆环族的治理机构是由七位最年长、最智慧的长老组成的长老议会。他们是传统的守护者，也是改变的最大阻力。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    议会大厅是一个完美的圆形空间，象征着圆环族对和谐的追求。七位长老坐在环形的席位上，而艾欧和塞琳站在中央。
+                </p>
+                
+                <div class="council-debate">
+                    <h4 class="font-bold mb-2 text-amber-400">长老议会辩论</h4>
+                    <p class="text-gray-300 mb-2">"艾欧，"首席长老奥利安开口了，他的声音平静但威严，"我们听说了一些关于'混沌'的传言。但圆环族自古以来都保持着世界的平衡，没有所谓的'混沌'能够威胁我们。"</p>
+                    <p class="text-gray-300">"尊敬的奥利安长老，"艾欧深深鞠躬，"混沌确实存在。我已经亲眼目睹了它的力量，三角边境的村庄、方碑的矩阵、螺旋的进化树，都受到了它的影响。"</p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    另一位长老莱拉摇头："那些都是其他种族的事情。圆环族的任务是维持平衡，不是卷入其他种族的纷争。"
+                </p>
+                
+                <div class="dialogue">
+                    "但这次不同，"塞琳站出来说，"混沌威胁的是整个几何境域，包括我们圆环族。和谐圆环的裂缝就是证明。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    议会大厅陷入了沉默。和谐圆环的裂缝是所有族人心中的痛，没有人能够否认它的存在。
+                </p>
+                
+                <h2>理念的冲突</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    要说服圆环族，艾欧必须首先解决一个根本性的问题：圆环族对"和谐"的理解已经僵化了。在他们看来，和谐就是保持不变，任何变化都是对和谐的破坏。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "族人们，"艾欧站在中央广场上，面对着聚集的人群，"我们一直以为和谐就是保持不变，但我们错了。真正的和谐是动态的，是在变化中保持平衡。"
+                </p>
+                
+                <div class="dialogue">
+                    "看看四季的更替，"她继续说，"春天发芽，夏天成长，秋天收获，冬天休眠。这难道不是变化吗？但这种变化维持着生命的和谐。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    人群中开始出现骚动。艾欧的话挑战了他们几百年来信奉的理念。
+                </p>
+                
+                <h3>证据的展示</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    空谈是无法说服他们的，艾欧知道必须展示证据。她请求长老议会允许她展示她在旅途中看到的景象。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在圆环族的水晶大厅里，艾欧通过形素投影，展示了一个个令人震惊的画面：
+                </p>
+                
+                <ul class="list-disc list-inside ml-4 space-y-2 text-gray-300">
+                    <li>三角边境的塔楼如何被扭曲变形</li>
+                    <li>方碑盟约的矩阵系统如何陷入混乱</li>
+                    <li>螺旋之子如何因为失控的进化而痛苦</li>
+                    <li>最重要的是，那些被混沌完全同化的生命形态</li>
+                </ul>
+                
+                <div class="dialogue">
+                    "这就是混沌的力量，"艾欧的声音沉重，"它不毁灭，而是同化。它要把所有的几何形态都变成它的样子，消除所有的规则和秩序。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    展示结束后，大厅里鸦雀无声。许多族人第一次意识到，威胁比他们想象的要严重得多。
+                </p>
+                
+                <h2>内部的分裂</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧的演讲在圆环族内部造成了分裂。年轻一代的族人开始支持她的观点，他们认为圆环族应该更加积极地参与到世界事务中。而老一辈则坚持传统，认为应该保持中立。
+                </p>
+                
+                <div class="council-debate">
+                    <h4 class="font-bold mb-2 text-amber-400">族内辩论</h4>
+                    <p class="text-gray-300 mb-2">"我们不能把祖先传承下来的和谐理念抛弃，"一位年长的族人说，"正是这种理念让我们在无数纷争中保持和平。"</p>
+                    <p class="text-gray-300">"但时代变了，"一个年轻的学者反驳道，"如果我们继续闭关自守，当混沌来临时，我们将独自面对。"</p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    分裂越来越严重，甚至影响到了圆环族的日常运作。一些年轻人开始自发组织起来，研究对抗混沌的方法，而长老们则试图阻止这种"破坏和谐"的行为。
+                </p>
+                
+                <h3>危机的临近</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在圆环族内部争论不休的时候，一个坏消息传来了——圆环族外围的几个村庄开始出现了异常现象。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "报告！"一个卫兵冲进议会大厅，"边境村庄的居民反映，他们画出的圆无法闭合，总是会出现无法解释的缺口。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个消息让所有人都感到了恐慌。对圆环族来说，无法画出完美的圆是最可怕的噩梦。
+                </p>
+                
+                <div class="dialogue">
+                    "混沌已经开始侵蚀我们了，"艾欧说，"这就是我一直在警告的。如果我们不团结起来，很快整个圆环族都会失去画出完美圆的能力。"
+                </div>
+                
+                <h2>转机</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    危机往往能带来转机。当混沌的威胁真实地出现在眼前时，即使是那些最保守的长老也开始动摇。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    奥利安长老召集了紧急会议。"也许我们确实需要重新考虑我们的立场，"他说，"但我们需要一个方案，一个既能保护我们传统，又能应对威胁的方案。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧抓住了这个机会。她提出了一个详细的计划：
+                </p>
+                
+                <div class="alliance-shield bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-yellow-400">圆环族参与计划</h3>
+                    <ol class="space-y-2 text-sm">
+                        <li>1. 建立形素监测网络，利用圆环族的和谐感知能力预警混沌入侵</li>
+                        <li>2. 组建和谐守护队，专门负责修复被混沌侵蚀的几何形态</li>
+                        <li>3. 与其他种族分享圆环族的平衡知识，帮助它们在变化中保持稳定</li>
+                        <li>4. 参与联盟的决策，但不放弃圆环族的中立传统</li>
+                    </ol>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个计划巧妙地平衡了传统和变革。它既让圆环族参与到联盟中，又保持了他们的特色和原则。
+                </p>
+                
+                <h3>最后的决定</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    经过三天的激烈讨论，长老议会终于做出了决定。圆环族将有限度地参与几何守护者联盟，主要负责监测和修复工作，但不直接参与战斗。
+                </p>
+                
+                <div class="dialogue">
+                    "这不是一个完美的决定，"奥利安长老说，"但这是目前最好的选择。我们既不能无视威胁，也不能完全抛弃我们的传统。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    虽然不是完全的胜利，但艾欧知道这已经是巨大的进步。她成功地说服了最保守的种族接受改变，这为说服其他种族奠定了基础。
+                </p>
+                
+                <h2>新的开始</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在圆环族的支持下，艾欧开始实施她的计划。形素监测网络很快建立起来，圆环族的和谐感知能力确实如她所说，能够敏锐地察觉到混沌的波动。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    更重要的是，圆环族的参与给了联盟一个重要的信号：即使是传统的守护者也开始改变。这极大地鼓舞了其他种族中的改革派。
+                </p>
+                
+                <div class="dialogue">
+                    "你做到了，"塞琳长老对艾欧说，"你让我们看到了，和谐不是停滞，而是在变化中寻找新的平衡。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧微笑着摇了摇头："这不是我一个人的功劳。是每一个愿意改变的人共同的努力。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    站在圆环中央城的最高处，艾欧望着远方。下一步，她要去三角议会，说服那些骄傲的战士们。但她知道，有了圆环族的支持，这条路会好走一些。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    联盟之路虽然艰难，但已经开始。只要一步一步走下去，终有一天，四大种族会重新团结在一起，共同守护这个由几何形态构成的世界。
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-3-section-3.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：古老的联盟</span>
+                    </a>
+                    <a href="chapter-4-section-2.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg font-semibold hover:from-yellow-700 hover:to-amber-700 transition">
+                        <span>下一节：联合三角议会</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-yellow-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-yellow-600 rounded-lg hover:bg-yellow-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader9/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">传统与变革</span>
+                                <span class="text-sm text-gray-500">1小时前</span>
+                            </div>
+                            <p class="text-gray-300">圆环族的故事太真实了！任何一个组织或社会都会面临传统与变革的冲突。艾欧的处理方式很聪明，既尊重了传统，又推动了变革。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 56
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader10/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">圆环族粉丝</span>
+                                <span class="text-sm text-gray-500">3小时前</span>
+                            </div>
+                            <p class="text-gray-300">终于等到圆环族的主场了！作为一个喜欢和谐与平衡的人，我完全理解长老们的顾虑。但有时候，为了保护重要的东西，确实需要做出改变。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-heart"></i> 42
+                                </button>
+                                <button class="text-gray-400 hover:text-yellow-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 下一节更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-yellow-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

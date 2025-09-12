@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色介绍 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .character-card {
+            transition: all 0.3s ease;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .ability-bar {
+            transition: width 1s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-users text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">角色介绍</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#heroes" class="hover:text-blue-400 transition">主要角色</a>
+                    <a href="#allies" class="hover:text-blue-400 transition">盟友</a>
+                    <a href="#villains" class="hover:text-blue-400 transition">反派</a>
+                    <a href="#relationships" class="hover:text-blue-400 transition">关系图</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">角色世界</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">认识几何境域中的英雄、盟友与敌人</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                每个角色都有自己的故事、动机和成长轨迹。他们的选择将决定整个世界的命运。
+            </p>
+        </div>
+    </header>
+
+    <!-- 主要角色 -->
+    <section id="heroes" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">主要角色</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 艾欧 -->
+                <div class="character-card bg-gray-800/50 rounded-2xl p-8 border-2 border-blue-500/30 hover:border-blue-500/60">
+                    <div class="text-center mb-6">
+                        <div class="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center float-animation">
+                            <i class="fas fa-user text-5xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">艾欧</h3>
+                        <p class="text-blue-400">圆环族学者</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">基本信息</h4>
+                            <div class="text-sm text-gray-400 space-y-1">
+                                <p><i class="fas fa-ruler-vertical mr-2"></i>年龄：24岁</p>
+                                <p><i class="fas fa-home mr-2"></i>出身：中央圆环</p>
+                                <p><i class="fas fa-briefcase mr-2"></i>职业：形态维护师</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">特殊能力</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">形素视觉</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">形素操控</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">智慧</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">角色描述</h4>
+                            <p class="text-sm text-gray-400 leading-relaxed">
+                                故事的主角，原本是一名普通的圆环族形态维护师。在中央圆环事故中意外获得看见形素的能力，成为唯一能够察觉混沌入侵的人。性格温和理性，但内心充满勇气和责任感。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">成长轨迹</h4>
+                            <div class="text-sm text-gray-400">
+                                <p class="mb-1">• 从普通学者到世界守护者</p>
+                                <p class="mb-1">• 学会接受并运用自己的能力</p>
+                                <p>• 成为四大种族团结的桥梁</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 塞琳 -->
+                <div class="character-card bg-gray-800/50 rounded-2xl p-8 border-2 border-purple-500/30 hover:border-purple-500/60">
+                    <div class="text-center mb-6">
+                        <div class="w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-user-tie text-5xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">塞琳</h3>
+                        <p class="text-purple-400">圆环族长老</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">基本信息</h4>
+                            <div class="text-sm text-gray-400 space-y-1">
+                                <p><i class="fas fa-ruler-vertical mr-2"></i>年龄：187岁</p>
+                                <p><i class="fas fa-home mr-2"></i>出身：长老议会</p>
+                                <p><i class="fas fa-briefcase mr-2"></i>职业：预言解读师</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">特殊能力</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">预言解读</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">古老知识</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">形素感知</span>
+                                    <div class="flex space-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">角色描述</h4>
+                            <p class="text-sm text-gray-400 leading-relaxed">
+                                圆环族最智慧的长老之一，预言之梦的解读者。掌握着世界古老的秘密，是艾欧的导师和引路人。性格沉稳睿智，对世界的命运有着深刻的忧患意识。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">重要作用</h4>
+                            <div class="text-sm text-gray-400">
+                                <p class="mb-1">• 解读混沌归来的预言</p>
+                                <p class="mb-1">• 指导艾欧控制能力</p>
+                                <p>• 推动四大种族重新联盟</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 盟友角色 -->
+    <section id="allies" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">盟友角色</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- 托里克 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">托里克</h3>
+                        <p class="text-purple-400 text-sm">三角议会将军</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        正直勇敢的三角战士，军事派的改革派。在见识到混沌的威胁后，成为艾欧最坚定的盟友。代表三角的力量和勇气。
+                    </p>
+                </div>
+                
+                <!-- 拉克 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 border border-cyan-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-24 h-24 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-cube text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">拉克</h3>
+                        <p class="text-cyan-400 text-sm">矩阵长</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        方碑盟约的改革派领袖，虽然严谨理性但思想开放。认识到单一秩序的弱点后，支持多元化的理念。代表方的秩序和稳定。
+                    </p>
+                </div>
+                
+                <!-- 薇拉 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 border border-green-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-dna text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">薇拉</h3>
+                        <p class="text-green-400 text-sm">螺旋先知</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        螺旋之子的精神领袖，富有远见和活力。引导族人找到平衡的进化之路，而不是激进的变异。代表螺旋的变化和适应。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 反派角色 -->
+    <section id="villains" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">反派角色</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 不规则者 -->
+                <div class="character-card bg-gray-800/50 rounded-2xl p-8 border-2 border-red-500/30 hover:border-red-500/60">
+                    <div class="text-center mb-6">
+                        <div class="w-32 h-32 bg-gradient-to-br from-red-500 to-red-600 rounded-full mx-auto mb-4 flex items-center justify-center morph-shape">
+                            <i class="fas fa-ghost text-5xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">不规则者</h3>
+                        <p class="text-red-400">混沌实体</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">基本信息</h4>
+                            <div class="text-sm text-gray-400 space-y-1">
+                                <p><i class="fas fa-infinity mr-2"></i>年龄：未知</p>
+                                <p><i class="fas fa-globe mr-2"></i>出身：混沌维度</p>
+                                <p><i class="fas fa-bolt mr-2"></i>本质：扭曲的化身</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">能力特点</h4>
+                            <div class="text-sm text-gray-400 space-y-1">
+                                <p>• 无固定形态，可以任意变形</p>
+                                <p>• 扭曲现实，破坏几何法则</p>
+                                <p>• 利用秩序本身的弱点</p>
+                                <p>• 侵蚀有序世界，制造混乱</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-300">目标</h4>
+                            <p class="text-sm text-gray-400">
+                                吞噬所有有序的世界，将一切都变成混沌的形态。认为秩序是束缚，混乱才是真正的自由。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他威胁 -->
+                <div class="space-y-6">
+                    <!-- 混沌奴仆 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-red-500/20">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-virus text-2xl text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold mb-1">混沌奴仆</h4>
+                                <p class="text-sm text-gray-400">
+                                    被混沌侵蚀的生物，失去了原有的形态，成为不规则者的爪牙。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 三角叛徒 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/20">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-user-ninja text-2xl text-purple-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold mb-1">三角叛徒</h4>
+                                <p class="text-sm text-gray-400">
+                                    三角议会的主战派领袖，秘密与混沌达成交易，试图利用混沌力量清除其他种族。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 形骸畸变体 -->
+                    <div class="bg-gray-800/50 rounded-xl p-6 border border-green-500/20">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-skull text-2xl text-green-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold mb-1">形骸畸变体</h4>
+                                <p class="text-sm text-gray-400">
+                                    螺旋之子激进化实验失败的结果，成为混沌入侵的帮凶，威胁着整个世界。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 角色关系图 -->
+    <section id="relationships" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">角色关系图</span>
+            </h2>
+            
+            <!-- 交互式关系图 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700 mb-8">
+                <div class="relative h-96 overflow-hidden">
+                    <svg id="relationshipGraph" class="w-full h-full" viewBox="0 0 800 400">
+                        <!-- 连接线 -->
+                        <g id="connections" stroke-width="2" fill="none">
+                            <!-- 艾欧到塞琳 -->
+                            <line x1="400" y1="200" x2="200" y2="100" stroke="#3B82F6" stroke-dasharray="5,5" opacity="0.6"/>
+                            
+                            <!-- 艾欧到托里克 -->
+                            <line x1="400" y1="200" x2="600" y2="100" stroke="#8B5CF6" stroke-dasharray="5,5" opacity="0.6"/>
+                            
+                            <!-- 艾欧到拉克 -->
+                            <line x1="400" y1="200" x2="200" y2="300" stroke="#06B6D4" stroke-dasharray="5,5" opacity="0.6"/>
+                            
+                            <!-- 艾欧到薇拉 -->
+                            <line x1="400" y1="200" x2="600" y2="300" stroke="#10B981" stroke-dasharray="5,5" opacity="0.6"/>
+                            
+                            <!-- 艾欧到不规则者 -->
+                            <line x1="400" y1="200" x2="400" y2="50" stroke="#EF4444" stroke-width="3" opacity="0.8"/>
+                            
+                            <!-- 托里克到三角叛徒 -->
+                            <line x1="600" y1="100" x2="650" y2="180" stroke="#8B5CF6" stroke-width="2" opacity="0.4"/>
+                        </g>
+                        
+                        <!-- 节点 -->
+                        <g id="nodes">
+                            <!-- 艾欧（中心） -->
+                            <g class="character-node cursor-pointer" data-name="艾欧">
+                                <circle cx="400" cy="200" r="35" fill="#3B82F6" stroke="#60A5FA" stroke-width="3"/>
+                                <text x="400" y="205" text-anchor="middle" fill="white" font-size="16" font-weight="bold">艾欧</text>
+                                <text x="400" y="250" text-anchor="middle" fill="#94A3B8" font-size="12">主角</text>
+                            </g>
+                            
+                            <!-- 塞琳 -->
+                            <g class="character-node cursor-pointer" data-name="塞琳">
+                                <circle cx="200" cy="100" r="28" fill="#3B82F6" stroke="#60A5FA" stroke-width="2"/>
+                                <text x="200" y="105" text-anchor="middle" fill="white" font-size="14">塞琳</text>
+                                <text x="200" y="140" text-anchor="middle" fill="#94A3B8" font-size="11">导师</text>
+                            </g>
+                            
+                            <!-- 托里克 -->
+                            <g class="character-node cursor-pointer" data-name="托里克">
+                                <circle cx="600" cy="100" r="28" fill="#8B5CF6" stroke="#A78BFA" stroke-width="2"/>
+                                <text x="600" y="105" text-anchor="middle" fill="white" font-size="14">托里克</text>
+                                <text x="600" y="140" text-anchor="middle" fill="#94A3B8" font-size="11">盟友</text>
+                            </g>
+                            
+                            <!-- 拉克 -->
+                            <g class="character-node cursor-pointer" data-name="拉克">
+                                <circle cx="200" cy="300" r="28" fill="#06B6D4" stroke="#67E8F9" stroke-width="2"/>
+                                <text x="200" y="305" text-anchor="middle" fill="white" font-size="14">拉克</text>
+                                <text x="200" y="340" text-anchor="middle" fill="#94A3B8" font-size="11">盟友</text>
+                            </g>
+                            
+                            <!-- 薇拉 -->
+                            <g class="character-node cursor-pointer" data-name="薇拉">
+                                <circle cx="600" cy="300" r="28" fill="#10B981" stroke="#6EE7B7" stroke-width="2"/>
+                                <text x="600" y="305" text-anchor="middle" fill="white" font-size="14">薇拉</text>
+                                <text x="600" y="340" text-anchor="middle" fill="#94A3B8" font-size="11">盟友</text>
+                            </g>
+                            
+                            <!-- 不规则者 -->
+                            <g class="character-node cursor-pointer" data-name="不规则者">
+                                <circle cx="400" cy="50" r="30" fill="#EF4444" stroke="#F87171" stroke-width="2" class="pulse-animation"/>
+                                <text x="400" y="55" text-anchor="middle" fill="white" font-size="14">混沌</text>
+                                <text x="400" y="90" text-anchor="middle" fill="#94A3B8" font-size="11">宿敌</text>
+                            </g>
+                            
+                            <!-- 三角叛徒 -->
+                            <g class="character-node cursor-pointer" data-name="三角叛徒">
+                                <circle cx="650" cy="180" r="20" fill="#8B5CF6" stroke="#A78BFA" stroke-width="1" opacity="0.6"/>
+                                <text x="650" y="185" text-anchor="middle" fill="white" font-size="12">叛徒</text>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- 图例 -->
+                <div class="flex justify-center space-x-6 mt-6">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span class="text-sm text-gray-400">圆环族</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        <span class="text-sm text-gray-400">三角议会</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 bg-cyan-500 rounded-full"></div>
+                        <span class="text-sm text-gray-400">方碑盟约</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span class="text-sm text-gray-400">螺旋之子</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 bg-red-500 rounded-full"></div>
+                        <span class="text-sm text-gray-400">混沌势力</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 关系详情 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-blue-400">艾欧的关系网络</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-user text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">塞琳（导师）</h4>
+                                    <p class="text-sm text-gray-400">亦师亦友的关系，塞琳是艾欧最信任的人</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-shield-alt text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">托里克（战友）</h4>
+                                    <p class="text-sm text-gray-400">从对立到盟友，相互尊重的战斗伙伴</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-cube text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">拉克（盟友）</h4>
+                                    <p class="text-sm text-gray-400">理念相同的朋友，共同追求多元和谐</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-dna text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">薇拉（盟友）</h4>
+                                    <p class="text-sm text-gray-400">精神上的知己，理解平衡的重要性</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-red-400">冲突与对立</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-ghost text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">不规则者（宿敌）</h4>
+                                    <p class="text-sm text-gray-400">秩序与混沌的根本对立，无法调和的矛盾</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-purple-500/50 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-user-ninja text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">三角叛徒（内部威胁）</h4>
+                                    <p class="text-sm text-gray-400">来自盟友内部的背叛，最危险的敌人</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="fas fa-eye-slash text-sm"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">保守派长老（阻碍）</h4>
+                                    <p class="text-sm text-gray-400">固守传统，拒绝接受变化和威胁</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 角色成长轨迹 -->
+    <section class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">角色成长轨迹</span>
+            </h2>
+            
+            <!-- 进度概览 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700 mb-8">
+                <h3 class="text-2xl font-bold mb-6 text-center">角色设定完成度</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- 主要角色 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#3B82F6" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="35.186" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">90%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-1">主要角色</h4>
+                        <p class="text-sm text-gray-400">背景故事完善中</p>
+                    </div>
+                    
+                    <!-- 关系图 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#8B5CF6" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="70.372" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">80%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-1">关系图</h4>
+                        <p class="text-sm text-gray-400">交互图已创建</p>
+                    </div>
+                    
+                    <!-- 成长轨迹 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#10B981" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="0" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">100%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-1">成长轨迹</h4>
+                        <p class="text-sm text-gray-400">已完成</p>
+                    </div>
+                    
+                    <!-- 整体进度 -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="transform -rotate-90 w-32 h-32">
+                                <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="12" fill="none"/>
+                                <circle cx="64" cy="64" r="56" stroke="#F59E0B" stroke-width="12" fill="none"
+                                        stroke-dasharray="351.86" stroke-dashoffset="105.558" stroke-linecap="round"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-2xl font-bold">70%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold mb-1">整体进度</h4>
+                        <p class="text-sm text-gray-400">持续完善中</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 时间线 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <h3 class="text-xl font-bold mb-8 text-center">角色成长时间线</h3>
+                
+                <div class="relative">
+                    <!-- 时间线主线 -->
+                    <div class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-green-500"></div>
+                    
+                    <!-- 章节节点 -->
+                    <div class="space-y-12">
+                        <!-- 第一章 -->
+                        <div class="relative flex items-center">
+                            <div class="flex-1 text-right pr-8">
+                                <h4 class="font-bold text-lg mb-2">第一章：觉醒</h4>
+                                <p class="text-sm text-gray-400">艾欧获得形素视觉能力</p>
+                                <ul class="text-sm text-gray-500 mt-2 space-y-1">
+                                    <li>• 认识到自己的特殊能力</li>
+                                    <li>• 开始怀疑世界的真相</li>
+                                    <li>• 与塞琳建立师徒关系</li>
+                                </ul>
+                            </div>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-eye text-white"></i>
+                            </div>
+                            <div class="flex-1 pl-8">
+                                <div class="text-sm text-gray-400">
+                                    <span class="block mb-1">能力成长：★★☆☆☆</span>
+                                    <span class="block">心理成长：★★☆☆☆</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第二章 -->
+                        <div class="relative flex items-center">
+                            <div class="flex-1 text-right pr-8">
+                                <div class="text-sm text-gray-400">
+                                    <span class="block mb-1">能力成长：★★★☆☆</span>
+                                    <span class="block">心理成长：★★★☆☆</span>
+                                </div>
+                            </div>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            <div class="flex-1 pl-8">
+                                <h4 class="font-bold text-lg mb-2">第二章：分裂的世界</h4>
+                                <p class="text-sm text-gray-400">接触其他种族，建立联盟</p>
+                                <ul class="text-sm text-gray-500 mt-2 space-y-1">
+                                    <li>• 说服托里克加入</li>
+                                    <li>• 争取拉克的支持</li>
+                                    <li>• 引导薇拉找到平衡</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 第三章 -->
+                        <div class="relative flex items-center">
+                            <div class="flex-1 text-right pr-8">
+                                <h4 class="font-bold text-lg mb-2">第三章：真相</h4>
+                                <p class="text-sm text-gray-400">了解混沌威胁，准备战斗</p>
+                                <ul class="text-sm text-gray-500 mt-2 space-y-1">
+                                    <li>• 掌握形素操控</li>
+                                    <li>• 成为联盟领袖</li>
+                                    <li>• 学会领导与决策</li>
+                                </ul>
+                            </div>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-brain text-white"></i>
+                            </div>
+                            <div class="flex-1 pl-8">
+                                <div class="text-sm text-gray-400">
+                                    <span class="block mb-1">能力成长：★★★★☆</span>
+                                    <span class="block">心理成长：★★★★☆</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第四章-第六章 -->
+                        <div class="relative flex items-center">
+                            <div class="flex-1 text-right pr-8">
+                                <div class="text-sm text-gray-400">
+                                    <span class="block mb-1">能力成长：★★★★★</span>
+                                    <span class="block">心理成长：★★★★★</span>
+                                </div>
+                            </div>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-star text-white"></i>
+                            </div>
+                            <div class="flex-1 pl-8">
+                                <h4 class="font-bold text-lg mb-2">第四-六章：守护与重生</h4>
+                                <p class="text-sm text-gray-400">成为世界守护者，实现终极平衡</p>
+                                <ul class="text-sm text-gray-500 mt-2 space-y-1">
+                                    <li>• 融合四大种族之力</li>
+                                    <li>• 击败混沌</li>
+                                    <li>• 建立新世界秩序</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 角色成长总结 -->
+            <div class="mt-8 space-y-6">
+                <!-- 艾欧的成长 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-blue-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">
+                        <i class="fas fa-seedling mr-2"></i>艾欧的成长之路
+                    </h3>
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-700/50 rounded-lg p-4">
+                            <div class="text-sm text-gray-400 mb-2">起始</div>
+                            <p class="font-semibold">普通学者</p>
+                            <p class="text-sm text-gray-500">缺乏自信，被动接受</p>
+                            <div class="mt-2 space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span>力量</span>
+                                    <span>★☆☆☆☆</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>智慧</span>
+                                    <span>★★★☆☆</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>领导力</span>
+                                    <span>★☆☆☆☆</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-4">
+                            <div class="text-sm text-gray-400 mb-2">发展中</div>
+                            <p class="font-semibold">能力觉醒</p>
+                            <p class="text-sm text-gray-500">学会担当，主动行动</p>
+                            <div class="mt-2 space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span>力量</span>
+                                    <span>★★★☆☆</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>智慧</span>
+                                    <span>★★★★☆</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>领导力</span>
+                                    <span>★★★☆☆</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-700/50 rounded-lg p-4">
+                            <div class="text-sm text-gray-400 mb-2">最终</div>
+                            <p class="font-semibold">世界守护者</p>
+                            <p class="text-sm text-gray-500">平衡化身，引领未来</p>
+                            <div class="mt-2 space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span>力量</span>
+                                    <span>★★★★★</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>智慧</span>
+                                    <span>★★★★★</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span>领导力</span>
+                                    <span>★★★★★</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他角色的成长 -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-purple-500/30 text-center">
+                        <h4 class="font-bold mb-2 text-purple-400">托里克</h4>
+                        <p class="text-sm text-gray-400 mb-2">从傲慢到谦逊</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <p>• 学会尊重其他种族</p>
+                            <p>• 理解力量不是一切</p>
+                            <p>• 成为可靠的盟友</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-cyan-500/30 text-center">
+                        <h4 class="font-bold mb-2 text-cyan-400">拉克</h4>
+                        <p class="text-sm text-gray-400 mb-2">从僵化到灵活</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <p>• 打破思维定式</p>
+                            <p>• 接受多样性</p>
+                            <p>• 创新解决方案</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-green-500/30 text-center">
+                        <h4 class="font-bold mb-2 text-green-400">薇拉</h4>
+                        <p class="text-sm text-gray-400 mb-2">从激进到平衡</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <p>• 找到进化的真谛</p>
+                            <p>• 平衡变化与稳定</p>
+                            <p>• 成为智者</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="../game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 角色卡片悬停效果
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 关系图节点交互
+        document.querySelectorAll('.character-node').forEach(node => {
+            node.addEventListener('mouseenter', function() {
+                const name = this.getAttribute('data-name');
+                // 高亮相关连接线
+                document.querySelectorAll('#connections line').forEach(line => {
+                    line.style.opacity = '0.2';
+                });
+                
+                // 根据节点位置找到相关连接
+                const cx = this.querySelector('circle').getAttribute('cx');
+                const cy = this.querySelector('circle').getAttribute('cy');
+                
+                document.querySelectorAll('#connections line').forEach(line => {
+                    const x1 = line.getAttribute('x1');
+                    const y1 = line.getAttribute('y1');
+                    const x2 = line.getAttribute('x2');
+                    const y2 = line.getAttribute('y2');
+                    
+                    if ((x1 == cx && y1 == cy) || (x2 == cx && y2 == cy)) {
+                        line.style.opacity = '1';
+                        line.style.strokeWidth = '4';
+                    }
+                });
+                
+                // 放大当前节点
+                this.querySelector('circle').style.transform = 'scale(1.2)';
+                this.querySelector('circle').style.transformOrigin = 'center';
+                this.querySelector('circle').style.transition = 'transform 0.3s ease';
+            });
+            
+            node.addEventListener('mouseleave', function() {
+                // 恢复所有连接线
+                document.querySelectorAll('#connections line').forEach(line => {
+                    line.style.opacity = line.getAttribute('opacity') || '0.6';
+                    line.style.strokeWidth = line.getAttribute('stroke-width') || '2';
+                });
+                
+                // 恢复节点大小
+                this.querySelector('circle').style.transform = 'scale(1)';
+            });
+            
+            node.addEventListener('click', function() {
+                const name = this.getAttribute('data-name');
+                // 滚动到对应的角色详情
+                const characterCard = document.querySelector(`[data-character="${name}"]`);
+                if (characterCard) {
+                    characterCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    characterCard.style.animation = 'pulse 1s ease-in-out';
+                    setTimeout(() => {
+                        characterCard.style.animation = '';
+                    }, 1000);
+                }
+            });
+        });
+
+        // 进度环形动画
+        const progressCircles = document.querySelectorAll('svg circle[stroke-dasharray]');
+        const progressObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const circle = entry.target;
+                    const offset = circle.getAttribute('stroke-dashoffset');
+                    circle.style.strokeDashoffset = offset;
+                    circle.style.transition = 'stroke-dashoffset 1.5s ease-out';
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        progressCircles.forEach(circle => {
+            progressObserver.observe(circle);
+        });
+
+        // 时间线动画
+        const timelineNodes = document.querySelectorAll('.space-y-12 > div');
+        const timelineObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateY(20px)';
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                        
+                        requestAnimationFrame(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        });
+                    }, index * 100);
+                    timelineObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        timelineNodes.forEach(node => {
+            timelineObserver.observe(node);
+        });
+    </script>
+</body>
+</html>

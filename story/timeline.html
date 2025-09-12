@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界观时间线 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .timeline-line {
+            background: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .era-card {
+            transition: all 0.3s ease;
+        }
+        
+        .era-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .event-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .event-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .event-item::after {
+            content: '';
+            position: absolute;
+            left: 0.375rem;
+            top: 1.25rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background: currentColor;
+            opacity: 0.3;
+        }
+        
+        .event-item:last-child::after {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-clock text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">世界观时间线</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#ancient" class="hover:text-blue-400 transition">远古时代</a>
+                    <a href="#golden" class="hover:text-blue-400 transition">黄金时代</a>
+                    <a href="#division" class="hover:text-blue-400 transition">分裂时期</a>
+                    <a href="#current" class="hover:text-blue-400 transition">现代</a>
+                    <a href="#future" class="hover:text-blue-400 transition">未来展望</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-green-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">世界的时间长河</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">从创世到未来，见证几何境域的兴衰变迁</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                每一个时代都留下了自己的印记，每一次事件都塑造了今天的世界。
+                了解历史，才能理解现在，预见未来。
+            </p>
+        </div>
+    </header>
+
+    <!-- 时间轴概览 -->
+    <section class="relative py-12 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <div class="relative">
+                <!-- 主时间线 -->
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 timeline-line transform -translate-x-1/2"></div>
+                
+                <!-- 时间节点 -->
+                <div class="space-y-12">
+                    <div class="flex items-center">
+                        <div class="w-1/2 text-right pr-8">
+                            <h3 class="text-xl font-bold text-blue-400">远古时代</h3>
+                            <p class="text-gray-400">创世之初</p>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-6 h-6 bg-blue-500 rounded-full border-4 border-gray-900"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <p class="text-sm text-gray-500">-10000 ~ -5000 年</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 text-right pr-8">
+                            <p class="text-sm text-gray-500">-5000 ~ -1000 年</p>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-6 h-6 bg-purple-500 rounded-full border-4 border-gray-900"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <h3 class="text-xl font-bold text-purple-400">黄金时代</h3>
+                            <p class="text-gray-400">四大种族的繁荣</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 text-right pr-8">
+                            <h3 class="text-xl font-bold text-yellow-400">分裂时期</h3>
+                            <p class="text-gray-400">联盟的瓦解</p>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-6 h-6 bg-yellow-500 rounded-full border-4 border-gray-900"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <p class="text-sm text-gray-500">-1000 ~ 0 年</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 text-right pr-8">
+                            <p class="text-sm text-gray-500">0 ~ 现在</p>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-6 h-6 bg-green-500 rounded-full border-4 border-gray-900 pulse-animation"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <h3 class="text-xl font-bold text-green-400">现代</h3>
+                            <p class="text-gray-400">混沌的威胁</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center opacity-60">
+                        <div class="w-1/2 text-right pr-8">
+                            <h3 class="text-xl font-bold text-cyan-400">未来</h3>
+                            <p class="text-gray-400">新的纪元</p>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-6 h-6 bg-cyan-500 rounded-full border-4 border-gray-900"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <p class="text-sm text-gray-500">待书写...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 远古时代 -->
+    <section id="ancient" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">远古时代</span>
+                <span class="text-2xl text-gray-400 ml-4">(-10000 ~ -5000 年)</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="era-card bg-gray-800/50 rounded-2xl p-8 border border-blue-500/30">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-400">
+                        <i class="fas fa-star mr-3"></i>世界的诞生
+                    </h3>
+                    <div class="space-y-4 text-blue-300">
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">大分离</h4>
+                            <p class="text-sm text-gray-300">混沌与秩序分离，形成最初的几何法则</p>
+                        </div>
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">源初形核的诞生</h4>
+                            <p class="text-sm text-gray-300">四个源初形核出现，奠定世界的基础</p>
+                        </div>
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">第一缕形素</h4>
+                            <p class="text-sm text-gray-300">形素能量开始在世界流动</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="era-card bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+                    <h3 class="text-2xl font-bold mb-6 text-purple-400">
+                        <i class="fas fa-users mr-3"></i>初代种族
+                    </h3>
+                    <div class="space-y-4 text-purple-300">
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">圆环族的觉醒</h4>
+                            <p class="text-sm text-gray-300">最早的智慧种族，领悟和谐之道</p>
+                        </div>
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">三角议会的建立</h4>
+                            <p class="text-sm text-gray-300">崇尚力量与效率的种族崛起</p>
+                        </div>
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">方碑盟约的形成</h4>
+                            <p class="text-sm text-gray-300">追求秩序与稳定的种族聚集</p>
+                        </div>
+                        <div class="event-item">
+                            <h4 class="font-semibold mb-1">螺旋之子的诞生</h4>
+                            <p class="text-sm text-gray-300">适应变化、不断进化的种族出现</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gray-800/30 rounded-xl p-8 border border-gray-700">
+                <h3 class="text-xl font-bold mb-4 text-center">
+                    <i class="fas fa-scroll mr-2"></i>远古传说
+                </h3>
+                <p class="text-gray-400 text-center max-w-3xl mx-auto">
+                    传说在远古时代，四大种族曾经统一在一个伟大的联盟之下。他们共同守护着世界，
+                    抵抗来自混沌维度的第一次入侵。这次胜利奠定了世界的基础，但也埋下了分裂的种子。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 黄金时代 -->
+    <section id="golden" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">黄金时代</span>
+                <span class="text-2xl text-gray-400 ml-4">(-5000 ~ -1000 年)</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="era-card bg-gray-800/50 rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-purple-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-landmark text-2xl text-purple-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold">文明的繁荣</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>• 中央圆环的建立</li>
+                        <li>• 顶点要塞的崛起</li>
+                        <li>• 矩阵城邦的规划</li>
+                        <li>• 生命之巢的扩张</li>
+                    </ul>
+                </div>
+                
+                <div class="era-card bg-gray-800/50 rounded-xl p-6 border border-green-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-green-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-brain text-2xl text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold">知识的巅峰</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>• 形素理论的完善</li>
+                        <li>• 几何法则的发现</li>
+                        <li>• 跨种族学术交流</li>
+                        <li>• 艺术与科学的繁荣</li>
+                    </ul>
+                </div>
+                
+                <div class="era-card bg-gray-800/50 rounded-xl p-6 border border-yellow-500/30">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-yellow-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-handshake text-2xl text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold">和平的联盟</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>• 几何守护者的创立</li>
+                        <li>• 贸易路线的建立</li>
+                        <li>• 文化融合的开始</li>
+                        <li>• 共同防御体系</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded-xl p-8 border border-purple-500/30">
+                <h3 class="text-xl font-bold mb-4">
+                    <i class="fas fa-crown mr-2 text-purple-400"></i>黄金时代的遗产
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2 text-purple-300">建筑奇迹</h4>
+                        <p class="text-sm text-gray-300">
+                            这个时代留下了许多宏伟的建筑，每一座都是几何美学的巅峰之作。
+                            即使在今天，这些建筑依然让人叹为观止。
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2 text-blue-300">知识传承</h4>
+                        <p class="text-sm text-gray-300">
+                            黄金时代的知识被记录在水晶典籍中，成为后世重要的精神财富。
+                            许多失传的技术至今仍在研究中。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 分裂时期 -->
+    <section id="division" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">分裂时期</span>
+                <span class="text-2xl text-gray-400 ml-4">(-1000 ~ 0 年)</span>
+            </h2>
+            
+            <div class="relative">
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-yellow-600 to-red-600 transform -translate-x-1/2 opacity-30"></div>
+                
+                <div class="space-y-8">
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <div class="bg-gray-800/50 rounded-lg p-4 border border-yellow-500/30">
+                                <h4 class="font-bold mb-1 text-yellow-400">理念之争</h4>
+                                <p class="text-sm text-gray-300">-950 年</p>
+                                <p class="text-sm text-gray-400 mt-2">四大种族对世界本质的理解产生分歧</p>
+                            </div>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                        </div>
+                        <div class="w-1/2 pl-8"></div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8"></div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-4 h-4 bg-orange-500 rounded-full"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <div class="bg-gray-800/50 rounded-lg p-4 border border-orange-500/30">
+                                <h4 class="font-bold mb-1 text-orange-400">第一次边界冲突</h4>
+                                <p class="text-sm text-gray-300">-720 年</p>
+                                <p class="text-sm text-gray-400 mt-2">三角议会与方碑盟约因领土问题爆发冲突</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <div class="bg-gray-800/50 rounded-lg p-4 border border-red-500/30">
+                                <h4 class="font-bold mb-1 text-red-400">联盟解体</h4>
+                                <p class="text-sm text-gray-300">-500 年</p>
+                                <p class="text-sm text-gray-400 mt-2">几何守护者联盟正式解散，四大种族各自为政</p>
+                            </div>
+                        </div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-4 h-4 bg-red-500 rounded-full"></div>
+                        </div>
+                        <div class="w-1/2 pl-8"></div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-1/2 pr-8"></div>
+                        <div class="w-0 flex-shrink-0">
+                            <div class="w-4 h-4 bg-gray-500 rounded-full"></div>
+                        </div>
+                        <div class="w-1/2 pl-8">
+                            <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-500/30">
+                                <h4 class="font-bold mb-1 text-gray-400">黑暗时代</h4>
+                                <p class="text-sm text-gray-300">-200 ~ 0 年</p>
+                                <p class="text-sm text-gray-400 mt-2">交流断绝，偏见加深，混沌开始悄然渗透</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 现代 -->
+    <section id="current" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">现代</span>
+                <span class="text-2xl text-gray-400 ml-4">(0 年 ~ 现在)</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 故事开始前 -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-green-400">
+                        <i class="fas fa-hourglass-start mr-2"></i>故事背景
+                    </h3>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-600">
+                        <div class="event-item text-gray-400">
+                            <h4 class="font-semibold text-gray-300 mb-1">0 年：现代纪元开始</h4>
+                            <p class="text-sm">四大种族各自发展，相互隔绝</p>
+                        </div>
+                        <div class="event-item text-gray-400">
+                            <h4 class="font-semibold text-gray-300 mb-1">100 年：形素波动异常</h4>
+                            <p class="text-sm">世界各地的形素开始出现不稳定现象</p>
+                        </div>
+                        <div class="event-item text-gray-400">
+                            <h4 class="font-semibold text-gray-300 mb-1">200 年：预言出现</h4>
+                            <p class="text-sm">各族的预言者同时看到混沌归来的景象</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 故事时间线 -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-blue-400">
+                        <i class="fas fa-book-open mr-2"></i>故事进程
+                    </h3>
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-blue-500/30">
+                        <div class="event-item text-blue-300">
+                            <h4 class="font-semibold text-white mb-1">现在：第一章 - 觉醒</h4>
+                            <p class="text-sm text-gray-300">艾欧获得看见形素的能力，发现混沌入侵</p>
+                        </div>
+                        <div class="event-item text-blue-300 opacity-60">
+                            <h4 class="font-semibold text-white mb-1">即将到来：第二章 - 分裂的世界</h4>
+                            <p class="text-sm text-gray-300">艾欧的旅程，发现四大种族的分裂</p>
+                        </div>
+                        <div class="event-item text-blue-300 opacity-40">
+                            <h4 class="font-semibold text-white mb-1">未来：第三章 - 真相</h4>
+                            <p class="text-sm text-gray-300">发现源初形核，了解混沌的真相</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 当前局势 -->
+            <div class="mt-12 bg-gradient-to-r from-red-900/20 to-purple-900/20 rounded-xl p-8 border border-red-500/30">
+                <h3 class="text-xl font-bold mb-6 text-center">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>当前局势
+                </h3>
+                <div class="grid md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-circle text-blue-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1">圆环族</h4>
+                        <p class="text-xs text-gray-400">内部保守，危机四伏</p>
+                    </div>
+                    <div>
+                        <div class="w-12 h-12 bg-purple-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-play text-purple-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1">三角议会</h4>
+                        <p class="text-xs text-gray-400">派系争斗，内忧外患</p>
+                    </div>
+                    <div>
+                        <div class="w-12 h-12 bg-cyan-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-square text-cyan-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1">方碑盟约</h4>
+                        <p class="text-xs text-gray-400">僵化守旧，拒绝改变</p>
+                    </div>
+                    <div>
+                        <div class="w-12 h-12 bg-green-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-spinner text-green-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-1">螺旋之子</h4>
+                        <p class="text-xs text-gray-400">激进进化，制造混乱</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 未来展望 -->
+    <section id="future" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">未来展望</span>
+            </h2>
+            
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-cyan-500/30">
+                <div class="text-center mb-8">
+                    <i class="fas fa-route text-6xl text-cyan-400 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">可能的未来</h3>
+                    <p class="text-gray-400">世界的命运尚未确定，每一步选择都将影响最终的结果</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-gradient-to-br from-green-900/20 to-green-800/20 rounded-lg p-6 border border-green-500/30">
+                        <h4 class="font-bold mb-3 text-green-400">
+                            <i class="fas fa-sun mr-2"></i>光明未来
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li>• 四大种族重新团结</li>
+                            <li>• 击退混沌入侵</li>
+                            <li>• 建立新的均衡时代</li>
+                            <li>• 几何文明的新繁荣</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-red-900/20 to-red-800/20 rounded-lg p-6 border border-red-500/30">
+                        <h4 class="font-bold mb-3 text-red-400">
+                            <i class="fas fa-moon mr-2"></i>黑暗未来
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li>• 种族间的全面战争</li>
+                            <li>• 混沌吞噬整个世界</li>
+                            <li>• 几何法则的崩溃</li>
+                            <li>• 文明的毁灭</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-400 italic">
+                        "未来不是固定的，它就像一条河流，每一个选择都会改变它的流向。"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="../game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 时代卡片动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.era-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease-out';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

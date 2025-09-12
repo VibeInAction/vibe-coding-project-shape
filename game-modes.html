@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏模式 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 几何动画 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes energy-flow {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -100; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-animation {
+            animation: rotate 20s linear infinite;
+        }
+        
+        .morph-animation {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        /* 几何背景 */
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        /* 渐变文字 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 模式卡片 */
+        .mode-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* 特性图标 */
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 24px;
+        }
+        
+        /* 能量流效果 */
+        .energy-flow {
+            stroke: #3B82F6;
+            stroke-width: 2;
+            stroke-dasharray: 10, 5;
+            animation: energy-flow 2s linear infinite;
+        }
+        
+        /* 形态变换效果 */
+        .shape-morph {
+            transition: all 0.5s ease;
+        }
+        
+        /* 胜利条件条 */
+        .victory-condition {
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .victory-condition::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: #10B981;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-animation"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-animation" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-gamepad text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">游戏模式</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#conquest" class="hover:text-blue-400 transition">征服模式</a>
+                    <a href="#form-battle" class="hover:text-blue-400 transition">形态争夺</a>
+                    <a href="#race-war" class="hover:text-blue-400 transition">种族战争</a>
+                    <a href="#survival" class="hover:text-blue-400 transition">生存挑战</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">游戏模式</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">多样化的游戏体验，挑战你的战略极限</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                每种模式都有独特的规则和挑战，无论是征服世界、争夺资源、
+                体验种族剧情，还是面对无尽 waves，都能找到属于你的乐趣。
+            </p>
+        </div>
+    </header>
+
+    <!-- 征服模式 -->
+    <section id="conquest" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="mode-card bg-gray-800/50 rounded-3xl p-8 md:p-12 border-2 border-blue-500/30 hover:border-blue-500/60">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="flex items-center mb-6">
+                            <div class="feature-icon bg-blue-500/20 text-blue-400 mr-4">
+                                <i class="fas fa-chess"></i>
+                            </div>
+                            <h2 class="text-4xl font-bold">征服模式</h2>
+                        </div>
+                        
+                        <p class="text-xl text-gray-300 mb-6">
+                            经典的 RTS 体验，通过策略和实力征服整个战场
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">胜利条件</h4>
+                                <p class="text-gray-400">摧毁所有敌方基地或控制源初形核</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">推荐玩家</h4>
+                                <p class="text-gray-400">1-8人，支持自由对战或团队对战</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">地图大小</h4>
+                                <p class="text-gray-400">小型、中型、大型、巨型地图可选</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-500/10 rounded-xl p-6">
+                            <h4 class="font-semibold mb-3 text-blue-400">模式特色</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">完整的经济系统，需要管理形魄能量和纯净形魄</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">完整的科技树系统，可研发多种科技和技能</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">英雄系统，每个种族可招募独特英雄</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">动态形态场，地形会影响战斗效果</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <!-- 征服模式视觉展示 -->
+                        <div class="bg-gray-700/50 rounded-2xl p-8 h-96 flex items-center justify-center">
+                            <svg class="w-full h-full">
+                                <!-- 地图网格 -->
+                                <defs>
+                                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#374151" stroke-width="1"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#grid)" />
+                                
+                                <!-- 基地 -->
+                                <g id="bases">
+                                    <!-- 玩家基地 -->
+                                    <circle cx="100" cy="100" r="30" fill="#3B82F6" opacity="0.8"/>
+                                    <text x="100" y="105" text-anchor="middle" fill="white" font-size="12">玩家</text>
+                                    
+                                    <!-- 敌方基地 -->
+                                    <circle cx="300" cy="80" r="25" fill="#EF4444" opacity="0.8"/>
+                                    <text x="300" y="85" text-anchor="middle" fill="white" font-size="10">敌方1</text>
+                                    
+                                    <circle cx="250" cy="200" r="25" fill="#EF4444" opacity="0.8"/>
+                                    <text x="250" y="205" text-anchor="middle" fill="white" font-size="10">敌方2</text>
+                                    
+                                    <circle cx="120" cy="250" r="25" fill="#EF4444" opacity="0.8"/>
+                                    <text x="120" y="255" text-anchor="middle" fill="white" font-size="10">敌方3</text>
+                                </g>
+                                
+                                <!-- 源初形核 -->
+                                <g id="source-core" transform="translate(200, 150)">
+                                    <circle r="20" fill="#F59E0B" class="pulse-animation"/>
+                                    <circle r="15" fill="#FBBF24"/>
+                                    <text y="5" text-anchor="middle" fill="#7C2D12" font-size="10" font-weight="bold">源核</text>
+                                </g>
+                                
+                                <!-- 单位移动路径 -->
+                                <path d="M 100,100 Q 150,125 200,150" fill="none" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5">
+                                    <animate attributeName="stroke-dashoffset" values="0;10" dur="1s" repeatCount="indefinite"/>
+                                </path>
+                            </svg>
+                        </div>
+                        
+                        <!-- 难度选择 -->
+                        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-full px-6 py-2 border border-gray-600">
+                            <span class="text-sm text-gray-400">难度：</span>
+                            <span class="text-green-400">简单</span>
+                            <span class="text-yellow-400 mx-2">中等</span>
+                            <span class="text-red-400">困难</span>
+                            <span class="text-purple-400 ml-2">专家</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 形态争夺 -->
+    <section id="form-battle" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <div class="mode-card bg-gray-800/50 rounded-3xl p-8 md:p-12 border-2 border-purple-500/30 hover:border-purple-500/60">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1">
+                        <!-- 形态争夺视觉展示 -->
+                        <div class="bg-gray-700/50 rounded-2xl p-8 h-96 flex items-center justify-center">
+                            <div class="relative w-full h-full">
+                                <!-- 形态节点 -->
+                                <div class="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
+                                    <div class="w-20 h-20 bg-purple-500/30 border-4 border-purple-500 rounded-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold">A</span>
+                                    </div>
+                                    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">+20%攻击</div>
+                                </div>
+                                
+                                <div class="absolute top-1/4 right-1/4 transform translate-x-1/2 -translate-y-1/2">
+                                    <div class="w-20 h-20 bg-cyan-500/30 border-4 border-cyan-500 rounded-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold">B</span>
+                                    </div>
+                                    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">+20%防御</div>
+                                </div>
+                                
+                                <div class="absolute bottom-1/4 left-1/4 transform -translate-x-1/2 translate-y-1/2">
+                                    <div class="w-20 h-20 bg-green-500/30 border-4 border-green-500 rounded-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold">C</span>
+                                    </div>
+                                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">+20%速度</div>
+                                </div>
+                                
+                                <div class="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2">
+                                    <div class="w-20 h-20 bg-yellow-500/30 border-4 border-yellow-500 rounded-full flex items-center justify-center">
+                                        <span class="text-2xl font-bold">D</span>
+                                    </div>
+                                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">+20%资源</div>
+                                </div>
+                                
+                                <!-- 中心控制点 -->
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center pulse-animation">
+                                        <i class="fas fa-crown text-white text-2xl"></i>
+                                    </div>
+                                    <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 text-sm text-purple-400 font-semibold">控制点</div>
+                                </div>
+                                
+                                <!-- 连接线 -->
+                                <svg class="absolute inset-0 w-full h-full">
+                                    <line x1="25%" y1="25%" x2="50%" y2="50%" stroke="#8B5CF6" stroke-width="2" opacity="0.5"/>
+                                    <line x1="75%" y1="25%" x2="50%" y2="50%" stroke="#06B6D4" stroke-width="2" opacity="0.5"/>
+                                    <line x1="25%" y1="75%" x2="50%" y2="50%" stroke="#10B981" stroke-width="2" opacity="0.5"/>
+                                    <line x1="75%" y1="75%" x2="50%" y2="50%" stroke="#F59E0B" stroke-width="2" opacity="0.5"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-1 md:order-2">
+                        <div class="flex items-center mb-6">
+                            <div class="feature-icon bg-purple-500/20 text-purple-400 mr-4">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <h2 class="text-4xl font-bold">形态争夺</h2>
+                        </div>
+                        
+                        <p class="text-xl text-gray-300 mb-6">
+                            控制关键形态节点，获得战场优势，击败对手
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">胜利条件</h4>
+                                <p class="text-gray-400">控制中心节点或积累足够积分</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">推荐玩家</h4>
+                                <p class="text-gray-400">2-6人，快节奏对战</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">游戏时长</h4>
+                                <p class="text-gray-400">15-30分钟，节奏紧凑</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-500/10 rounded-xl p-6">
+                            <h4 class="font-semibold mb-3 text-purple-400">节点效果</h4>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-purple-500 rounded-full mr-2"></div>
+                                    <span class="text-gray-300">攻击节点：+20%攻击力</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-cyan-500 rounded-full mr-2"></div>
+                                    <span class="text-gray-300">防御节点：+20%防御力</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                                    <span class="text-gray-300">速度节点：+20%移动速度</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
+                                    <span class="text-gray-300">资源节点：+20%资源获取</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 种族战争 -->
+    <section id="race-war" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="mode-card bg-gray-800/50 rounded-3xl p-8 md:p-12 border-2 border-cyan-500/30 hover:border-cyan-500/60">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="flex items-center mb-6">
+                            <div class="feature-icon bg-cyan-500/20 text-cyan-400 mr-4">
+                                <i class="fas fa-flag"></i>
+                            </div>
+                            <h2 class="text-4xl font-bold">种族战争</h2>
+                        </div>
+                        
+                        <p class="text-xl text-gray-300 mb-6">
+                            体验每个种族独特的故事线，深入了解世界观
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">游戏类型</h4>
+                                <p class="text-gray-400">单人战役模式，每个种族独立剧情</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">章节数量</h4>
+                                <p class="text-gray-400">每个种族5个章节，总计20个关卡</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">特色系统</h4>
+                                <p class="text-gray-400">剧情选择影响故事走向</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 种族选择 -->
+                        <div class="bg-cyan-500/10 rounded-xl p-6">
+                            <h4 class="font-semibold mb-4 text-cyan-400">选择你的种族</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-700/50 rounded-lg p-4 border border-blue-500/30 cursor-pointer hover:border-blue-500 transition">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-500 rounded-full"></div>
+                                        <div>
+                                            <h5 class="font-semibold">圆环族</h5>
+                                            <p class="text-xs text-gray-400">和谐与循环</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 border border-purple-500/30 cursor-pointer hover:border-purple-500 transition">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[35px] border-b-purple-500"></div>
+                                        <div>
+                                            <h5 class="font-semibold">三角议会</h5>
+                                            <p class="text-xs text-gray-400">力量与效率</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 border border-cyan-500/30 cursor-pointer hover:border-cyan-500 transition">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-cyan-500 transform rotate-45"></div>
+                                        <div>
+                                            <h5 class="font-semibold">方碑盟约</h5>
+                                            <p class="text-xs text-gray-400">秩序与规则</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-700/50 rounded-lg p-4 border border-green-500/30 cursor-pointer hover:border-green-500 transition">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-green-500" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%)"></div>
+                                        <div>
+                                            <h5 class="font-semibold">螺旋之子</h5>
+                                            <p class="text-xs text-gray-400">变化与成长</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <!-- 种族战争视觉展示 -->
+                        <div class="bg-gray-700/50 rounded-2xl p-8 h-96 flex items-center justify-center">
+                            <div class="relative w-full h-full">
+                                <!-- 剧情选择界面 -->
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full">
+                                        <h3 class="text-xl font-bold mb-4 text-center">圆环族：第一章</h3>
+                                        <p class="text-gray-400 text-sm mb-4">中央圆环发生了异变，作为形态维护师的你需要调查真相...</p>
+                                        
+                                        <div class="space-y-3 mb-4">
+                                            <div class="bg-blue-500/20 rounded-lg p-3 cursor-pointer hover:bg-blue-500/30 transition">
+                                                <p class="text-sm font-semibold">A. 立即前往现场</p>
+                                                <p class="text-xs text-gray-400">直接面对危险，可能发现真相</p>
+                                            </div>
+                                            <div class="bg-blue-500/20 rounded-lg p-3 cursor-pointer hover:bg-blue-500/30 transition">
+                                                <p class="text-sm font-semibold">B. 先向长老报告</p>
+                                                <p class="text-xs text-gray-400">寻求支援，但可能错过时机</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <div class="inline-flex items-center px-4 py-2 bg-blue-500 rounded-lg text-sm font-semibold cursor-pointer hover:bg-blue-600 transition">
+                                                <span>确认选择</span>
+                                                <i class="fas fa-arrow-right ml-2"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 剧情进度条 -->
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-gray-700 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1 text-center">剧情进度：1/5 章节</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 生存挑战 -->
+    <section id="survival" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <div class="mode-card bg-gray-800/50 rounded-3xl p-8 md:p-12 border-2 border-green-500/30 hover:border-green-500/60">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1">
+                        <!-- 生存挑战视觉展示 -->
+                        <div class="bg-gray-700/50 rounded-2xl p-8 h-96 flex items-center justify-center">
+                            <div class="relative w-full h-full">
+                                <!-- 防守基地 -->
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <div class="w-32 h-32 bg-green-500/20 border-4 border-green-500 rounded-lg">
+                                        <div class="absolute inset-2 bg-green-500/10 rounded border-2 border-green-400">
+                                            <div class="absolute inset-2 bg-green-500/5 rounded">
+                                                <div class="h-full flex items-center justify-center">
+                                                    <i class="fas fa-home text-green-400 text-3xl"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 防御塔 -->
+                                <div class="absolute top-1/4 left-1/4">
+                                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-tower-observation text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute top-1/4 right-1/4">
+                                    <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-burst text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-1/4 left-1/4">
+                                    <div class="w-12 h-12 bg-cyan-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-satellite-dish text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-1/4 right-1/4">
+                                    <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-shield-alt text-white"></i>
+                                    </div>
+                                </div>
+                                
+                                <!-- 敌人Wave指示器 -->
+                                <div class="absolute top-4 left-1/2 transform -translate-x-1/2">
+                                    <div class="bg-red-500 rounded-full px-4 py-2 flex items-center">
+                                        <i class="fas fa-skull text-white mr-2"></i>
+                                        <span class="text-white font-bold">Wave 15</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 资源显示 -->
+                                <div class="absolute bottom-4 left-4">
+                                    <div class="bg-gray-800 rounded-lg px-3 py-2">
+                                        <p class="text-sm"><i class="fas fa-bolt text-yellow-400 mr-1"></i> 2500</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-1 md:order-2">
+                        <div class="flex items-center mb-6">
+                            <div class="feature-icon bg-green-500/20 text-green-400 mr-4">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h2 class="text-4xl font-bold">生存挑战</h2>
+                        </div>
+                        
+                        <p class="text-xl text-gray-300 mb-6">
+                            抵御无尽的混沌入侵，考验你的防守极限
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">游戏目标</h4>
+                                <p class="text-gray-400">尽可能长时间生存，击败更多Wave</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">难度递增</h4>
+                                <p class="text-gray-400">每5波敌人强度大幅提升</p>
+                            </div>
+                            
+                            <div class="victory-condition">
+                                <h4 class="font-semibold mb-1">特殊机制</h4>
+                                <p class="text-gray-400">Boss敌人每10波出现一次</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-500/10 rounded-xl p-6">
+                            <h4 class="font-semibold mb-3 text-green-400">生存要素</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">资源管理系统，合理分配升级和建造</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">防御塔升级，解锁更强能力</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">英雄技能，关键时刻扭转战局</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                    <span class="text-gray-300">成就系统，解锁特殊奖励</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 模式对比 -->
+    <section class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">模式对比</span>
+            </h2>
+            
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-4 px-4">特性</th>
+                                <th class="text-center py-4 px-4">征服模式</th>
+                                <th class="text-center py-4 px-4">形态争夺</th>
+                                <th class="text-center py-4 px-4">种族战争</th>
+                                <th class="text-center py-4 px-4">生存挑战</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-4 px-4">游戏时长</td>
+                                <td class="text-center py-4 px-4">30-60分钟</td>
+                                <td class="text-center py-4 px-4">15-30分钟</td>
+                                <td class="text-center py-4 px-4">5-10小时</td>
+                                <td class="text-center py-4 px-4">无限制</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-4 px-4">适合玩家</td>
+                                <td class="text-center py-4 px-4">策略爱好者</td>
+                                <td class="text-center py-4 px-4">快节奏玩家</td>
+                                <td class="text-center py-4 px-4">剧情爱好者</td>
+                                <td class="text-center py-4 px-4">挑战玩家</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-4 px-4">核心玩法</td>
+                                <td class="text-center py-4 px-4">资源管理与扩张</td>
+                                <td class="text-center py-4 px-4">据点控制</td>
+                                <td class="text-center py-4 px-4">剧情体验</td>
+                                <td class="text-center py-4 px-4">塔防生存</td>
+                            </tr>
+                            <tr class="border-b border-gray-700">
+                                <td class="py-4 px-4">重玩价值</td>
+                                <td class="text-center py-4 px-4">★★★★☆</td>
+                                <td class="text-center py-4 px-4">★★★★★</td>
+                                <td class="text-center py-4 px-4">★★★☆☆</td>
+                                <td class="text-center py-4 px-4">★★★★★</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-4">推荐指数</td>
+                                <td class="text-center py-4 px-4">
+                                    <span class="text-green-400">★★★★★</span>
+                                </td>
+                                <td class="text-center py-4 px-4">
+                                    <span class="text-blue-400">★★★★☆</span>
+                                </td>
+                                <td class="text-center py-4 px-4">
+                                    <span class="text-purple-400">★★★★★</span>
+                                </td>
+                                <td class="text-center py-4 px-4">
+                                    <span class="text-yellow-400">★★★★☆</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="story/index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="story/characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="story/world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="story/media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="story/timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 卡片悬停效果
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

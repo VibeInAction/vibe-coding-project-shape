@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何境域：形态之战 - RTS游戏介绍</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .rotate-animation {
+            animation: rotate 20s linear infinite;
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .geometry-glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5),
+                        0 0 40px rgba(59, 130, 246, 0.3),
+                        0 0 60px rgba(59, 130, 246, 0.1);
+        }
+        
+        .tech-node {
+            transition: all 0.3s ease;
+        }
+        
+        .tech-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .tech-line {
+            stroke: #4b5563;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .tech-line.active {
+            stroke: #3b82f6;
+            stroke-width: 3;
+        }
+        
+        .hero-card {
+            transition: all 0.3s ease;
+        }
+        
+        .hero-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .unit-card {
+            transition: all 0.3s ease;
+        }
+        
+        .unit-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .faction-tab {
+            transition: all 0.3s ease;
+        }
+        
+        .faction-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .skill-bar {
+            transition: width 0.5s ease;
+        }
+        
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-item:hover::before {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-gray-800/90 backdrop-blur-md z-50 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center rotate-animation">
+                        <i class="fas fa-shapes text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        几何境域：形态之战
+                    </span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="nav-item px-3 py-2 hover:text-blue-400 transition">游戏概览</a>
+                    <a href="world-lore.html" class="nav-item px-3 py-2 hover:text-blue-400 transition">世界观</a>
+                    <a href="story/index.html" class="nav-item px-3 py-2 hover:text-blue-400 transition">故事剧情</a>
+                    <a href="game/index.html" class="nav-item px-3 py-2 hover:text-green-400 transition">游戏原型</a>
+                    <a href="#factions" class="nav-item px-3 py-2 hover:text-blue-400 transition">种族介绍</a>
+                    <a href="#tech-tree" class="nav-item px-3 py-2 hover:text-blue-400 transition">科技树</a>
+                    <a href="#skills" class="nav-item px-3 py-2 hover:text-blue-400 transition">技能系统</a>
+                    <a href="#units" class="nav-item px-3 py-2 hover:text-blue-400 transition">兵种单位</a>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900"></div>
+        
+        <!-- 动态几何背景 -->
+        <div class="absolute inset-0">
+            <div class="absolute top-1/4 left-1/4 w-64 h-64 border-2 border-blue-500/20 rounded-full rotate-animation"></div>
+            <div class="absolute top-1/2 right-1/4 w-48 h-48 border-2 border-purple-500/20 transform rotate-45 float-animation"></div>
+            <div class="absolute bottom-1/4 left-1/2 w-96 h-96 border-2 border-cyan-500/20 rotate-animation" style="animation-duration: 30s;"></div>
+            <div class="absolute top-1/3 right-1/3 w-32 h-32 border border-green-500/20 transform rotate-12 float-animation"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-6xl md:text-8xl font-bold mb-6">
+                <span class="bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+                    几何境域
+                </span>
+            </h1>
+            <h2 class="text-3xl md:text-5xl font-light mb-8 text-gray-300">形态之战</h2>
+            <p class="text-xl md:text-2xl mb-12 max-w-3xl mx-auto text-gray-400">
+                在这个由形状决定命运的世界中，掌控几何之力，重塑宇宙秩序
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="game/index.html" class="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                    <i class="fas fa-gamepad mr-2"></i>体验游戏原型
+                </a>
+                <a href="story/index.html" class="px-8 py-4 border border-purple-500/50 rounded-full font-semibold hover:bg-purple-500/20 transition duration-300 inline-flex items-center justify-center">
+                    <i class="fas fa-book-open mr-2"></i>阅读故事
+                </a>
+                <a href="world-lore.html" class="px-8 py-4 border border-cyan-500/50 rounded-full font-semibold hover:bg-cyan-500/20 transition duration-300 inline-flex items-center justify-center">
+                    <i class="fas fa-globe mr-2"></i>探索世界观
+                </a>
+                <a href="game-modes.html" class="px-8 py-4 border border-purple-500/50 rounded-full font-semibold hover:bg-purple-500/20 transition duration-300 inline-flex items-center justify-center">
+                    <i class="fas fa-trophy mr-2"></i>游戏模式
+                </a>
+                <a href="story/media-resources.html" class="px-8 py-4 border border-pink-500/50 rounded-full font-semibold hover:bg-pink-500/20 transition duration-300 inline-flex items-center justify-center">
+                    <i class="fas fa-palette mr-2"></i>媒体资源
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 float-animation">
+            <i class="fas fa-chevron-down text-2xl text-gray-500"></i>
+        </div>
+    </header>
+
+    <!-- 游戏概览 -->
+    <section id="overview" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+                <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    游戏概览
+                </span>
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-blue-500 transition duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-atom text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">形魄能量系统</h3>
+                    <p class="text-gray-400">
+                        形魄能量是世界的基础资源，通过建造几何采集器从形态场中提取。
+                        纯净形魄用于高级科技，几何共鸣增强相邻建筑的效能。
+                    </p>
+                </div>
+                
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-project-diagram text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">几何组合系统</h3>
+                    <p class="text-gray-400">
+                        不同几何单位可以组合成新的战术阵型，特定组合触发协同效果。
+                        阵型可升级解锁新的组合方式，创造无限战术可能。
+                    </p>
+                </div>
+                
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-cyan-500 transition duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-wind text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">形态场影响</h3>
+                    <p class="text-gray-400">
+                        地图上的形态场强度影响单位移动和技能效果。
+                        玩家可以通过建造改变局部形态场，掌握战场主动权。
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 世界观、故事与游戏卡片 -->
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <a href="game/index.html" class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-green-500 transition duration-300 block">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-gamepad text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold mb-4">游戏原型 Demo</h3>
+                            <p class="text-gray-400 mb-4">
+                                体验几何境域的RTS游戏原型！选择四大种族之一，
+                                建造基地，训练单位，收集形魄能量，指挥你的军队走向胜利。
+                            </p>
+                            <div class="inline-flex items-center text-green-400 hover:text-green-300 transition">
+                                <span>体验原型</span>
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                这是一个简单的演示版本
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="world-lore.html" class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-purple-500 transition duration-300 block">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-globe text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold mb-4">探索世界观</h3>
+                            <p class="text-gray-400 mb-4">
+                                深入了解几何境域的世界设定，包括世界起源、形素体系、
+                                四大种族的历史与文化，以及混沌威胁背后的真相。
+                            </p>
+                            <div class="inline-flex items-center text-purple-400 hover:text-purple-300 transition">
+                                <span>查看详情</span>
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="story/index.html" class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 hover:border-cyan-500 transition duration-300 block">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-book-open text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold mb-4">阅读故事剧情</h3>
+                            <p class="text-gray-400 mb-4">
+                                跟随艾欧的冒险旅程，见证他从普通圆环族学者成长为几何守护者的传奇故事，
+                                体验友情、背叛与救赎的宏大叙事。
+                            </p>
+                            <div class="inline-flex items-center text-cyan-400 hover:text-cyan-300 transition">
+                                <span>开始阅读</span>
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 md:p-12 border border-gray-700">
+                <h3 class="text-3xl font-bold mb-6 text-center">核心游戏机制</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-3 text-blue-400">战略深度</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>四个独特种族，各有鲜明特色</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>动态地形影响战术选择</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>科技树分支多样，发展路线灵活</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>英雄技能改变战局走向</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold mb-3 text-purple-400">视觉创新</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>几何美学贯穿始终</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>流畅的形态变换动画</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>粒子效果呈现能量流动</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>独特的UI设计融入几何元素</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 种族介绍 -->
+    <section id="factions" class="py-20 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+                <span class="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    四大种族
+                </span>
+            </h2>
+            
+            <!-- 种族标签页 -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button class="faction-tab active px-6 py-3 rounded-full font-semibold" data-faction="circle">
+                    <i class="fas fa-circle mr-2"></i>圆环族
+                </button>
+                <button class="faction-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-faction="triangle">
+                    <i class="fas fa-play mr-2"></i>三角议会
+                </button>
+                <button class="faction-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-faction="square">
+                    <i class="fas fa-square mr-2"></i>方碑盟约
+                </button>
+                <button class="faction-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-faction="spiral">
+                    <i class="fas fa-spinner mr-2"></i>螺旋之子
+                </button>
+            </div>
+            
+            <!-- 种族内容 -->
+            <div id="faction-content" class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-gray-700">
+                <!-- 圆环族 -->
+                <div class="faction-content-item active" data-faction="circle">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full mr-4"></div>
+                                圆环族 - 和谐与循环
+                            </h3>
+                            <p class="text-xl text-gray-300 mb-6">
+                                追求和谐、循环与无限。通常是哲学家、预言家、能量大师。
+                                他们的城市多为环形放射状，建筑可旋转以优化能量流动。
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-shield-alt text-blue-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">种族特色</h4>
+                                        <p class="text-gray-400">擅长防御和恢复，拥有强大的能量操控能力</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-magic text-blue-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">特殊能力</h4>
+                                        <p class="text-gray-400">共鸣护盾、能量转移、预言术</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-chess-rook text-blue-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">核心建筑</h4>
+                                        <p class="text-gray-400">中央圆环、共鸣塔、预言圆顶</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl p-8 text-center">
+                                <div class="relative inline-block">
+                                    <div class="w-48 h-48 border-4 border-blue-400 rounded-full mx-auto relative">
+                                        <div class="absolute inset-4 border-2 border-blue-300 rounded-full rotate-animation"></div>
+                                        <div class="absolute inset-8 border border-blue-200 rounded-full rotate-animation" style="animation-direction: reverse;"></div>
+                                    </div>
+                                    <div class="absolute -inset-4 border border-blue-500/30 rounded-full pulse-ring"></div>
+                                </div>
+                                <p class="mt-6 text-gray-300">完美圆形代表和谐与永恒</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 三角议会 -->
+                <div class="faction-content-item hidden" data-faction="triangle">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                                <div class="w-0 h-0 border-l-[24px] border-l-transparent border-r-[24px] border-r-transparent border-b-[48px] border-b-purple-500 mr-4"></div>
+                                三角议会 - 力量与效率
+                            </h3>
+                            <p class="text-xl text-gray-300 mb-6">
+                                崇尚力量、效率和稳定。是杰出的战士、建筑师和工程师。
+                                他们的建筑棱角分明，结构坚固，必须连接形成三角结构。
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-sword text-purple-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">种族特色</h4>
+                                        <p class="text-gray-400">攻击力强，建造速度快，结构稳定</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-bolt text-purple-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">特殊能力</h4>
+                                        <p class="text-gray-400">三角攻击、力量聚焦、结构加固</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-chess-rook text-purple-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">核心建筑</h4>
+                                        <p class="text-gray-400">三角要塞、棱镜炮塔、战争工坊</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl p-8 text-center">
+                                <div class="relative inline-block">
+                                    <div class="w-48 h-48 relative mx-auto">
+                                        <div class="absolute inset-0 border-4 border-purple-400 transform rotate-180"></div>
+                                        <div class="absolute inset-8 border-2 border-purple-300"></div>
+                                        <div class="absolute inset-16 border border-purple-200"></div>
+                                    </div>
+                                </div>
+                                <p class="mt-6 text-gray-300">三角结构代表力量与稳定</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 方碑盟约 -->
+                <div class="faction-content-item hidden" data-faction="square">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                                <div class="w-12 h-12 bg-cyan-500 mr-4"></div>
+                                方碑盟约 - 秩序与规则
+                            </h3>
+                            <p class="text-xl text-gray-300 mb-6">
+                                注重秩序、规则和收藏。是法律制定者、历史学家和物质管理者。
+                                他们的城市像巨大的网格或迷宫，高度模块化。
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-cubes text-cyan-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">种族特色</h4>
+                                        <p class="text-gray-400">高度模块化，拥有最强的经济和技术</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-cogs text-cyan-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">特殊能力</h4>
+                                        <p class="text-gray-400">空间折叠、物质重组、标准化生产</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-chess-rook text-cyan-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">核心建筑</h4>
+                                        <p class="text-gray-400">方尖碑、矩阵阵列、研究所</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="bg-gradient-to-br from-cyan-500/20 to-green-500/20 rounded-2xl p-8 text-center">
+                                <div class="relative inline-block">
+                                    <div class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto">
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                        <div class="bg-cyan-400/20 border border-cyan-400 rounded"></div>
+                                    </div>
+                                </div>
+                                <p class="mt-6 text-gray-300">方形代表秩序与规则</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 螺旋之子 -->
+                <div class="faction-content-item hidden" data-faction="spiral">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-6 flex items-center">
+                                <div class="w-12 h-12 bg-green-500 mr-4 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                        <path d="M12 17c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0-8c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3z"/>
+                                    </svg>
+                                </div>
+                                螺旋之子 - 变化与成长
+                            </h3>
+                            <p class="text-xl text-gray-300 mb-6">
+                                拥抱变化、成长和复杂性。是艺术家、生命法师和探索者。
+                                他们的居所常常是生长和变化的有机几何形态。
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-seedling text-green-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">种族特色</h4>
+                                        <p class="text-gray-400">单位会随时间成长进化，机动性强</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-dna text-green-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">特殊能力</h4>
+                                        <p class="text-gray-400">生命绽放、形态进化、适应性</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-chess-rook text-green-400 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">核心建筑</h4>
+                                        <p class="text-gray-400">生命核心、螺旋花园、进化腔室</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="bg-gradient-to-br from-green-500/20 to-yellow-500/20 rounded-2xl p-8 text-center">
+                                <div class="relative inline-block">
+                                    <svg class="w-48 h-48 mx-auto" viewBox="0 0 200 200">
+                                        <path d="M100,20 Q150,50 140,100 T100,180 Q50,150 60,100 T100,20" 
+                                              fill="none" 
+                                              stroke="rgb(74 222 128)" 
+                                              stroke-width="3"
+                                              class="rotate-animation"/>
+                                        <path d="M100,40 Q130,60 125,100 T100,160 Q70,140 75,100 T100,40" 
+                                              fill="none" 
+                                              stroke="rgb(134 239 172)" 
+                                              stroke-width="2"
+                                              class="rotate-animation" 
+                                              style="animation-direction: reverse;"/>
+                                    </svg>
+                                </div>
+                                <p class="mt-6 text-gray-300">螺旋代表成长与演变</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 科技树 -->
+    <section id="tech-tree" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+                <span class="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                    科技树系统
+                </span>
+            </h2>
+            
+            <p class="text-xl text-center text-gray-400 mb-12 max-w-3xl mx-auto">
+                每个种族都有独特的科技发展路线，玩家需要根据战局选择合适的科技方向，
+                打造属于自己的制胜策略。
+            </p>
+            
+            <!-- 科技树标签页 -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button class="tech-tab active px-6 py-3 rounded-full font-semibold bg-gradient-to-r from-blue-500 to-blue-600" data-tech="circle">
+                    圆环族科技
+                </button>
+                <button class="tech-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-tech="triangle">
+                    三角议会科技
+                </button>
+                <button class="tech-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-tech="square">
+                    方碑盟约科技
+                </button>
+                <button class="tech-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-tech="spiral">
+                    螺旋之子科技
+                </button>
+            </div>
+            
+            <!-- 科技树内容 -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 overflow-x-auto">
+                <!-- 圆环族科技树 -->
+                <div class="tech-tree-content active" data-tech="circle">
+                    <div class="min-w-[800px]">
+                        <div class="grid grid-cols-3 gap-8 mb-12">
+                            <!-- 第一层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-blue-400">第一层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-atom text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">形态共鸣</h5>
+                                        <p class="text-sm text-gray-400">相邻建筑效率+25%</p>
+                                        <div class="mt-2 text-xs text-blue-300">100 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-sync text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">循环理论</h5>
+                                        <p class="text-sm text-gray-400">资源生产+20%</p>
+                                        <div class="mt-2 text-xs text-blue-300">100 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第二层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-purple-400">第二层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-shield-alt text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">能量护盾</h5>
+                                        <p class="text-sm text-gray-400">建筑获得护盾</p>
+                                        <div class="mt-2 text-xs text-purple-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-eye text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">预言术</h5>
+                                        <p class="text-sm text-gray-400">扩大视野范围</p>
+                                        <div class="mt-2 text-xs text-purple-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-heart text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">和谐律动</h5>
+                                        <p class="text-sm text-gray-400">治疗速度提升</p>
+                                        <div class="mt-2 text-xs text-purple-300">200 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第三层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-yellow-400">第三层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-globe text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">完美球体</h5>
+                                        <p class="text-sm text-gray-400">终极防御建筑</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-infinity text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">无限循环</h5>
+                                        <p class="text-sm text-gray-400">资源自动补充</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-network-wired text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">共振网络</h5>
+                                        <p class="text-sm text-gray-400">全局单位增益</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-xl p-6">
+                            <h5 class="font-semibold mb-3">科技解锁要求：</h5>
+                            <ul class="text-sm text-gray-400 space-y-1">
+                                <li>• 第二层科技需要完成任意一个第一层科技</li>
+                                <li>• 第三层科技需要完成对应分支的第二层科技</li>
+                                <li>• 某些高级科技需要特定的建筑支持</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 三角议会科技树 -->
+                <div class="tech-tree-content hidden" data-tech="triangle">
+                    <div class="min-w-[800px]">
+                        <div class="grid grid-cols-3 gap-8 mb-12">
+                            <!-- 第一层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-purple-400">第一层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-dice-d6 text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">结构优化</h5>
+                                        <p class="text-sm text-gray-400">建筑生命值+25%</p>
+                                        <div class="mt-2 text-xs text-purple-300">100 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-purple-500/20 border-2 border-purple-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-ruler-combined text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">锐角理论</h5>
+                                        <p class="text-sm text-gray-400">攻击力+15%</p>
+                                        <div class="mt-2 text-xs text-purple-300">100 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第二层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-pink-400">第二层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-pink-500/20 border-2 border-pink-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-lock text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">三角锁定</h5>
+                                        <p class="text-sm text-gray-400">目标无法逃脱</p>
+                                        <div class="mt-2 text-xs text-pink-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-pink-500/20 border-2 border-pink-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-bolt text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">力量传导</h5>
+                                        <p class="text-sm text-gray-400">攻击传递效果</p>
+                                        <div class="mt-2 text-xs text-pink-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-pink-500/20 border-2 border-pink-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-hammer text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">坚固基础</h5>
+                                        <p class="text-sm text-gray-400">建造速度+30%</p>
+                                        <div class="mt-2 text-xs text-pink-300">200 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第三层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-yellow-400">第三层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-explosion text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">绝对三角形</h5>
+                                        <p class="text-sm text-gray-400">范围毁灭技能</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-clone text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">无限三角分形</h5>
+                                        <p class="text-sm text-gray-400">单位数量激增</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-mountain text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">顶点冲击</h5>
+                                        <p class="text-sm text-gray-400">终极攻击技能</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-xl p-6">
+                            <h5 class="font-semibold mb-3">三角议会科技特色：</h5>
+                            <ul class="text-sm text-gray-400 space-y-1">
+                                <li>• 科技研发速度比其他种族快20%</li>
+                                <li>• 军事建筑获得额外攻击力加成</li>
+                                <li>• 三个相同建筑形成三角结构时效率最大化</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 方碑盟约科技树 -->
+                <div class="tech-tree-content hidden" data-tech="square">
+                    <div class="min-w-[800px]">
+                        <div class="grid grid-cols-3 gap-8 mb-12">
+                            <!-- 第一层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-cyan-400">第一层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-cyan-500/20 border-2 border-cyan-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-industry text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">标准化</h5>
+                                        <p class="text-sm text-gray-400">单位成本-15%</p>
+                                        <div class="mt-2 text-xs text-cyan-300">100 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-cyan-500/20 border-2 border-cyan-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-compress-arrows-alt text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">空间折叠</h5>
+                                        <p class="text-sm text-gray-400">建筑传送能力</p>
+                                        <div class="mt-2 text-xs text-cyan-300">100 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第二层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-blue-400">第二层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-project-diagram text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">量子建造</h5>
+                                        <p class="text-sm text-gray-400">同时建造多个</p>
+                                        <div class="mt-2 text-xs text-blue-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-exchange-alt text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">物质重组</h5>
+                                        <p class="text-sm text-gray-400">改变单位属性</p>
+                                        <div class="mt-2 text-xs text-blue-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-blue-500/20 border-2 border-blue-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-shield-alt text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">矩阵防御</h5>
+                                        <p class="text-sm text-gray-400">全局护盾网络</p>
+                                        <div class="mt-2 text-xs text-blue-300">200 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第三层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-yellow-400">第三层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-cube text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">超立方体</h5>
+                                        <p class="text-sm text-gray-400">多维空间打击</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-th-large text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">完美方阵</h5>
+                                        <p class="text-sm text-gray-400">无敌防御阵型</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-balance-scale text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">几何法则</h5>
+                                        <p class="text-sm text-gray-400">改变战场规则</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-xl p-6">
+                            <h5 class="font-semibold mb-3">方碑盟约科技特色：</h5>
+                            <ul class="text-sm text-gray-400 space-y-1">
+                                <li>• 科技研发成本比其他种族低15%</li>
+                                <li>• 可以同时研究多个同级别科技</li>
+                                <li>• 建筑可以模块化升级，功能可自由组合</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 螺旋之子科技树 -->
+                <div class="tech-tree-content hidden" data-tech="spiral">
+                    <div class="min-w-[800px]">
+                        <div class="grid grid-cols-3 gap-8 mb-12">
+                            <!-- 第一层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-green-400">第一层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-green-500/20 border-2 border-green-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-seedling text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">快速生长</h5>
+                                        <p class="text-sm text-gray-400">训练速度+30%</p>
+                                        <div class="mt-2 text-xs text-green-300">100 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-green-500/20 border-2 border-green-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-adjust text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">适应性</h5>
+                                        <p class="text-sm text-gray-400">环境增益效果</p>
+                                        <div class="mt-2 text-xs text-green-300">100 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第二层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-emerald-400">第二层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-emerald-500/20 border-2 border-emerald-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-spa text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">生命绽放</h5>
+                                        <p class="text-sm text-gray-400">单位分裂繁殖</p>
+                                        <div class="mt-2 text-xs text-emerald-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-emerald-500/20 border-2 border-emerald-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-brain text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">形态记忆</h5>
+                                        <p class="text-sm text-gray-400">保留进化经验</p>
+                                        <div class="mt-2 text-xs text-emerald-300">200 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-emerald-500/20 border-2 border-emerald-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-wind text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">螺旋冲刺</h5>
+                                        <p class="text-sm text-gray-400">移动速度+50%</p>
+                                        <div class="mt-2 text-xs text-emerald-300">200 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 第三层 -->
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold mb-6 text-yellow-400">第三层科技</h4>
+                                <div class="space-y-4">
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-infinity text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">黄金螺旋</h5>
+                                        <p class="text-sm text-gray-400">终极进化形态</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-snowflake text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">无限分形</h5>
+                                        <p class="text-sm text-gray-400">召唤分身部队</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                    <div class="tech-node bg-yellow-500/20 border-2 border-yellow-400 rounded-xl p-4 mx-auto w-48">
+                                        <i class="fas fa-tree text-2xl mb-2"></i>
+                                        <h5 class="font-semibold">生命之树</h5>
+                                        <p class="text-sm text-gray-400">全局治疗与复活</p>
+                                        <div class="mt-2 text-xs text-yellow-300">500 形魄</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700/50 rounded-xl p-6">
+                            <h5 class="font-semibold mb-3">螺旋之子科技特色：</h5>
+                            <ul class="text-sm text-gray-400 space-y-1">
+                                <li>• 科技效果随时间自动增强</li>
+                                <li>• 进化后的单位可以保留科技加成</li>
+                                <li>• 特定科技可以在战斗中继续升级</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能系统 -->
+    <section id="skills" class="py-20 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+                <span class="bg-gradient-to-r from-yellow-400 to-red-400 bg-clip-text text-transparent">
+                    英雄技能系统
+                </span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <!-- 圆环族英雄 -->
+                <div class="hero-card bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-2xl p-6 border border-blue-500/30">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-sun text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">和谐大师</h3>
+                        <p class="text-sm text-gray-400">圆环族英雄</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-blue-400 mb-1">共鸣护盾</h4>
+                            <p class="text-sm text-gray-400">创造区域护盾，吸收伤害</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-blue-400 mb-1">能量调和</h4>
+                            <p class="text-sm text-gray-400">转移伤害到护盾系统</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-yellow-400 mb-1">完美圆环</h4>
+                            <p class="text-sm text-gray-400">创造时间减缓领域</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 三角议会英雄 -->
+                <div class="hero-card bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-2xl p-6 border border-purple-500/30">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-chess-knight text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">战争统帅</h3>
+                        <p class="text-sm text-gray-400">三角议会英雄</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-purple-400 mb-1">三角冲锋</h4>
+                            <p class="text-sm text-gray-400">线性穿刺攻击</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-purple-400 mb-1">力量叠加</h4>
+                            <p class="text-sm text-gray-400">提升友军攻击力</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-yellow-400 mb-1">三角毁灭</h4>
+                            <p class="text-sm text-gray-400">释放毁灭性能量波</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 方碑盟约英雄 -->
+                <div class="hero-card bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 rounded-2xl p-6 border border-cyan-500/30">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-cyan-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-cube text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">矩阵指挥官</h3>
+                        <p class="text-sm text-gray-400">方碑盟约英雄</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-cyan-400 mb-1">网格化</h4>
+                            <p class="text-sm text-gray-400">组织单位优化阵型</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-cyan-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-cyan-400 mb-1">计算最优</h4>
+                            <p class="text-sm text-gray-400">提升友军命中率</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-cyan-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-yellow-400 mb-1">量子传送</h4>
+                            <p class="text-sm text-gray-400">传送友军单位</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 螺旋之子英雄 -->
+                <div class="hero-card bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-2xl p-6 border border-green-500/30">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-leaf text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">生命编织者</h3>
+                        <p class="text-sm text-gray-400">螺旋之子英雄</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-green-400 mb-1">生命绽放</h4>
+                            <p class="text-sm text-gray-400">治疗友军单位</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-green-400 mb-1">进化引导</h4>
+                            <p class="text-sm text-gray-400">加速单位进化</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3">
+                            <h4 class="font-semibold text-yellow-400 mb-1">生命之树</h4>
+                            <p class="text-sm text-gray-400">范围持续治疗</p>
+                            <div class="mt-2 bg-gray-700 rounded-full h-2">
+                                <div class="skill-bar bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+                <h3 class="text-2xl font-bold mb-6">技能系统特点</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-level-up-alt text-2xl text-yellow-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">技能升级</h4>
+                        <p class="text-sm text-gray-400">英雄可通过战斗获得经验，升级强化技能效果</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-sync-alt text-2xl text-blue-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">技能连携</h4>
+                        <p class="text-sm text-gray-400">不同英雄技能可以组合产生额外效果</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-magic text-2xl text-purple-400"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">终极技能</h4>
+                        <p class="text-sm text-gray-400">积攒能量释放改变战局的强大技能</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 兵种单位 -->
+    <section id="units" class="py-20 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+                <span class="bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+                    兵种单位
+                </span>
+            </h2>
+            
+            <!-- 兵种分类标签 -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button class="unit-tab active px-6 py-3 rounded-full font-semibold bg-gradient-to-r from-blue-500 to-blue-600" data-unit="circle">
+                    圆环族单位
+                </button>
+                <button class="unit-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-unit="triangle">
+                    三角议会单位
+                </button>
+                <button class="unit-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-unit="square">
+                    方碑盟约单位
+                </button>
+                <button class="unit-tab px-6 py-3 rounded-full font-semibold bg-gray-700" data-unit="spiral">
+                    螺旋之子单位
+                </button>
+            </div>
+            
+            <!-- 兵种展示区 -->
+            <div id="units-container">
+                <!-- 圆环族单位 -->
+                <div class="units-content active" data-unit="circle">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-circle text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">共鸣者</h3>
+                                <p class="text-sm text-gray-400">基础单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>能量远程</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">15</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">100</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">移动速度:</span>
+                                    <span>中等</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 多个相邻时攻击力提升
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-shield-alt text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">守护者</h3>
+                                <p class="text-sm text-gray-400">防御单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>近战</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">10</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">300</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">护盾值:</span>
+                                    <span class="text-blue-400">200</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 可牺牲为友军提供护盾
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-blue-700 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-ring text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">轨道战士</h3>
+                                <p class="text-sm text-gray-400">空中单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>环形散射</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">20</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">150</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">移动速度:</span>
+                                    <span class="text-green-400">快速</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 移动时不会受攻击
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-sun text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">能量大师</h3>
+                                <p class="text-sm text-gray-400">支援单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>能量操控</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">25</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">120</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">能量值:</span>
+                                    <span class="text-blue-400">200</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 治疗友军，阻断能量
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 三角议会单位 -->
+                <div class="units-content hidden" data-unit="triangle">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-purple-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-play text-2xl transform rotate-180"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">三角战士</h3>
+                                <p class="text-sm text-gray-400">基础单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>近战穿刺</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">20</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">120</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">护甲:</span>
+                                    <span class="text-yellow-400">3</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 三角阵型防御翻倍
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-gem text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">棱镜射手</h3>
+                                <p class="text-sm text-gray-400">远程单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>光线折射</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">25</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">80</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">射程:</span>
+                                    <span class="text-green-400">远</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 攻击可弹跳多个目标
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-purple-700 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-fighter-jet text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">三角战机</h3>
+                                <p class="text-sm text-gray-400">空中单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>能量导弹</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">30</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">150</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">移动速度:</span>
+                                    <span class="text-green-400">极快</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 瞬间改变方向
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-yellow-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-mountain text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">金字塔</h3>
+                                <p class="text-sm text-gray-400">攻城单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>毁灭光束</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">80</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">500</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">护甲:</span>
+                                    <span class="text-yellow-400">10</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 对建筑伤害翻倍
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 方碑盟约单位 -->
+                <div class="units-content hidden" data-unit="square">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-cyan-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-cube text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">方块步兵</h3>
+                                <p class="text-sm text-gray-400">基础单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>能量射击</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">18</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">140</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">护甲:</span>
+                                    <span class="text-yellow-400">5</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 可组合成更大方块
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-cyan-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-th text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">网格炮手</h3>
+                                <p class="text-sm text-gray-400">远程单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>网格激光</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">35</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">100</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">射程:</span>
+                                    <span class="text-green-400">超远</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 攻击形成网格封锁
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-cyan-700 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-cubes text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">立方战机</h3>
+                                <p class="text-sm text-gray-400">空中单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>变形光束</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">40</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">200</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">模式:</span>
+                                    <span>3种</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 切换功能模式
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-yellow-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-building text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">矩阵巨像</h3>
+                                <p class="text-sm text-gray-400">终极单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>矩阵炮</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">100</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">1000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">模块数:</span>
+                                    <span>9个</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 可重组和变形
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 螺旋之子单位 -->
+                <div class="units-content hidden" data-unit="spiral">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-seedling text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">螺旋幼体</h3>
+                                <p class="text-sm text-gray-400">成长型单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>能量触手</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">初始攻击:</span>
+                                    <span class="text-blue-400">10</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">最大攻击:</span>
+                                    <span class="text-blue-400">30</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">成长时间:</span>
+                                    <span>120秒</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 随时间自动成长变强
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-green-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-leaf text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">藤蔓爬行者</h3>
+                                <p class="text-sm text-gray-400">地面单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>藤蔓鞭打</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">25</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">160</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">地形:</span>
+                                    <span class="text-green-400">攀爬</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 植被中获得加成
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-green-700 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-dragon text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">螺旋飞龙</h3>
+                                <p class="text-sm text-gray-400">飞行单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>螺旋吐息</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击力:</span>
+                                    <span class="text-blue-400">45</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">220</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">繁殖:</span>
+                                    <span class="text-green-400">可孵化</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 可繁殖后代
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="unit-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                            <div class="text-center mb-4">
+                                <div class="w-16 h-16 bg-yellow-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fas fa-dna text-2xl"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">进化巨兽</h3>
+                                <p class="text-sm text-gray-400">进化单位</p>
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">攻击类型:</span>
+                                    <span>形态吞噬</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">基础攻击:</span>
+                                    <span class="text-blue-400">60</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">生命值:</span>
+                                    <span class="text-green-400">800</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">进化级:</span>
+                                    <span>3级</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <p class="text-sm text-gray-300">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <strong>特殊能力:</strong> 不断进化和适应
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 进化说明 -->
+                    <div class="mt-8 bg-gradient-to-r from-green-500/10 to-yellow-500/10 rounded-xl p-6 border border-green-500/30">
+                        <h4 class="text-lg font-semibold mb-3 text-green-400">进化系统说明</h4>
+                        <p class="text-sm text-gray-300">
+                            螺旋之子的单位拥有独特的进化能力。螺旋幼体可以成长为更强大的形态，
+                            进化巨兽通过吸收敌人的能量不断进化，获得新的能力和更高的属性。
+                            在战斗中，合理利用进化时机是取胜的关键。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="story/index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="story/characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="story/world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="story/media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="story/timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 种族标签切换
+        const factionTabs = document.querySelectorAll('.faction-tab');
+        const factionContents = document.querySelectorAll('.faction-content-item');
+
+        factionTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const faction = tab.dataset.faction;
+                
+                // 更新标签状态
+                factionTabs.forEach(t => {
+                    t.classList.remove('active', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+                    t.classList.add('bg-gray-700');
+                });
+                tab.classList.add('active', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+                tab.classList.remove('bg-gray-700');
+                
+                // 更新内容
+                factionContents.forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('active');
+                });
+                document.querySelector(`.faction-content-item[data-faction="${faction}"]`).classList.remove('hidden');
+                document.querySelector(`.faction-content-item[data-faction="${faction}"]`).classList.add('active');
+            });
+        });
+
+        // 科技树标签切换
+        const techTabs = document.querySelectorAll('.tech-tab');
+        const techContents = document.querySelectorAll('.tech-tree-content');
+
+        techTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tech = tab.dataset.tech;
+                
+                // 更新标签状态
+                techTabs.forEach(t => {
+                    t.classList.remove('active', 'bg-gradient-to-r', 'from-blue-500', 'to-blue-600');
+                    t.classList.add('bg-gray-700');
+                });
+                tab.classList.add('active', 'bg-gradient-to-r', 'from-blue-500', 'to-blue-600');
+                tab.classList.remove('bg-gray-700');
+                
+                // 更新内容
+                techContents.forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('active');
+                });
+                document.querySelector(`.tech-tree-content[data-tech="${tech}"]`).classList.remove('hidden');
+                document.querySelector(`.tech-tree-content[data-tech="${tech}"]`).classList.add('active');
+            });
+        });
+
+        // 兵种标签切换
+        const unitTabs = document.querySelectorAll('.unit-tab');
+        const unitsContents = document.querySelectorAll('.units-content');
+
+        unitTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const unit = tab.dataset.unit;
+                
+                // 更新标签状态
+                unitTabs.forEach(t => {
+                    t.classList.remove('active', 'bg-gradient-to-r', 'from-blue-500', 'to-blue-600');
+                    t.classList.add('bg-gray-700');
+                });
+                tab.classList.add('active', 'bg-gradient-to-r', 'from-blue-500', 'to-blue-600');
+                tab.classList.remove('bg-gray-700');
+                
+                // 更新内容
+                unitsContents.forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('active');
+                });
+                document.querySelector(`.units-content[data-unit="${unit}"]`).classList.remove('hidden');
+                document.querySelector(`.units-content[data-unit="${unit}"]`).classList.add('active');
+            });
+        });
+
+        // 技能条动画
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const skillBars = entry.target.querySelectorAll('.skill-bar');
+                    skillBars.forEach(bar => {
+                        const width = bar.parentElement.previousElementSibling.textContent.includes('终极') ? '100%' : '70%';
+                        bar.style.width = width;
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.hero-card').forEach(card => {
+            skillObserver.observe(card);
+        });
+
+        // 移动端菜单
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const nav = document.querySelector('nav .hidden.md\\:flex');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            nav.classList.toggle('hidden');
+            nav.classList.toggle('absolute');
+            nav.classList.toggle('top-16');
+            nav.classList.toggle('left-0');
+            nav.classList.toggle('right-0');
+            nav.classList.toggle('bg-gray-800');
+            nav.classList.toggle('flex-col');
+            nav.classList.toggle('p-4');
+            nav.classList.toggle('space-y-4');
+        });
+
+        // 滚动时添加导航栏阴影
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 10) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+    </script>
+</body>
+</html>

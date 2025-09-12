@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章节导航模板 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            z-index: 30;
+            transition: width 0.3s ease;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book-open text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">[章节标题]</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fontSizeDecrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="fontSizeDisplay" class="text-sm">标准</span>
+                    <button id="fontSizeIncrease" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="themeToggle" class="p-2 hover:bg-gray-700 rounded transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 章节标题 -->
+    <header class="relative py-12 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">[章节小标题]</span>
+            </h1>
+            <div class="flex items-center justify-center space-x-6 text-gray-400">
+                <span><i class="fas fa-clock mr-2"></i>阅读时长：约[XX]分钟</span>
+                <span><i class="fas fa-file-word mr-2"></i>约[X,XXX]字</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="relative pb-20">
+        <div class="container mx-auto max-w-4xl px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- 侧边栏导航 -->
+                <aside class="md:col-span-1">
+                    <div class="sticky top-24 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                        <h3 class="font-bold mb-4 text-blue-400">章节导航</h3>
+                        <nav class="space-y-2" id="sectionNav">
+                            <!-- 动态生成的小节导航 -->
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- 故事内容 -->
+                <div class="md:col-span-3">
+                    <article id="storyContent" class="story-content bg-gray-800/30 rounded-xl p-8 border border-gray-700">
+                        <!-- 故事内容将在这里动态加载 -->
+                    </article>
+
+                    <!-- 章节导航 -->
+                    <div class="mt-8 flex justify-between items-center">
+                        <div class="text-gray-400">
+                            <a href="[上一页链接]" class="hover:text-blue-400 transition">
+                                <i class="fas fa-chevron-left mr-2"></i>[上一章标题]
+                            </a>
+                        </div>
+                        <div class="flex space-x-4">
+                            <a href="[下一页链接]" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                                [下一节标题]
+                                <i class="fas fa-chevron-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="mt-12 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                        <h3 class="text-xl font-bold mb-4">
+                            <i class="fas fa-comments mr-2"></i>读者评论
+                        </h3>
+                        <div class="space-y-4" id="comments">
+                            <!-- 动态加载评论 -->
+                        </div>
+                        <div class="mt-4">
+                            <textarea id="commentInput" class="w-full bg-gray-700 rounded-lg p-3 text-white resize-none" rows="3" placeholder="写下你的想法..."></textarea>
+                            <button id="submitComment" class="mt-2 px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition">
+                                发表评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 最后更新：2024年
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 章节配置
+        const chapterConfig = {
+            title: "[章节标题]",
+            subtitle: "[章节小标题]",
+            sections: [
+                { id: "section-1", title: "小节一标题" },
+                { id: "section-2", title: "小节二标题" },
+                // 更多小节...
+            ],
+            prevChapter: { title: "[上一章标题]", url: "[上一页链接]" },
+            nextChapter: { title: "[下一节标题]", url: "[下一页链接]" }
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新标题
+            document.querySelector('header h1 span').textContent = chapterConfig.subtitle;
+            document.querySelector('nav span:last-child').textContent = chapterConfig.title;
+            
+            // 生成小节导航
+            const sectionNav = document.getElementById('sectionNav');
+            chapterConfig.sections.forEach(section => {
+                const link = document.createElement('a');
+                link.href = `#${section.id}`;
+                link.className = 'block py-2 px-3 rounded hover:bg-gray-700 transition text-sm';
+                link.innerHTML = `<i class="fas fa-circle text-xs mr-2 text-blue-400"></i>${section.title}`;
+                sectionNav.appendChild(link);
+            });
+            
+            // 更新章节导航
+            const prevLink = document.querySelector('.flex.justify-between > div > a');
+            const nextLink = document.querySelector('.flex.space-x-4 > a');
+            
+            if (chapterConfig.prevChapter) {
+                prevLink.href = chapterConfig.prevChapter.url;
+                prevLink.innerHTML = `<i class="fas fa-chevron-left mr-2"></i>${chapterConfig.prevChapter.title}`;
+            }
+            
+            if (chapterConfig.nextChapter) {
+                nextLink.href = chapterConfig.nextChapter.url;
+                nextLink.innerHTML = `${chapterConfig.nextChapter.title}<i class="fas fa-chevron-right ml-2"></i>`;
+            }
+            
+            // 加载评论（模拟）
+            loadComments();
+        });
+
+        // 阅读进度
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('readingProgress').style.width = scrollPercent + '%';
+        });
+
+        // 字体大小调整
+        let fontSize = 16;
+        const content = document.getElementById('storyContent');
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (fontSize > 12) {
+                fontSize -= 2;
+                content.style.fontSize = fontSize + 'px';
+                updateFontSizeDisplay();
+            }
+        });
+        
+        function updateFontSizeDisplay() {
+            const display = document.getElementById('fontSizeDisplay');
+            if (fontSize <= 16) display.textContent = '标准';
+            else if (fontSize <= 20) display.textContent = '较大';
+            else display.textContent = '最大';
+        }
+
+        // 主题切换
+        let isDarkTheme = true;
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('bg-gray-900');
+            document.body.classList.toggle('bg-gray-100');
+            document.body.classList.toggle('text-gray-100');
+            document.body.classList.toggle('text-gray-900');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 评论功能
+        document.getElementById('submitComment').addEventListener('click', function() {
+            const input = document.getElementById('commentInput');
+            const comment = input.value.trim();
+            
+            if (comment) {
+                addComment({
+                    author: '匿名读者',
+                    avatar: 'fa-user',
+                    time: '刚刚',
+                    content: comment
+                });
+                input.value = '';
+            }
+        });
+
+        function addComment(comment) {
+            const commentsContainer = document.getElementById('comments');
+            const commentEl = document.createElement('div');
+            commentEl.className = 'bg-gray-700/50 rounded-lg p-4';
+            commentEl.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex items-center justify-center">
+                        <i class="fas ${comment.avatar} text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold">${comment.author}</div>
+                        <div class="text-xs text-gray-400">${comment.time}</div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-300">${comment.content}</p>
+            `;
+            commentsContainer.insertBefore(commentEl, commentsContainer.firstChild);
+        }
+
+        function loadComments() {
+            // 模拟加载评论
+            const sampleComments = [
+                {
+                    author: '几何爱好者',
+                    avatar: 'fa-user',
+                    time: '2小时前',
+                    content: '这一章写得真精彩！期待下一章。'
+                },
+                {
+                    author: '故事追随者',
+                    avatar: 'fa-user-astronaut',
+                    time: '5小时前',
+                    content: '世界观设定很有创意，几何形状的设定很独特。'
+                }
+            ];
+            
+            sampleComments.forEach(comment => addComment(comment));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何境域：形态之战 - 游戏原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+        
+        #gameCanvas {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            cursor: crosshair;
+        }
+        
+        .unit {
+            position: absolute;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .unit-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #3b82f6 0%, #1e40af 100%);
+            border: 2px solid #60a5fa;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .unit-triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 26px solid #ef4444;
+            filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+        }
+        
+        .unit-square {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            border: 2px solid #34d399;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+        
+        .unit-spiral {
+            width: 30px;
+            height: 30px;
+            background: conic-gradient(from 0deg, #a855f7, #ec4899, #a855f7);
+            border-radius: 50%;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+        }
+        
+        .building {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .building-base {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.1) 100%);
+        }
+        
+        .building-tower {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 8px;
+        }
+        
+        .resource-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+        }
+        
+        .form-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 3px solid;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .form-node.attack {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .form-node.defense {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        .form-node.speed {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .form-node.resource {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .form-node.controlled {
+            animation: nodeControl 1s ease-in-out infinite;
+        }
+        
+        @keyframes nodeControl {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+        
+        .selection-box {
+            position: absolute;
+            border: 2px dashed #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            pointer-events: none;
+        }
+        
+        .health-bar {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s ease;
+        }
+        
+        .minimap {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+        
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            color: white;
+        }
+        
+        .building-preview {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        .projectile {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fbbf24;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        
+        /* 游戏模式选择界面 */
+        .mode-selection {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .mode-card {
+            background: rgba(30, 30, 30, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 280px;
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .mode-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            border-radius: 50%;
+        }
+        
+        /* 剧情选择界面 */
+        .story-selection {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .story-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 200px;
+        }
+        
+        .story-card:hover {
+            border-color: #60a5fa;
+            transform: scale(1.05);
+        }
+        
+        /* Wave指示器 */
+        .wave-indicator {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+            animation: waveAnnounce 2s ease-in-out;
+        }
+        
+        @keyframes waveAnnounce {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <!-- 游戏模式选择界面 -->
+    <div id="modeSelection" class="mode-selection">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12 text-white">选择游戏模式</h2>
+            <div class="flex flex-wrap justify-center">
+                <!-- 征服模式 -->
+                <div class="mode-card" onclick="startGameMode('conquest')">
+                    <div class="mode-icon bg-blue-500/20 text-blue-400">
+                        <i class="fas fa-chess"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white">征服模式</h3>
+                    <p class="text-gray-400 text-center mb-4">经典的RTS体验，通过策略和实力征服整个战场</p>
+                    <div class="text-sm text-gray-500 text-center">
+                        <p>• 摧毁所有敌方基地</p>
+                        <p>• 控制源初形核</p>
+                        <p>• 30-60分钟</p>
+                    </div>
+                </div>
+                
+                <!-- 形态争夺 -->
+                <div class="mode-card" onclick="startGameMode('formBattle')">
+                    <div class="mode-icon bg-purple-500/20 text-purple-400">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white">形态争夺</h3>
+                    <p class="text-gray-400 text-center mb-4">控制关键形态节点，获得战场优势</p>
+                    <div class="text-sm text-gray-500 text-center">
+                        <p>• 控制形态节点</p>
+                        <p>• 积分竞赛</p>
+                        <p>• 15-30分钟</p>
+                    </div>
+                </div>
+                
+                <!-- 种族战争 -->
+                <div class="mode-card" onclick="startGameMode('raceWar')">
+                    <div class="mode-icon bg-cyan-500/20 text-cyan-400">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white">种族战争</h3>
+                    <p class="text-gray-400 text-center mb-4">体验每个种族独特的故事线</p>
+                    <div class="text-sm text-gray-500 text-center">
+                        <p>• 剧情驱动</p>
+                        <p>• 种族专属任务</p>
+                        <p>• 5-10小时</p>
+                    </div>
+                </div>
+                
+                <!-- 生存挑战 -->
+                <div class="mode-card" onclick="startGameMode('survival')">
+                    <div class="mode-icon bg-green-500/20 text-green-400">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white">生存挑战</h3>
+                    <p class="text-gray-400 text-center mb-4">抵御无尽的混沌入侵</p>
+                    <div class="text-sm text-gray-500 text-center">
+                        <p>• Wave生存</p>
+                        <p>• 塔防元素</p>
+                        <p>• 无限制</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 种族战争故事选择 -->
+    <div id="storySelection" class="story-selection" style="display: none;">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-4xl">
+            <h2 class="text-3xl font-bold text-center mb-8 text-white">选择你的种族故事</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="story-card" onclick="selectRaceStory('circle')">
+                    <div class="w-16 h-16 bg-blue-500 rounded-full mx-auto mb-3"></div>
+                    <h4 class="text-lg font-semibold text-center text-white">圆环族</h4>
+                    <p class="text-sm text-gray-400 text-center">和谐与循环</p>
+                </div>
+                <div class="story-card" onclick="selectRaceStory('triangle')">
+                    <div class="w-0 h-0 border-l-[32px] border-l-transparent border-r-[32px] border-r-transparent border-b-[56px] border-b-red-500 mx-auto mb-3"></div>
+                    <h4 class="text-lg font-semibold text-center text-white">三角议会</h4>
+                    <p class="text-sm text-gray-400 text-center">力量与效率</p>
+                </div>
+                <div class="story-card" onclick="selectRaceStory('square')">
+                    <div class="w-16 h-16 bg-green-500 transform rotate-45 mx-auto mb-3"></div>
+                    <h4 class="text-lg font-semibold text-center text-white">方碑盟约</h4>
+                    <p class="text-sm text-gray-400 text-center">秩序与规则</p>
+                </div>
+                <div class="story-card" onclick="selectRaceStory('spiral')">
+                    <div class="w-16 h-16 bg-purple-500 mx-auto mb-3" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%)"></div>
+                    <h4 class="text-lg font-semibold text-center text-white">螺旋之子</h4>
+                    <p class="text-sm text-gray-400 text-center">变化与成长</p>
+                </div>
+            </div>
+            <div class="text-center">
+                <button onclick="closeStorySelection()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition">
+                    返回
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 游戏标题栏 -->
+    <div id="gameHeader" class="absolute top-0 left-0 right-0 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700 p-4 z-50" style="display: none;">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-2xl font-bold text-white">
+                    <i class="fas fa-shapes text-blue-400 mr-2"></i>
+                    几何境域：形态之战 - <span id="currentModeName">游戏模式</span>
+                </h1>
+                <button onclick="backToModeSelection()" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition">
+                    <i class="fas fa-arrow-left mr-1"></i>选择模式
+                </button>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="resourceDisplay" class="text-white">
+                    <i class="fas fa-bolt text-yellow-400 mr-1"></i>
+                    <span id="morphEnergy">100</span> 形魄能量
+                </div>
+                <div id="gameStats" class="text-white text-sm">
+                    <span id="stat1"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wave指示器 -->
+    <div id="waveIndicator" class="wave-indicator"></div>
+    
+    <!-- 游戏画布 -->
+    <div id="gameContainer" class="relative w-full h-screen" style="display: none;">
+        <canvas id="gameCanvas"></canvas>
+        <div id="unitLayer"></div>
+        <div id="buildingLayer"></div>
+        <div id="projectileLayer"></div>
+        <div id="selectionBox" class="selection-box" style="display: none;"></div>
+    </div>
+    
+    <!-- 控制面板 -->
+    <div id="controlPanel" class="control-panel" style="display: none;">
+        <h3 class="text-lg font-bold mb-3">控制面板</h3>
+        <div id="raceSelection" class="grid grid-cols-2 gap-2 mb-3">
+            <button onclick="selectRace('circle')" class="race-btn px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm transition">
+                <i class="fas fa-circle mr-1"></i>圆环族
+            </button>
+            <button onclick="selectRace('triangle')" class="race-btn px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm transition">
+                <i class="fas fa-play mr-1"></i>三角议会
+            </button>
+            <button onclick="selectRace('square')" class="race-btn px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm transition">
+                <i class="fas fa-square mr-1"></i>方碑盟约
+            </button>
+            <button onclick="selectRace('spiral')" class="race-btn px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition">
+                <i class="fas fa-sync mr-1"></i>螺旋之子
+            </button>
+        </div>
+        <div id="buildingControls" class="border-t border-gray-600 pt-3">
+            <h4 class="font-semibold mb-2">建筑</h4>
+            <button onclick="startBuilding('base')" class="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition mb-2">
+                <i class="fas fa-home mr-1"></i>基地 (50能量)
+            </button>
+            <button id="towerButton" onclick="startBuilding('tower')" class="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition mb-2" style="display: none;">
+                <i class="fas fa-tower-observation mr-1"></i>防御塔 (30能量)
+            </button>
+            <button onclick="spawnUnit()" class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm transition">
+                <i class="fas fa-plus mr-1"></i>生成单位 (20能量)
+            </button>
+        </div>
+    </div>
+    
+    <!-- 小地图 -->
+    <div id="minimap" class="minimap" style="display: none;">
+        <canvas id="minimapCanvas" width="200" height="150"></canvas>
+    </div>
+    
+    <!-- 游戏信息 -->
+    <div id="gameInfo" class="absolute top-24 right-4 bg-gray-800/80 backdrop-blur-sm rounded-lg p-4 text-white max-w-xs" style="display: none;">
+        <h3 class="font-bold mb-2">游戏说明</h3>
+        <ul id="gameInstructions" class="text-sm space-y-1 text-gray-300">
+            <li>• 选择种族后点击生成单位</li>
+            <li>• 拖拽选择多个单位</li>
+            <li>• 右键移动选中单位</li>
+            <li>• 单位会自动攻击敌人</li>
+            <li>• 收集黄色能量节点获得资源</li>
+        </ul>
+        <div class="mt-3 pt-3 border-t border-gray-600">
+            <p class="text-xs text-gray-400">
+                当前种族: <span id="currentRace" class="text-blue-400">未选择</span>
+            </p>
+            <p class="text-xs text-gray-400">
+                单位数量: <span id="unitCount" class="text-green-400">0</span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- 剧情对话框 -->
+    <div id="storyDialog" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-gray-800 rounded-2xl p-8 max-w-2xl">
+            <h3 id="storyTitle" class="text-2xl font-bold mb-4 text-white"></h3>
+            <p id="storyText" class="text-gray-300 mb-6"></p>
+            <div id="storyChoices" class="space-y-3 mb-6"></div>
+            <div class="text-center">
+                <button id="storyContinue" onclick="continueStory()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                    继续
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const game = {
+            canvas: null,
+            ctx: null,
+            minimapCanvas: null,
+            minimapCtx: null,
+            units: [],
+            buildings: [],
+            projectiles: [],
+            resources: [],
+            formNodes: [],
+            selectedUnits: [],
+            currentRace: null,
+            currentMode: null,
+            morphEnergy: 100,
+            isBuilding: false,
+            buildingType: null,
+            camera: { x: 0, y: 0, zoom: 1 },
+            mouse: { x: 0, y: 0, down: false },
+            selection: { startX: 0, startY: 0, endX: 0, endY: 0 },
+            
+            // 模式特定状态
+            conquest: {
+                enemyBases: [],
+                sourceCore: null
+            },
+            formBattle: {
+                nodes: [],
+                scores: {},
+                controlPoints: []
+            },
+            raceWar: {
+                currentStory: null,
+                chapter: 1,
+                storyProgress: {}
+            },
+            survival: {
+                wave: 0,
+                enemies: [],
+                nextWaveTime: 0,
+                lastWaveTime: 0
+            }
+        };
+        
+        // 开始游戏模式
+        function startGameMode(mode) {
+            game.currentMode = mode;
+            document.getElementById('modeSelection').style.display = 'none';
+            document.getElementById('gameHeader').style.display = 'block';
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById('controlPanel').style.display = 'block';
+            document.getElementById('minimap').style.display = 'block';
+            document.getElementById('gameInfo').style.display = 'block';
+            
+            // 设置游戏标题
+            const modeNames = {
+                conquest: '征服模式',
+                formBattle: '形态争夺',
+                raceWar: '种族战争',
+                survival: '生存挑战'
+            };
+            document.getElementById('currentModeName').textContent = modeNames[mode];
+            
+            // 初始化游戏
+            initGame();
+            
+            // 根据模式进行特殊初始化
+            switch(mode) {
+                case 'conquest':
+                    initConquestMode();
+                    break;
+                case 'formBattle':
+                    initFormBattleMode();
+                    document.getElementById('towerButton').style.display = 'block';
+                    break;
+                case 'raceWar':
+                    document.getElementById('storySelection').style.display = 'flex';
+                    break;
+                case 'survival':
+                    initSurvivalMode();
+                    document.getElementById('towerButton').style.display = 'block';
+                    break;
+            }
+            
+            // 更新游戏说明
+            updateGameInstructions(mode);
+        }
+        
+        // 返回模式选择
+        function backToModeSelection() {
+            location.reload();
+        }
+        
+        // 选择种族故事
+        function selectRaceStory(race) {
+            game.currentRace = race;
+            document.getElementById('storySelection').style.display = 'none';
+            initRaceWarMode(race);
+        }
+        
+        // 关闭故事选择
+        function closeStorySelection() {
+            document.getElementById('storySelection').style.display = 'none';
+            backToModeSelection();
+        }
+        
+        // 初始化征服模式
+        function initConquestMode() {
+            // 生成敌人基地
+            const enemyPositions = [
+                { x: 300, y: 100, race: 'triangle' },
+                { x: 500, y: 300, race: 'square' },
+                { x: 200, y: 400, race: 'spiral' }
+            ];
+            
+            enemyPositions.forEach(pos => {
+                const base = {
+                    id: Date.now() + Math.random(),
+                    type: 'base',
+                    race: pos.race,
+                    x: pos.x,
+                    y: pos.y,
+                    health: 200,
+                    isEnemy: true
+                };
+                game.conquest.enemyBases.push(base);
+                game.buildings.push(base);
+                createBuildingElement(base);
+            });
+            
+            // 生成源初形核
+            game.conquest.sourceCore = {
+                id: 'source-core',
+                x: 400,
+                y: 250,
+                controlled: null
+            };
+            
+            // 更新统计显示
+            updateGameStats();
+        }
+        
+        // 初始化形态争夺模式
+        function initFormBattleMode() {
+            const nodeTypes = ['attack', 'defense', 'speed', 'resource'];
+            const nodePositions = [
+                { x: 150, y: 150 },
+                { x: 650, y: 150 },
+                { x: 150, y: 350 },
+                { x: 650, y: 350 },
+                { x: 400, y: 250 } // 中心控制点
+            ];
+            
+            nodeTypes.forEach((type, index) => {
+                if (index < nodePositions.length - 1) {
+                    const node = {
+                        id: `node-${type}`,
+                        type: type,
+                        x: nodePositions[index].x,
+                        y: nodePositions[index].y,
+                        controlled: null,
+                        effect: getFormNodeEffect(type)
+                    };
+                    game.formBattle.nodes.push(node);
+                    createFormNodeElement(node);
+                }
+            });
+            
+            // 中心控制点
+            const centerNode = {
+                id: 'center-node',
+                type: 'control',
+                x: nodePositions[4].x,
+                y: nodePositions[4].y,
+                controlled: null,
+                effect: { score: 5 }
+            };
+            game.formBattle.controlPoints.push(centerNode);
+            createFormNodeElement(centerNode);
+            
+            // 初始化分数
+            game.formBattle.scores = { player: 0, enemy: 0 };
+        }
+        
+        // 获取形态节点效果
+        function getFormNodeEffect(type) {
+            const effects = {
+                attack: { damage: 20 },
+                defense: { armor: 20 },
+                speed: { speed: 20 },
+                resource: { income: 20 }
+            };
+            return effects[type];
+        }
+        
+        // 初始化种族战争模式
+        function initRaceWarMode(race) {
+            game.currentRace = race;
+            game.raceWar.currentStory = race;
+            game.raceWar.chapter = 1;
+            
+            // 显示第一章剧情
+            showStoryChapter(race, 1);
+            
+            // 根据种族生成初始单位
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const unit = {
+                        id: Date.now() + i,
+                        x: 400 + (Math.random() - 0.5) * 100,
+                        y: 250 + (Math.random() - 0.5) * 100,
+                        race: race,
+                        health: 100,
+                        maxHealth: 100,
+                        speed: 2,
+                        damage: 10,
+                        targetX: null,
+                        targetY: null,
+                        element: null
+                    };
+                    game.units.push(unit);
+                    createUnitElement(unit);
+                    updateUnitCount();
+                }, i * 500);
+            }
+            
+            // 更新种族显示
+            document.getElementById('currentRace').textContent = getRaceName(race);
+            updateGameStats();
+        }
+        
+        // 显示故事章节
+        function showStoryChapter(race, chapter) {
+            const stories = {
+                circle: {
+                    1: {
+                        title: "圆环族：第一章 - 破碎的圆环",
+                        text: "中央圆环发生了异变，作为形态维护师的你被派去调查真相...",
+                        choices: [
+                            { text: "A. 立即前往现场", value: "rush" },
+                            { text: "B. 先向长老报告", value: "report" }
+                        ]
+                    }
+                },
+                triangle: {
+                    1: {
+                        title: "三角议会：第一章 - 战争的号角",
+                        text: "边境传来了异常的能量读数，三角议会需要你去查明真相...",
+                        choices: [
+                            { text: "A. 率领部队前往", value: "military" },
+                            { text: "B. 派遣侦察队", value: "scout" }
+                        ]
+                    }
+                },
+                square: {
+                    1: {
+                        title: "方碑盟约：第一章 - 秩序的裂痕",
+                        text: "检测到不规则几何形态的出现，这可能威胁到现有的秩序...",
+                        choices: [
+                            { text: "A. 启动净化协议", value: "purify" },
+                            { text: "B. 进行研究分析", value: "research" }
+                        ]
+                    }
+                },
+                spiral: {
+                    1: {
+                        title: "螺旋之子：第一章 - 进化的呼唤",
+                        text: "生命之巢感知到了新的进化可能性，你需要去探索这个源头...",
+                        choices: [
+                            { text: "A. 立即出发", value: "explore" },
+                            { text: "B. 做好准备", value: "prepare" }
+                        ]
+                    }
+                }
+            };
+            
+            const story = stories[race]?.[chapter];
+            if (story) {
+                document.getElementById('storyTitle').textContent = story.title;
+                document.getElementById('storyText').textContent = story.text;
+                
+                const choicesDiv = document.getElementById('storyChoices');
+                choicesDiv.innerHTML = '';
+                story.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-left transition';
+                    btn.innerHTML = `<p class="font-semibold">${choice.text}</p>`;
+                    btn.onclick = () => makeStoryChoice(choice.value);
+                    choicesDiv.appendChild(btn);
+                });
+                
+                document.getElementById('storyDialog').style.display = 'flex';
+            }
+        }
+        
+        // 做出故事选择
+        function makeStoryChoice(choice) {
+            // 保存选择
+            game.raceWar.storyProgress[game.raceWar.chapter] = choice;
+            document.getElementById('storyDialog').style.display = 'none';
+            
+            // 根据选择生成相应的单位或建筑
+            if (choice === 'rush' || choice === 'military') {
+                // 生成额外单位
+                for (let i = 0; i < 2; i++) {
+                    setTimeout(() => spawnUnit(), i * 300);
+                }
+            } else if (choice === 'research' || choice === 'prepare') {
+                // 增加初始资源
+                game.morphEnergy += 50;
+                updateResourceDisplay();
+            }
+        }
+        
+        // 继续故事
+        function continueStory() {
+            document.getElementById('storyDialog').style.display = 'none';
+        }
+        
+        // 初始化生存模式
+        function initSurvivalMode() {
+            game.survival.wave = 1;
+            game.survival.nextWaveTime = Date.now() + 10000; // 10秒后第一波
+            
+            // 生成玩家基地
+            const base = {
+                id: 'player-base',
+                type: 'base',
+                race: 'circle',
+                x: 400,
+                y: 250,
+                health: 500,
+                maxHealth: 500
+            };
+            game.buildings.push(base);
+            createBuildingElement(base);
+            
+            // 显示第一波提示
+            showWaveIndicator(1);
+            updateGameStats();
+        }
+        
+        // 显示Wave提示
+        function showWaveIndicator(wave) {
+            const indicator = document.getElementById('waveIndicator');
+            indicator.textContent = `第 ${wave} 波`;
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+        
+        // 初始化游戏
+        function initGame() {
+            game.canvas = document.getElementById('gameCanvas');
+            game.ctx = game.canvas.getContext('2d');
+            game.minimapCanvas = document.getElementById('minimapCanvas');
+            game.minimapCtx = game.minimapCanvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 设置事件监听
+            setupEventListeners();
+            
+            // 生成资源节点
+            generateResources();
+            
+            // 开始游戏循环
+            gameLoop();
+        }
+        
+        function resizeCanvas() {
+            game.canvas.width = window.innerWidth;
+            game.canvas.height = window.innerHeight;
+        }
+        
+        function setupEventListeners() {
+            const container = document.getElementById('gameContainer');
+            
+            container.addEventListener('mousedown', handleMouseDown);
+            container.addEventListener('mousemove', handleMouseMove);
+            container.addEventListener('mouseup', handleMouseUp);
+            container.addEventListener('contextmenu', handleRightClick);
+            
+            // 防止右键菜单
+            container.addEventListener('contextmenu', e => e.preventDefault());
+        }
+        
+        function handleMouseDown(e) {
+            const rect = game.canvas.getBoundingClientRect();
+            game.mouse.x = e.clientX - rect.left;
+            game.mouse.y = e.clientY - rect.top;
+            game.mouse.down = true;
+            
+            if (e.button === 0) { // 左键
+                game.selection.startX = game.mouse.x;
+                game.selection.startY = game.mouse.y;
+                
+                // 检查是否点击了单位
+                const clickedUnit = getUnitAtPosition(game.mouse.x, game.mouse.y);
+                if (!clickedUnit) {
+                    game.selectedUnits = [];
+                }
+            }
+        }
+        
+        function handleMouseMove(e) {
+            const rect = game.canvas.getBoundingClientRect();
+            game.mouse.x = e.clientX - rect.left;
+            game.mouse.y = e.clientY - rect.top;
+            
+            if (game.mouse.down && e.buttons === 1) {
+                game.selection.endX = game.mouse.x;
+                game.selection.endY = game.mouse.y;
+                updateSelectionBox();
+            }
+            
+            // 建筑预览
+            if (game.isBuilding) {
+                updateBuildingPreview();
+            }
+        }
+        
+        function handleMouseUp(e) {
+            if (e.button === 0) {
+                game.mouse.down = false;
+                
+                // 选择框选单位
+                selectUnitsInBox();
+                hideSelectionBox();
+                
+                // 放置建筑
+                if (game.isBuilding) {
+                    placeBuilding();
+                }
+            }
+        }
+        
+        function handleRightClick(e) {
+            e.preventDefault();
+            
+            if (game.selectedUnits.length > 0) {
+                const rect = game.canvas.getBoundingClientRect();
+                const targetX = e.clientX - rect.left;
+                const targetY = e.clientY - rect.top;
+                
+                // 移动选中的单位
+                game.selectedUnits.forEach(unit => {
+                    unit.targetX = targetX + (Math.random() - 0.5) * 50;
+                    unit.targetY = targetY + (Math.random() - 0.5) * 50;
+                });
+            }
+        }
+        
+        function selectRace(race) {
+            game.currentRace = race;
+            document.getElementById('currentRace').textContent = getRaceName(race);
+            
+            // 更新按钮状态
+            document.querySelectorAll('.race-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-white');
+            });
+            event.target.classList.add('ring-2', 'ring-white');
+        }
+        
+        function getRaceName(race) {
+            const names = {
+                circle: '圆环族',
+                triangle: '三角议会',
+                square: '方碑盟约',
+                spiral: '螺旋之子'
+            };
+            return names[race] || '未选择';
+        }
+        
+        function spawnUnit() {
+            if (!game.currentRace) {
+                showMessage('请先选择一个种族！');
+                return;
+            }
+            
+            if (game.morphEnergy < 20) {
+                showMessage('形魄能量不足！');
+                return;
+            }
+            
+            // 找到基地位置
+            const base = game.buildings.find(b => b.type === 'base' && b.race === game.currentRace && !b.isEnemy);
+            if (!base && game.currentMode !== 'raceWar') {
+                showMessage('需要先建造基地！');
+                return;
+            }
+            
+            const spawnX = base ? base.x : 400;
+            const spawnY = base ? base.y : 250;
+            
+            game.morphEnergy -= 20;
+            updateResourceDisplay();
+            
+            const unit = {
+                id: Date.now(),
+                x: spawnX + (Math.random() - 0.5) * 100,
+                y: spawnY + (Math.random() - 0.5) * 100,
+                race: game.currentRace,
+                health: 100,
+                maxHealth: 100,
+                speed: 2,
+                damage: 10,
+                targetX: null,
+                targetY: null,
+                element: null
+            };
+            
+            // 应用形态节点加成
+            if (game.currentMode === 'formBattle') {
+                applyFormNodeBonuses(unit);
+            }
+            
+            game.units.push(unit);
+            createUnitElement(unit);
+            updateUnitCount();
+        }
+        
+        // 应用形态节点加成
+        function applyFormNodeBonuses(unit) {
+            game.formBattle.nodes.forEach(node => {
+                if (node.controlled === 'player') {
+                    if (node.type === 'attack') unit.damage *= 1.2;
+                    if (node.type === 'speed') unit.speed *= 1.2;
+                    if (node.type === 'defense') unit.health *= 1.2;
+                }
+            });
+        }
+        
+        function createUnitElement(unit) {
+            const element = document.createElement('div');
+            element.className = `unit unit-${unit.race}`;
+            element.style.left = unit.x + 'px';
+            element.style.top = unit.y + 'px';
+            element.onclick = () => selectUnit(unit);
+            
+            // 添加血条
+            const healthBar = document.createElement('div');
+            healthBar.className = 'health-bar';
+            const healthFill = document.createElement('div');
+            healthFill.className = 'health-fill';
+            healthFill.style.width = '100%';
+            healthBar.appendChild(healthFill);
+            element.appendChild(healthBar);
+            
+            unit.element = element;
+            document.getElementById('unitLayer').appendChild(element);
+        }
+        
+        function createFormNodeElement(node) {
+            const element = document.createElement('div');
+            element.className = `form-node ${node.type}`;
+            element.style.left = (node.x - 25) + 'px';
+            element.style.top = (node.y - 25) + 'px';
+            element.textContent = node.type === 'control' ? '★' : node.type[0].toUpperCase();
+            element.onclick = () => captureNode(node);
+            
+            node.element = element;
+            document.getElementById('unitLayer').appendChild(element);
+        }
+        
+        // 占领节点
+        function captureNode(node) {
+            if (game.selectedUnits.length > 0) {
+                const nearbyUnits = game.selectedUnits.filter(unit => {
+                    const dx = unit.x - node.x;
+                    const dy = unit.y - node.y;
+                    return Math.sqrt(dx * dx + dy * dy) < 100;
+                });
+                
+                if (nearbyUnits.length > 0) {
+                    node.controlled = 'player';
+                    node.element.classList.add('controlled');
+                    
+                    // 更新分数
+                    if (node.type === 'control') {
+                        game.formBattle.scores.player += 5;
+                    } else {
+                        game.formBattle.scores.player += 1;
+                    }
+                    
+                    updateGameStats();
+                }
+            }
+        }
+        
+        function selectUnit(unit) {
+            if (game.selectedUnits.includes(unit)) {
+                game.selectedUnits = game.selectedUnits.filter(u => u !== unit);
+            } else {
+                game.selectedUnits.push(unit);
+            }
+            updateUnitSelection();
+        }
+        
+        function selectUnitsInBox() {
+            const minX = Math.min(game.selection.startX, game.selection.endX);
+            const maxX = Math.max(game.selection.startX, game.selection.endX);
+            const minY = Math.min(game.selection.startY, game.selection.endY);
+            const maxY = Math.max(game.selection.startY, game.selection.endY);
+            
+            game.selectedUnits = game.units.filter(unit => {
+                return unit.x >= minX && unit.x <= maxX && unit.y >= minY && unit.y <= maxY;
+            });
+            
+            updateUnitSelection();
+        }
+        
+        function updateUnitSelection() {
+            game.units.forEach(unit => {
+                if (game.selectedUnits.includes(unit)) {
+                    unit.element.style.boxShadow = '0 0 0 3px #60a5fa';
+                } else {
+                    unit.element.style.boxShadow = '';
+                }
+            });
+        }
+        
+        function updateSelectionBox() {
+            const box = document.getElementById('selectionBox');
+            const width = Math.abs(game.selection.endX - game.selection.startX);
+            const height = Math.abs(game.selection.endY - game.selection.startY);
+            const left = Math.min(game.selection.startX, game.selection.endX);
+            const top = Math.min(game.selection.startY, game.selection.endY);
+            
+            box.style.display = 'block';
+            box.style.left = left + 'px';
+            box.style.top = top + 'px';
+            box.style.width = width + 'px';
+            box.style.height = height + 'px';
+        }
+        
+        function hideSelectionBox() {
+            document.getElementById('selectionBox').style.display = 'none';
+        }
+        
+        function startBuilding(type) {
+            if (!game.currentRace) {
+                showMessage('请先选择一个种族！');
+                return;
+            }
+            
+            const costs = { base: 50, tower: 30 };
+            if (game.morphEnergy < costs[type]) {
+                showMessage('形魄能量不足！');
+                return;
+            }
+            
+            game.isBuilding = true;
+            game.buildingType = type;
+            game.canvas.style.cursor = 'pointer';
+        }
+        
+        function placeBuilding() {
+            const costs = { base: 50, tower: 30 };
+            if (game.morphEnergy >= costs[game.buildingType]) {
+                game.morphEnergy -= costs[game.buildingType];
+                updateResourceDisplay();
+                
+                const building = {
+                    id: Date.now(),
+                    type: game.buildingType,
+                    race: game.currentRace,
+                    x: game.mouse.x - 30,
+                    y: game.mouse.y - 30,
+                    health: game.buildingType === 'base' ? 200 : 100
+                };
+                
+                game.buildings.push(building);
+                createBuildingElement(building);
+            }
+            
+            game.isBuilding = false;
+            game.buildingType = null;
+            game.canvas.style.cursor = 'crosshair';
+        }
+        
+        function createBuildingElement(building) {
+            const element = document.createElement('div');
+            element.className = `building building-${building.type}`;
+            element.style.left = building.x + 'px';
+            element.style.top = building.y + 'px';
+            
+            building.element = element;
+            document.getElementById('buildingLayer').appendChild(element);
+        }
+        
+        function updateBuildingPreview() {
+            // 简化的建筑预览逻辑
+        }
+        
+        function generateResources() {
+            for (let i = 0; i < 5; i++) {
+                const resource = {
+                    id: Date.now() + i,
+                    x: Math.random() * (game.canvas.width - 100) + 50,
+                    y: Math.random() * (game.canvas.height - 100) + 50,
+                    value: 20,
+                    respawnTime: 0
+                };
+                
+                game.resources.push(resource);
+                createResourceElement(resource);
+            }
+        }
+        
+        function createResourceElement(resource) {
+            const element = document.createElement('div');
+            element.className = 'resource-node';
+            element.style.left = (resource.x - 20) + 'px';
+            element.style.top = (resource.y - 20) + 'px';
+            
+            resource.element = element;
+            document.getElementById('unitLayer').appendChild(element);
+        }
+        
+        function getUnitAtPosition(x, y) {
+            return game.units.find(unit => {
+                const dx = unit.x - x;
+                const dy = unit.y - y;
+                return Math.sqrt(dx * dx + dy * dy) < 20;
+            });
+        }
+        
+        function updateUnits() {
+            game.units.forEach(unit => {
+                // 移动单位
+                if (unit.targetX !== null && unit.targetY !== null) {
+                    const dx = unit.targetX - unit.x;
+                    const dy = unit.targetY - unit.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 5) {
+                        unit.x += (dx / distance) * unit.speed;
+                        unit.y += (dy / distance) * unit.speed;
+                    } else {
+                        unit.targetX = null;
+                        unit.targetY = null;
+                    }
+                }
+                
+                // 更新位置
+                if (unit.element) {
+                    unit.element.style.left = unit.x + 'px';
+                    unit.element.style.top = unit.y + 'px';
+                }
+                
+                // 收集资源
+                game.resources.forEach(resource => {
+                    if (resource.respawnTime <= 0) {
+                        const dx = unit.x - resource.x;
+                        const dy = unit.y - resource.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < 30) {
+                            game.morphEnergy += resource.value;
+                            updateResourceDisplay();
+                            resource.element.style.display = 'none';
+                            resource.respawnTime = 300; // 5秒重生
+                        }
+                    }
+                });
+                
+                // 自动攻击
+                const enemy = findNearestEnemy(unit);
+                if (enemy && getDistance(unit, enemy) < 150) {
+                    createProjectile(unit, enemy);
+                }
+            });
+            
+            // 更新资源重生
+            game.resources.forEach(resource => {
+                if (resource.respawnTime > 0) {
+                    resource.respawnTime--;
+                    if (resource.respawnTime === 0) {
+                        resource.element.style.display = 'block';
+                    }
+                }
+            });
+        }
+        
+        function findNearestEnemy(unit) {
+            let nearest = null;
+            let minDistance = Infinity;
+            
+            // 根据模式查找敌人
+            if (game.currentMode === 'conquest') {
+                // 查找敌人单位
+                game.units.forEach(u => {
+                    if (u.race !== unit.race) {
+                        const dist = getDistance(unit, u);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            nearest = u;
+                        }
+                    }
+                });
+                
+                // 也攻击敌人基地
+                game.conquest.enemyBases.forEach(base => {
+                    const dist = getDistance(unit, base);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        nearest = base;
+                    }
+                });
+            } else if (game.currentMode === 'survival') {
+                // 生存模式攻击敌人
+                game.survival.enemies.forEach(enemy => {
+                    const dist = getDistance(unit, enemy);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        nearest = enemy;
+                    }
+                });
+            } else {
+                // 其他模式攻击不同种族的单位
+                game.units.forEach(u => {
+                    if (u.race !== unit.race) {
+                        const dist = getDistance(unit, u);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            nearest = u;
+                        }
+                    }
+                });
+            }
+            
+            return nearest;
+        }
+        
+        function getDistance(a, b) {
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        function createProjectile(from, to) {
+            if (Math.random() > 0.05) return; // 降低攻击频率
+            
+            const projectile = {
+                x: from.x,
+                y: from.y,
+                targetX: to.x,
+                targetY: to.y,
+                speed: 5,
+                damage: from.damage || 10,
+                owner: from
+            };
+            
+            game.projectiles.push(projectile);
+            
+            const element = document.createElement('div');
+            element.className = 'projectile';
+            element.style.left = projectile.x + 'px';
+            element.style.top = projectile.y + 'px';
+            projectile.element = element;
+            document.getElementById('projectileLayer').appendChild(element);
+        }
+        
+        function updateProjectiles() {
+            game.projectiles = game.projectiles.filter(projectile => {
+                const dx = projectile.targetX - projectile.x;
+                const dy = projectile.targetY - projectile.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 10) {
+                    // 击中目标
+                    if (projectile.target.health) {
+                        projectile.target.health -= projectile.damage;
+                        if (projectile.target.health <= 0) {
+                            // 目标被摧毁
+                            handleTargetDestroyed(projectile.target);
+                        }
+                        updateHealthBar(projectile.target);
+                    }
+                    projectile.element.remove();
+                    return false;
+                }
+                
+                projectile.x += (dx / distance) * projectile.speed;
+                projectile.y += (dy / distance) * projectile.speed;
+                
+                if (projectile.element) {
+                    projectile.element.style.left = projectile.x + 'px';
+                    projectile.element.style.top = projectile.y + 'px';
+                }
+                
+                return true;
+            });
+        }
+        
+        function handleTargetDestroyed(target) {
+            if (target.type === 'base') {
+                // 基地被摧毁
+                if (game.currentMode === 'conquest' && target.isEnemy) {
+                    game.conquest.enemyBases = game.conquest.enemyBases.filter(b => b !== target);
+                    checkConquestVictory();
+                } else if (game.currentMode === 'survival' && target.id === 'player-base') {
+                    showMessage('游戏结束！基地被摧毁');
+                    setTimeout(() => backToModeSelection(), 3000);
+                }
+            }
+            
+            // 移除元素
+            if (target.element) {
+                target.element.remove();
+            }
+            
+            // 从数组中移除
+            game.buildings = game.buildings.filter(b => b !== target);
+            game.units = game.units.filter(u => u !== target);
+            game.survival.enemies = game.survival.enemies.filter(e => e !== target);
+        }
+        
+        function updateHealthBar(target) {
+            if (target.element) {
+                const healthFill = target.element.querySelector('.health-fill');
+                if (healthFill) {
+                    const percent = Math.max(0, (target.health / target.maxHealth) * 100);
+                    healthFill.style.width = percent + '%';
+                }
+            }
+        }
+        
+        // 检查征服模式胜利
+        function checkConquestVictory() {
+            if (game.conquest.enemyBases.length === 0) {
+                showMessage('胜利！你摧毁了所有敌人基地！');
+                setTimeout(() => backToModeSelection(), 3000);
+            }
+        }
+        
+        // 更新生存模式
+        function updateSurvivalMode() {
+            const now = Date.now();
+            
+            // 检查是否需要生成新的Wave
+            if (now > game.survival.nextWaveTime) {
+                spawnSurvivalWave(game.survival.wave);
+                game.survival.wave++;
+                game.survival.nextWaveTime = now + 30000; // 30秒下一波
+                showWaveIndicator(game.survival.wave);
+                updateGameStats();
+            }
+            
+            // 更新敌人
+            game.survival.enemies.forEach(enemy => {
+                // 敌人AI：寻找最近的玩家单位或基地
+                const target = findPlayerTarget(enemy);
+                if (target) {
+                    const dx = target.x - enemy.x;
+                    const dy = target.y - enemy.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 50) {
+                        enemy.x += (dx / distance) * enemy.speed;
+                        enemy.y += (dy / distance) * enemy.speed;
+                    }
+                    
+                    // 更新位置
+                    if (enemy.element) {
+                        enemy.element.style.left = enemy.x + 'px';
+                        enemy.element.style.top = enemy.y + 'px';
+                    }
+                    
+                    // 攻击
+                    if (distance < 100 && Math.random() < 0.02) {
+                        createProjectile(enemy, target);
+                    }
+                }
+            });
+        }
+        
+        // 生成生存波次
+        function spawnSurvivalWave(wave) {
+            const enemyCount = 5 + wave * 2;
+            const baseHealth = 50 + wave * 10;
+            const baseDamage = 5 + wave * 2;
+            
+            for (let i = 0; i < enemyCount; i++) {
+                setTimeout(() => {
+                    const angle = (i / enemyCount) * Math.PI * 2;
+                    const distance = 300;
+                    const enemy = {
+                        id: Date.now() + i,
+                        x: 400 + Math.cos(angle) * distance,
+                        y: 250 + Math.sin(angle) * distance,
+                        race: 'chaos',
+                        health: baseHealth,
+                        maxHealth: baseHealth,
+                        speed: 1 + Math.random(),
+                        damage: baseDamage,
+                        element: null
+                    };
+                    
+                    game.survival.enemies.push(enemy);
+                    
+                    // 创建敌人元素
+                    const element = document.createElement('div');
+                    element.className = 'unit';
+                    element.style.left = enemy.x + 'px';
+                    element.style.top = enemy.y + 'px';
+                    element.style.width = '25px';
+                    element.style.height = '25px';
+                    element.style.background = 'radial-gradient(circle, #dc2626 0%, #7f1d1d 100%)';
+                    element.style.borderRadius = '30% 70% 70% 30% / 30% 30% 70% 70%';
+                    element.style.animation = 'pulse 1s infinite';
+                    
+                    // 添加血条
+                    const healthBar = document.createElement('div');
+                    healthBar.className = 'health-bar';
+                    const healthFill = document.createElement('div');
+                    healthFill.className = 'health-fill';
+                    healthFill.style.width = '100%';
+                    healthBar.appendChild(healthFill);
+                    element.appendChild(healthBar);
+                    
+                    enemy.element = element;
+                    document.getElementById('unitLayer').appendChild(element);
+                }, i * 200);
+            }
+            
+            // Boss波
+            if (wave % 5 === 0) {
+                setTimeout(() => {
+                    const boss = {
+                        id: 'boss-' + wave,
+                        x: 400,
+                        y: 100,
+                        race: 'chaos',
+                        health: baseHealth * 5,
+                        maxHealth: baseHealth * 5,
+                        speed: 0.5,
+                        damage: baseDamage * 3,
+                        element: null,
+                        isBoss: true
+                    };
+                    
+                    game.survival.enemies.push(boss);
+                    
+                    const element = document.createElement('div');
+                    element.className = 'unit';
+                    element.style.left = boss.x + 'px';
+                    element.style.top = boss.y + 'px';
+                    element.style.width = '50px';
+                    element.style.height = '50px';
+                    element.style.background = 'conic-gradient(from 0deg, #dc2626, #7c3aed, #dc2626)';
+                    element.style.borderRadius = '40% 60% 60% 40% / 60% 40% 60% 40%';
+                    element.style.animation = 'pulse 0.5s infinite';
+                    
+                    const healthBar = document.createElement('div');
+                    healthBar.className = 'health-bar';
+                    healthBar.style.width = '50px';
+                    const healthFill = document.createElement('div');
+                    healthFill.className = 'health-fill';
+                    healthFill.style.width = '100%';
+                    healthBar.appendChild(healthFill);
+                    element.appendChild(healthBar);
+                    
+                    boss.element = element;
+                    document.getElementById('unitLayer').appendChild(element);
+                    
+                    showMessage('Boss出现！');
+                }, enemyCount * 200);
+            }
+        }
+        
+        // 寻找玩家目标
+        function findPlayerTarget(enemy) {
+            let target = null;
+            let minDistance = Infinity;
+            
+            // 优先攻击基地
+            const base = game.buildings.find(b => b.type === 'base' && !b.isEnemy);
+            if (base) {
+                const dist = getDistance(enemy, base);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    target = base;
+                }
+            }
+            
+            // 其次攻击玩家单位
+            game.units.forEach(unit => {
+                const dist = getDistance(enemy, unit);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    target = unit;
+                }
+            });
+            
+            return target;
+        }
+        
+        function updateResourceDisplay() {
+            document.getElementById('morphEnergy').textContent = game.morphEnergy;
+        }
+        
+        function updateUnitCount() {
+            document.getElementById('unitCount').textContent = game.units.length;
+        }
+        
+        function updateGameStats() {
+            const stat1 = document.getElementById('stat1');
+            
+            switch(game.currentMode) {
+                case 'conquest':
+                    stat1.textContent = `剩余敌基地: ${game.conquest.enemyBases.length}`;
+                    break;
+                case 'formBattle':
+                    stat1.textContent = `分数: ${game.formBattle.scores.player}`;
+                    break;
+                case 'raceWar':
+                    stat1.textContent = `章节: ${game.raceWar.chapter}/5`;
+                    break;
+                case 'survival':
+                    stat1.textContent = `Wave: ${game.survival.wave}`;
+                    break;
+            }
+        }
+        
+        function updateGameInstructions(mode) {
+            const instructions = document.getElementById('gameInstructions');
+            const baseInstructions = [
+                '• 选择种族后点击生成单位',
+                '• 拖拽选择多个单位',
+                '• 右键移动选中单位',
+                '• 单位会自动攻击敌人'
+            ];
+            
+            let modeInstructions = [];
+            switch(mode) {
+                case 'conquest':
+                    modeInstructions = [
+                        '• 摧毁所有红色敌人基地',
+                        '• 保护你的蓝色基地',
+                        '• 收集资源建造更多单位'
+                    ];
+                    break;
+                case 'formBattle':
+                    modeInstructions = [
+                        '• 控制地图上的形态节点',
+                        '• 带单位靠近节点占领',
+                        '• 节点提供不同加成效果'
+                    ];
+                    break;
+                case 'raceWar':
+                    modeInstructions = [
+                        '• 体验种族专属剧情',
+                        '• 根据选择影响故事发展',
+                        '• 完成章节任务'
+                    ];
+                    break;
+                case 'survival':
+                    modeInstructions = [
+                        '• 建造防御塔保护基地',
+                        '• 抵御源源不断的敌人',
+                        '• 每5波出现Boss'
+                    ];
+                    break;
+            }
+            
+            instructions.innerHTML = [...baseInstructions, ...modeInstructions]
+                .map(inst => `<li>${inst}</li>`)
+                .join('');
+        }
+        
+        function showMessage(msg) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'absolute top-32 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-4 py-2 rounded-lg';
+            msgDiv.textContent = msg;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => msgDiv.remove(), 2000);
+        }
+        
+        function drawGrid() {
+            game.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            game.ctx.lineWidth = 1;
+            
+            const gridSize = 50;
+            for (let x = 0; x < game.canvas.width; x += gridSize) {
+                game.ctx.beginPath();
+                game.ctx.moveTo(x, 0);
+                game.ctx.lineTo(x, game.canvas.height);
+                game.ctx.stroke();
+            }
+            
+            for (let y = 0; y < game.canvas.height; y += gridSize) {
+                game.ctx.beginPath();
+                game.ctx.moveTo(0, y);
+                game.ctx.lineTo(game.canvas.width, y);
+                game.ctx.stroke();
+            }
+        }
+        
+        function drawMinimap() {
+            const ctx = game.minimapCtx;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, 200, 150);
+            
+            const scaleX = 200 / game.canvas.width;
+            const scaleY = 150 / game.canvas.height;
+            
+            // 绘制单位
+            game.units.forEach(unit => {
+                ctx.fillStyle = getRaceColor(unit.race);
+                ctx.fillRect(unit.x * scaleX - 2, unit.y * scaleY - 2, 4, 4);
+            });
+            
+            // 绘制生存模式敌人
+            if (game.currentMode === 'survival') {
+                ctx.fillStyle = '#dc2626';
+                game.survival.enemies.forEach(enemy => {
+                    const size = enemy.isBoss ? 6 : 4;
+                    ctx.fillRect(enemy.x * scaleX - size/2, enemy.y * scaleY - size/2, size, size);
+                });
+            }
+            
+            // 绘制建筑
+            game.buildings.forEach(building => {
+                ctx.fillStyle = getRaceColor(building.race);
+                ctx.fillRect(building.x * scaleX - 3, building.y * scaleY - 3, 6, 6);
+            });
+            
+            // 绘制资源
+            ctx.fillStyle = '#fbbf24';
+            game.resources.forEach(resource => {
+                if (resource.respawnTime <= 0) {
+                    ctx.fillRect(resource.x * scaleX - 2, resource.y * scaleY - 2, 4, 4);
+                }
+            });
+            
+            // 绘制形态节点
+            if (game.currentMode === 'formBattle') {
+                game.formBattle.nodes.forEach(node => {
+                    ctx.fillStyle = node.controlled === 'player' ? '#10b981' : '#6b7280';
+                    ctx.fillRect(node.x * scaleX - 3, node.y * scaleY - 3, 6, 6);
+                });
+            }
+        }
+        
+        function getRaceColor(race) {
+            const colors = {
+                circle: '#3b82f6',
+                triangle: '#ef4444',
+                square: '#10b981',
+                spiral: '#a855f7',
+                chaos: '#dc2626'
+            };
+            return colors[race] || '#ffffff';
+        }
+        
+        function gameLoop() {
+            // 清空画布
+            game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
+            
+            // 绘制网格
+            drawGrid();
+            
+            // 更新游戏逻辑
+            updateUnits();
+            updateProjectiles();
+            
+            // 模式特定更新
+            if (game.currentMode === 'survival') {
+                updateSurvivalMode();
+            }
+            
+            // 绘制小地图
+            drawMinimap();
+            
+            // 能量自然恢复
+            if (Math.random() < 0.01) {
+                game.morphEnergy = Math.min(game.morphEnergy + 1, 200);
+                updateResourceDisplay();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 页面加载时显示模式选择
+        window.onload = function() {
+            // 游戏初始状态：显示模式选择界面
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章：终极对决 - 混沌之源 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes chaos-distort {
+            0% { transform: scale(1) rotate(0deg); filter: blur(0px); }
+            25% { transform: scale(1.1) rotate(90deg); filter: blur(1px); }
+            50% { transform: scale(0.9) rotate(180deg); filter: blur(2px); }
+            75% { transform: scale(1.05) rotate(270deg); filter: blur(1px); }
+            100% { transform: scale(1) rotate(360deg); filter: blur(0px); }
+        }
+        
+        @keyframes reality-tear {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        @keyframes void-pulse {
+            0%, 100% { 
+                box-shadow: 0 0 50px rgba(75, 85, 99, 0.8),
+                           0 0 100px rgba(75, 85, 99, 0.5),
+                           0 0 150px rgba(75, 85, 99, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 80px rgba(75, 85, 99, 1),
+                           0 0 160px rgba(75, 85, 99, 0.8),
+                           0 0 240px rgba(75, 85, 99, 0.5);
+            }
+        }
+        
+        @keyframes portal-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .chaos-distort {
+            animation: chaos-distort 4s ease-in-out infinite;
+        }
+        
+        .reality-tear {
+            animation: reality-tear 10s linear infinite;
+            background-size: 200% 200%;
+            background-image: linear-gradient(45deg, #1f2937, #374151, #1f2937);
+        }
+        
+        .void-pulse {
+            animation: void-pulse 3s ease-in-out infinite;
+        }
+        
+        .portal-rotate {
+            animation: portal-rotate 20s linear infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #9333ea 0%, #6b21a8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(147, 51, 234, 0.1);
+            border-left: 4px solid #9333ea;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .chaos-source {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(75, 85, 99, 0.3) 0%, transparent 70%);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .void-portal {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000000 0%, #1f2937 40%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .void-portal::before {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 50%;
+            animation: portal-rotate 15s linear infinite reverse;
+        }
+        
+        .void-portal::after {
+            content: '';
+            position: absolute;
+            inset: -40px;
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            border-radius: 50%;
+            animation: portal-rotate 25s linear infinite;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #9333ea, #6b21a8);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        .reality-fragment {
+            position: absolute;
+            background: rgba(147, 51, 234, 0.2);
+            border: 1px solid rgba(147, 51, 234, 0.5);
+            transform: rotate(45deg);
+        }
+        
+        .comment-system {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .comment-system::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comment-system::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .comment-system::-webkit-scrollbar-thumb {
+            background: rgba(147, 51, 234, 0.5);
+            border-radius: 3px;
+        }
+        
+        /* 深色模式样式 */
+        .dark {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-gray-900 {
+            background-color: #020617;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #1e293b;
+        }
+        
+        .dark .text-gray-700 {
+            color: #cbd5e1;
+        }
+        
+        .dark .border-gray-700 {
+            border-color: #334155;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .chaos-source {
+                height: 300px;
+            }
+            
+            .void-portal {
+                width: 150px;
+                height: 150px;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-purple-500 rounded-full rotate-slow chaos-distort"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation chaos-distort" style="animation-delay: 0.5s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-purple-500 rotate-slow chaos-distort" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-purple-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回章节目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第六章</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button id="fontSizeDecrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="fontSizeDisplay" class="text-sm">16px</span>
+                        <button id="fontSizeIncrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container mx-auto px-6 py-4">
+        <nav class="flex items-center space-x-2 text-sm text-gray-400">
+            <a href="../index.html" class="hover:text-white transition">游戏主页</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html" class="hover:text-white transition">故事</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">章节目录</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">第六章</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-purple-400">混沌之源</span>
+        </nav>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">混沌之源</span>
+            </h1>
+            <p class="text-xl text-gray-400">第六章 · 第一节</p>
+            <div class="mt-6 flex justify-center items-center space-x-8 text-sm text-gray-500">
+                <span><i class="far fa-calendar-alt mr-1"></i>发布于 2024年</span>
+                <span><i class="far fa-clock mr-1"></i>阅读时间约 20 分钟</span>
+                <span><i class="far fa-eye mr-1"></i>4,567 次阅读</span>
+            </div>
+        </header>
+
+        <!-- 章节内容 -->
+        <article id="storyContent" class="story-content text-lg">
+            <p class="text-center text-gray-400 mb-8">
+                <i class="fas fa-quote-left mr-2"></i>
+                追溯到一切的起点，才能找到终结的方法
+                <i class="fas fa-quote-right ml-2"></i>
+            </p>
+
+            <div class="prose prose-lg max-w-none">
+                <p>
+                    内部背叛的危机刚刚平息，一个更加惊人的发现让所有守护者
+                    陷入了沉默。拉克长在分析被捕获的混沌实体时，发现了一个
+                    意外的模式——所有的混沌活动都指向同一个源头。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-search mr-2"></i>混沌的源头
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">发现过程</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 追踪混沌形素的流动路径</li>
+                                <li>• 分析能量波动的频率模式</li>
+                                <li>• 绘制入侵事件的时间线</li>
+                                <li>• 发现所有路径的交汇点</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">源头特征</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 位于几何境域的边缘地带</li>
+                                <li>• 现实结构最为薄弱</li>
+                                <li>• 时间和空间开始扭曲</li>
+                                <li>• 传说中"世界之痕"的位置</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "世界之痕..."塞琳长老听到这个名词时，脸色变得苍白，
+                    "那是最古老的传说，据说在世界诞生之初，那里曾经是
+                    混沌与秩序的交界处。"
+                </p>
+
+                <div class="dialogue">
+                    "传说变成了现实，"艾欧凝视着地图上的标记点，"混沌
+                    就是从那里开始侵蚀我们的世界的。要阻止混沌，必须
+                    封闭那个源头。"
+                </div>
+
+                <p>
+                    世界之痕位于几何境域的最边缘，一个被称为"虚空裂隙"
+                    的地方。据说那里是世界的尽头，现实法则在那里变得
+                    极其脆弱。没有人真正去过那里，因为在传说中，那是
+                    连古神都不敢踏足的禁地。
+                </p>
+
+                <!-- 混沌源头场景 -->
+                <div class="my-12">
+                    <div class="chaos-source reality-tear">
+                        <div class="void-portal void-pulse"></div>
+                        
+                        <!-- 现实碎片 -->
+                        <div class="reality-fragment w-16 h-16 top-10 left-10 chaos-distort"></div>
+                        <div class="reality-fragment w-12 h-12 top-20 right-20 chaos-distort" style="animation-delay: 0.3s;"></div>
+                        <div class="reality-fragment w-20 h-20 bottom-20 left-1/4 chaos-distort" style="animation-delay: 0.6s;"></div>
+                        <div class="reality-fragment w-14 h-14 bottom-10 right-1/3 chaos-distort" style="animation-delay: 0.9s;"></div>
+                        
+                        <!-- 混沌实体 -->
+                        <div class="absolute top-1/4 left-1/4">
+                            <div class="w-8 h-8 bg-gray-800 rounded-full chaos-distort"></div>
+                        </div>
+                        <div class="absolute top-1/3 right-1/4">
+                            <div class="w-10 h-10 bg-gray-800 chaos-distort" style="animation-delay: 0.5s;"></div>
+                        </div>
+                        <div class="absolute bottom-1/3 left-1/3">
+                            <div class="w-6 h-6 bg-gray-800 rounded-full chaos-distort" style="animation-delay: 1s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "我们不能贸然行动，"托里克将军提出了警告，"从之前的
+                    经验来看，越是接近源头，混沌的力量就越强大。我们
+                    需要一个周密的计划。"
+                </p>
+
+                <p>
+                    联合指挥部连夜制定了作战计划。这次行动将是几何守护者
+                    联盟成立以来最大规模的军事行动。四大种族将倾尽全力，
+                    目标只有一个——封闭混沌之源。
+                </p>
+
+                <div class="dialogue">
+                    "这次不同，"薇拉先知看着作战地图，"我们面对的不仅
+                    仅是混沌的爪牙，而是混沌的本体。"
+                </div>
+
+                <p>
+                    根据拉克长的分析，混沌之源是一个连接着异次元的通道。
+                    只要这个通道存在，混沌就会源源不断地涌入几何境域。
+                    而封闭通道的唯一方法，就是使用源初形核的力量。
+                </p>
+
+                <p>
+                    "但源初形核的力量有限，"塞琳长老担忧地说，"如果要
+                    封闭如此巨大的通道，可能会消耗掉所有的能量。"
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-purple-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-skull mr-2"></i>最终作战计划
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold mb-2">第一阶段：突破防线</h4>
+                            <p class="text-gray-400 text-sm">三角议会作为先锋，突破混沌的外围防御，为后续部队开辟道路</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">第二阶段：建立阵地</h4>
+                            <p class="text-gray-400 text-sm">方碑盟约建立防御阵地，保护源初形核和支援部队</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">第三阶段：净化通道</h4>
+                            <p class="text-gray-400 text-sm">圆环族和螺旋之子配合，净化通道周围的混沌形素</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">第四阶段：封闭源头</h4>
+                            <p class="text-gray-400 text-sm">艾欧使用源初形核，在四大种族的协助下封闭混沌通道</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    计划制定完毕，但所有人都知道，实际执行起来会遇到
+                    无数的变数。混沌不会坐以待毙，它一定会动用所有的
+                    力量来阻止这个计划。
+                </p>
+
+                <p>
+                    出发前的夜晚，艾欧独自站在营地的边缘，望着远方的天空。
+                    那里，世界之痕的方向，天空已经开始呈现出不正常的
+                    紫色。那是混沌污染的迹象。
+                </p>
+
+                <div class="dialogue">
+                    "睡不着吗？"塞琳长老的声音从身后传来。
+                </div>
+
+                <p>
+                    艾欧回头，勉强笑了笑："我在想，如果失败了怎么办。"
+                </p>
+
+                <p>
+                    "那就继续战斗，"塞琳长老走到她身边，"圆环族有句
+                    古话：只要还有一丝希望，就永不放弃。"
+                </p>
+
+                <p>
+                    "我知道，但这次不一样。如果源初形核的能量耗尽..."
+                </p>
+
+                <div class="dialogue">
+                    "那就创造新的希望，"塞琳长老轻轻拍了拍她的肩膀，
+                    "形素来自于世界，只要世界还在，希望就永远不会消失。"
+                </div>
+
+                <p>
+                    第二天黎明，联合军团踏上了征程。这是几何境域历史上
+                    第一次，四大种族的军队并肩作战。圆环族的学者、
+                    三角议会的战士、方碑盟约的工程师、螺旋之子的变形者，
+                    每个人都知道这次行动的重要性。
+                </p>
+
+                <p>
+                    越接近世界之痕，环境的异变就越明显。大地开始扭曲，
+                    空中出现裂缝，甚至连时间都变得不稳定。有时候，他们
+                    会看到过去的幻象，有时候又会看到未来的片段。
+                </p>
+
+                <div class="dialogue">
+                    "这就是现实崩坏的感觉，"薇拉先知的声音中带着敬畏，
+                    "混沌正在侵蚀世界的基础法则。"
+                </div>
+
+                <p>
+                    五天后，他们终于到达了距离世界之痕还有最后一天路程
+                    的地方。在这里，他们看到了令人震惊的景象——一座由
+                    纯粹的混沌构成的山脉正在缓缓生长。
+                </p>
+
+                <p>
+                    "混沌正在重塑这个世界，"拉克长通过监测器分析道，
+                    "如果我们再不行动，整个几何境域都会变成混沌的
+                    领地。"
+                </p>
+
+                <p>
+                    当夜，军团在混沌山脉的阴影下扎营。所有人都能感受到
+                    那股压抑的力量，仿佛有无数双眼睛在黑暗中注视着
+                    他们。
+                </p>
+
+                <p>
+                    突然，营地的警报响起了。混沌的进攻开始了。
+                </p>
+
+                <p>
+                    数以万计的混沌实体从山脉中涌出，它们比之前遇到的
+                    任何敌人都要强大。这些实体已经完全适应了物理法则，
+                    它们能够扭曲空间，操控时间，甚至复制守护者的力量。
+                </p>
+
+                <div class="dialogue">
+                    "它们在进化！"托里克将军大喊着，指挥战士们迎敌，
+                    "混沌在学习和适应！"
+                </div>
+
+                <p>
+                    战斗异常激烈。守护者们发现，他们的战术在面对这些
+                    新的混沌实体时效果大打折扣。敌人似乎能够预知他们
+                    的每一步行动。
+                </p>
+
+                <p>
+                    "有内奸！"有人喊道，"我们的战术被泄露了！"
+                </p>
+
+                <p>
+                    但艾欧知道，这不是内奸的问题。混沌已经开始理解
+                    秩序的思维模式，它正在变得越来越聪明。
+                </p>
+
+                <p>
+                    经过一夜的激战，守护者们终于击退了进攻。但伤亡
+                    惨重，而且他们距离目标还有很远的路。
+                </p>
+
+                <div class="dialogue">
+                    "我们需要改变计划，"艾欧在战后的会议上说，"正面
+                    突破已经不可能了。"
+                </div>
+
+                <p>
+                    就在这时，一个意想不到的机会出现了。螺旋之子的
+                    侦察兵发现了一条隐秘的通道，可以直接通向混沌之源。
+                    但这条通道极其危险，据说连混沌自己都不太使用。
+                </p>
+
+                <p>
+                    "这是我们的机会，"薇拉先知说，"但也是最大的赌注。"
+                </p>
+
+                <p>
+                    经过激烈的讨论，他们决定兵分两路。主力部队继续
+                    正面进攻，吸引混沌的注意力；而精锐小队则通过隐秘
+                    通道，直接执行封闭源头的任务。
+                </p>
+
+                <p>
+                    艾欧将带领精锐小队，成员包括塞琳、托里克、拉克和
+                    薇拉。他们将面对最直接的挑战——与混沌之源的
+                    本体对抗。
+                </p>
+
+                <p>
+                    "这可能是我们最后一次并肩作战了，"托里克将军
+                    检查着他的武器，"让这场战斗成为传奇吧。"
+                </p>
+
+                <p>
+                    精锐小队踏上了隐秘通道。那是一条扭曲的隧道，墙壁
+                    在不断变化，时而是固体，时而是液体，时而又像是
+                    纯粹的能量。
+                </p>
+
+                <div class="dialogue">
+                    "这里已经不完全属于我们的世界了，"拉克长看着
+                    手中的仪器，"现实法则在这里变得很不稳定。"
+                </div>
+
+                <p>
+                    越往前走，他们感受到的压力就越大。那是一种来自
+                    深层次的恐惧，仿佛整个世界都在排斥他们的存在。
+                    每一步都像是在与整个宇宙对抗。
+                </p>
+
+                <p>
+                    终于，在通道的尽头，他们看到了混沌之源的真面目。
+                </p>
+
+                <p>
+                    那不是一个实体，而是一个概念的具体化——一个不断
+                    旋转的黑色球体，周围环绕着紫色的能量。从这个球体
+                    中，无数的物质和能量被吸入，又被吐出，但每一项
+                    都被扭曲成了混沌的形态。
+                </p>
+
+                <p>
+                    "这就是混沌的本质，"艾欧轻声说道，"不是破坏，
+                    而是无休止的转化。"
+                </p>
+
+                <p>
+                    混沌之源似乎察觉到了他们的到来。整个空间开始震动，
+                    一个巨大的意识直接出现在他们的脑海中。
+                </p>
+
+                <div class="dialogue">
+                    "秩序的产物...你们终于来了...这个宇宙需要改变...
+                    需要进化..."
+                </div>
+
+                <p>
+                    那不是语言，而是纯粹的思想，直接烙印在意识上。
+                    混沌想要告诉他们，它不是邪恶的，它只是想帮助
+                    世界进化到一个更高的层次。
+                </p>
+
+                <p>
+                    "但你的进化意味着毁灭，"艾欧大声回应，"我们拒绝
+                    这种进化！"
+                </p>
+
+                <p>
+                    混沌之源发出了愤怒的波动。整个空间开始崩塌，
+                    现实的碎片像玻璃一样破碎。终极对决，即将开始。
+                </p>
+
+                <p class="text-center text-gray-400 mt-8 pt-8 border-t border-gray-700">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    本节完
+                </p>
+            </div>
+        </article>
+
+        <!-- 导航按钮 -->
+        <div class="mt-12 flex justify-between items-center">
+            <a href="chapter-5-section-3.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一节：内部的背叛</span>
+            </a>
+            <a href="chapter-6-section-2.html" class="flex items-center space-x-2 px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                <span>下一节：终极形态</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-3 text-purple-400"></i>
+                读者评论
+            </h3>
+            
+            <div id="commentSection" class="comment-system space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <h4 class="text-lg font-semibold mb-4">发表评论</h4>
+                <form id="commentForm" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" id="commentName" placeholder="你的名字" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" id="commentEmail" placeholder="邮箱（可选）" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <textarea id="commentContent" rows="4" placeholder="分享你的想法..." 
+                              class="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                    <button type="submit" class="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-paper-plane mr-2"></i>发布评论
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 故事即将完结
+            </p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="../index.html" class="hover:text-white transition">返回主页</a>
+                <a href="index.html" class="hover:text-white transition">章节目录</a>
+                <a href="../world-lore.html" class="hover:text-white transition">世界观</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 进度条
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+        
+        window.addEventListener('scroll', updateProgressBar);
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // 字体大小调整
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const storyContent = document.getElementById('storyContent');
+        let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
+        
+        fontSizeDisplay.textContent = currentFontSize + 'px';
+        storyContent.style.fontSize = currentFontSize + 'px';
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                updateFontSize();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                updateFontSize();
+            }
+        });
+        
+        function updateFontSize() {
+            fontSizeDisplay.textContent = currentFontSize + 'px';
+            storyContent.style.fontSize = currentFontSize + 'px';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+
+        // 评论系统
+        const comments = [
+            {
+                name: '科幻爱好者',
+                content: '混沌之源的设定太震撼了！不是简单的邪恶力量，而是一种进化的理念。这种灰色地带的设定让故事更有深度。',
+                time: '5小时前',
+                avatar: '🚀'
+            },
+            {
+                name: '哲学思考者',
+                content: '混沌与秩序的辩证关系在这章体现得淋漓尽致。也许混沌并不是敌人，只是另一种存在的形式？',
+                time: '8小时前',
+                avatar: '🤔'
+            },
+            {
+                name: '战术分析师',
+                content: '兵分两路的决策很明智。但隐秘通道真的安全吗？感觉那里藏着更大的危险...',
+                time: '1天前',
+                avatar: '♟️'
+            }
+        ];
+        
+        function loadComments() {
+            const commentSection = document.getElementById('commentSection');
+            commentSection.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-lg">
+                            ${comment.avatar}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h5 class="font-semibold">${comment.name}</h5>
+                                <span class="text-sm text-gray-500">${comment.time}</span>
+                            </div>
+                            <p class="text-gray-300">${comment.content}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        loadComments();
+        
+        // 提交评论
+        document.getElementById('commentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('commentName').value;
+            const content = document.getElementById('commentContent').value;
+            
+            if (name && content) {
+                const newComment = {
+                    name: name,
+                    content: content,
+                    time: '刚刚',
+                    avatar: name.charAt(0).toUpperCase()
+                };
+                
+                comments.unshift(newComment);
+                loadComments();
+                
+                // 清空表单
+                document.getElementById('commentName').value = '';
+                document.getElementById('commentEmail').value = '';
+                document.getElementById('commentContent').value = '';
+                
+                // 显示成功提示
+                alert('评论发布成功！');
+            }
+        });
+
+        // 添加混沌源头的动态效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const chaosSource = document.querySelector('.chaos-source');
+            const voidPortal = document.querySelector('.void-portal');
+            
+            // 创建现实崩塌效果
+            setInterval(() => {
+                const tear = document.createElement('div');
+                tear.className = 'absolute w-1 h-8 bg-purple-500/30';
+                tear.style.left = Math.random() * 100 + '%';
+                tear.style.top = Math.random() * 100 + '%';
+                tear.style.transform = `rotate(${Math.random() * 360}deg)`;
+                tear.style.animation = 'chaos-distort 2s ease-out';
+                chaosSource.appendChild(tear);
+                
+                setTimeout(() => {
+                    tear.remove();
+                }, 2000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

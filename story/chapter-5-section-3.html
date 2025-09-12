@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五章：形态守护者 - 内部的背叛 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes betrayal-shadow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(147, 51, 234, 0.5),
+                           0 0 40px rgba(147, 51, 234, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(147, 51, 234, 0.8),
+                           0 0 80px rgba(147, 51, 234, 0.5);
+            }
+        }
+        
+        @keyframes chaos-leak {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+        }
+        
+        @keyframes suspicion-glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2) hue-rotate(10deg); }
+        }
+        
+        @keyframes trust-fade {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .betrayal-shadow {
+            animation: betrayal-shadow 3s ease-in-out infinite;
+        }
+        
+        .chaos-leak {
+            animation: chaos-leak 2s ease-out infinite;
+        }
+        
+        .suspicion-glow {
+            animation: suspicion-glow 4s ease-in-out infinite;
+        }
+        
+        .trust-fade {
+            animation: trust-fade 3s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(147, 51, 234, 0.1);
+            border-left: 4px solid #9333ea;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+        
+        .betrayal-scene {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(147, 51, 234, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .character-shadow {
+            position: absolute;
+            bottom: 20px;
+            width: 60px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #9333ea, #7c3aed);
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        .comment-system {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .comment-system::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comment-system::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .comment-system::-webkit-scrollbar-thumb {
+            background: rgba(147, 51, 234, 0.5);
+            border-radius: 3px;
+        }
+        
+        /* 深色模式样式 */
+        .dark {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-gray-900 {
+            background-color: #020617;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #1e293b;
+        }
+        
+        .dark .text-gray-700 {
+            color: #cbd5e1;
+        }
+        
+        .dark .border-gray-700 {
+            border-color: #334155;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .betrayal-scene {
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-purple-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-purple-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-purple-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回章节目录</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">第五章</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button id="fontSizeDecrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="fontSizeDisplay" class="text-sm">16px</span>
+                        <button id="fontSizeIncrease" class="p-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 面包屑导航 -->
+    <div class="container mx-auto px-6 py-4">
+        <nav class="flex items-center space-x-2 text-sm text-gray-400">
+            <a href="../index.html" class="hover:text-white transition">游戏主页</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html" class="hover:text-white transition">故事</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">章节目录</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="index.html#chapters" class="hover:text-white transition">第五章</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-purple-400">内部的背叛</span>
+        </nav>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 container mx-auto px-6 py-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <span class="gradient-text">内部的背叛</span>
+            </h1>
+            <p class="text-xl text-gray-400">第五章 · 第三节</p>
+            <div class="mt-6 flex justify-center items-center space-x-8 text-sm text-gray-500">
+                <span><i class="far fa-calendar-alt mr-1"></i>发布于 2024年</span>
+                <span><i class="far fa-clock mr-1"></i>阅读时间约 20 分钟</span>
+                <span><i class="far fa-eye mr-1"></i>3,456 次阅读</span>
+            </div>
+        </header>
+
+        <!-- 章节内容 -->
+        <article id="storyContent" class="story-content text-lg">
+            <p class="text-center text-gray-400 mb-8">
+                <i class="fas fa-quote-left mr-2"></i>
+                最大的威胁往往来自内部，信任的破碎比任何攻击都更致命
+                <i class="fas fa-quote-right ml-2"></i>
+            </p>
+
+            <div class="prose prose-lg max-w-none">
+                <p>
+                    第一场胜利的喜悦还没有持续多久，一个令人不安的消息传来。
+                    螺旋之子的营地遭到了神秘袭击，而袭击者的身份，让所有人都
+                    感到震惊。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-user-secret mr-2"></i>背叛的迹象
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">袭击事件</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 时间：胜利后的第三天夜晚</li>
+                                <li>• 地点：螺旋之子前沿营地</li>
+                                <li>• 损失：能量储存装置被毁</li>
+                                <li>• 目标：阻止螺旋之子恢复力量</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">可疑证据</h4>
+                            <ul class="text-gray-400 space-y-1">
+                                <li>• 袭击者使用了三角议会的武器</li>
+                                <li>• 留下了三角军团的徽记</li>
+                                <li>• 目击者看到红色能量光束</li>
+                                <li>• 袭击手法与托里克相似</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    "不，这不可能！"托里克将军的声音中充满了愤怒和难以置信，
+                    "三角议会从来没有下令袭击盟友！这一定是混沌的阴谋！"
+                </p>
+
+                <div class="dialogue">
+                    "但证据确凿，"拉克长冷静地分析道，"武器碎片、能量残留、
+                    甚至是战斗风格，都与三角军团如出一辙。托里克，你需要解释。"
+                </div>
+
+                <p>
+                    薇拉先知的脸色苍白，她的族人受到了严重的损失。"如果不是
+                    混沌，那为什么要这样做？我们刚刚才建立联盟，为什么要
+                    破坏它？"
+                </p>
+
+                <p>
+                    艾欧站在众人之间，试图平息这场争端。作为形态协调者，
+                    他必须保持中立，但眼前的证据确实对托里克极为不利。
+                </p>
+
+                <!-- 背叛场景 -->
+                <div class="my-12">
+                    <div class="betrayal-scene">
+                        <!-- 背景元素 -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-gray-900"></div>
+                        
+                        <!-- 角色位置 -->
+                        <div class="absolute bottom-20 left-1/4 transform -translate-x-1/2">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-2 suspicion-glow">
+                                    <i class="fas fa-user text-white text-2xl"></i>
+                                </div>
+                                <p class="text-sm text-gray-400">托里克</p>
+                            </div>
+                            <div class="character-shadow mx-auto"></div>
+                        </div>
+                        
+                        <div class="absolute bottom-20 right-1/4 transform translate-x-1/2">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center mb-2">
+                                    <i class="fas fa-user text-white text-2xl"></i>
+                                </div>
+                                <p class="text-sm text-gray-400">薇拉</p>
+                            </div>
+                            <div class="character-shadow mx-auto"></div>
+                        </div>
+                        
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center betrayal-shadow">
+                                <i class="fas fa-mask text-white text-3xl"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 混沌泄露效果 -->
+                        <div class="absolute top-10 left-1/2 transform -translate-x-1/2">
+                            <div class="w-4 h-4 bg-purple-900 rounded-full chaos-leak"></div>
+                        </div>
+                        <div class="absolute top-20 right-20">
+                            <div class="w-3 h-3 bg-purple-900 rounded-full chaos-leak" style="animation-delay: 0.5s;"></div>
+                        </div>
+                        <div class="absolute top-30 left-20">
+                            <div class="w-5 h-5 bg-purple-900 rounded-full chaos-leak" style="animation-delay: 1s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    会议室内，气氛紧张到了极点。塞琳长老试图调解，但螺旋
+                    之子的愤怒已经无法平息。他们要求托里克给出一个解释，
+                    而三角将军则坚持这是陷害。
+                </p>
+
+                <div class="dialogue">
+                    "我以三角议会将军的名义发誓，"托里克将手放在心口，
+                    "如果真的是我的人做的，我亲手处决他们。但请相信我，
+                    这不是三角议会的风格。"
+                </div>
+
+                <p>
+                    艾欧看着托里克的眼神，那里面只有真诚和愤怒。作为能看见
+                    形素的人，他能够感觉到托里克身上的形素流动纯净而强大，
+                    没有任何混沌的污染。
+                </p>
+
+                <p>
+                    "等等，"艾欧突然说道，"让我看看袭击的现场。也许我能发现
+                    什么线索。"
+                </p>
+
+                <p>
+                    在螺旋之子的营地，艾欧仔细观察着每一个细节。被毁的能量
+                    装置、武器碎片、地面上的痕迹...突然，他注意到了一些
+                    不对劲的地方。
+                </p>
+
+                <p>
+                    "这些能量残留，"艾欧蹲下身，手指触摸着地面，"虽然看起来
+                    像是三角的红色形素，但仔细看，里面混杂着一些..."
+                </p>
+
+                <div class="dialogue">
+                    "混沌的痕迹，"塞琳长老接过话头，"有人故意模仿了三角的
+                    攻击方式，但无法完全掩饰混沌的本质。"
+                </div>
+
+                <p>
+                    就在这时，一个更惊人的发现出现了。拉克长在分析袭击的
+                    数据时，发现了一个隐藏的信号——这个信号指向了守护者
+                    阵营的内部。
+                </p>
+
+                <div class="bg-gray-800/50 rounded-xl p-6 my-8 border border-purple-500/30">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-bug mr-2"></i>内鬼的调查
+                    </h3>
+                    <div class="text-gray-300 space-y-2">
+                        <p>• 信号源：方碑盟约的通信网络</p>
+                        <p>• 传输内容：混沌的加密信息</p>
+                        <p>• 发送频率：每三天一次</p>
+                        <p>• 接收方：未知的混沌节点</p>
+                    </div>
+                </div>
+
+                <p>
+                    "不...这不可能，"拉克长的声音第一次出现了动摇，"方碑
+                    盟约的通信系统是最高机密，只有最高层才能访问。"
+                </p>
+
+                <p>
+                    气氛变得更加凝重。如果内鬼真的存在，而且能够接触到
+                    方碑盟约的核心机密，那么情况就比想象中更加危险。
+                </p>
+
+                <p>
+                    "我们必须找出内鬼，"艾欧严肃地说，"但在那之前，我们
+                    不能互相猜疑。这正是混沌想要看到的——让我们从内部
+                    瓦解。"
+                </p>
+
+                <p>
+                    然而，信任一旦动摇，就很难重建。螺旋之子开始怀疑每一个
+                    人，三角议会也因为被诬陷而感到愤怒。联盟的裂痕正在
+                    不断扩大。
+                </p>
+
+                <div class="dialogue">
+                    "我有个提议，"薇拉先知突然说道，"让艾欧使用源初形核的
+                    力量，扫描每一个人。纯净的心不会被混沌污染，而背叛者
+                    无处遁形。"
+                </div>
+
+                <p>
+                    这个提议引起了激烈的争论。有人认为这是唯一的方法，
+                    也有人认为这是对个人隐私的侵犯。但最终，为了联盟的
+                    存续，大家同意了这个方案。
+                </p>
+
+                <p>
+                    艾欧手持源初形核，开始逐个扫描守护者阵营的高层。圆环族
+                    的长老、三角议会的将军、方碑盟约的长老、螺旋之子的
+                    先知...每一个人的形素都纯净无暇。
+                </p>
+
+                <p>
+                    "没有人被污染，"艾欧困惑地说，"但信号确实是从内部
+                    发出的。"
+                </p>
+
+                <p>
+                    就在这时，一个意想不到的人站了出来。
+                </p>
+
+                <p>
+                    "是我，"一个方碑盟约的低级官员说道，他的眼中闪烁着
+                    紫色的光芒，"我一直在为混沌服务。因为只有混沌，
+                    才能带来真正的变化。"
+                </p>
+
+                <p>
+                    所有人都震惊了。这个官员平时默默无闻，谁能想到他
+                    竟然是混沌的奸细？
+                </p>
+
+                <div class="dialogue">
+                    "你们所谓的守护，只是维持这个腐朽的世界，"官员冷笑着，
+                    "而混沌，将带来新的秩序。一个更加真实、更加自由的秩序。"
+                </div>
+
+                <p>
+                    话音未落，他的身体开始剧烈变化。皮肤上浮现出紫色的
+                    纹路，身体周围的空气开始扭曲。他正在被混沌彻底同化。
+                </p>
+
+                <p>
+                    "阻止他！"托里克大喊着冲了上去，但已经太晚了。
+                </p>
+
+                <p>
+                    一道紫色的能量波从官员身上爆发，将所有人都震退。当
+                    能量消散时，原地只留下了一个扭曲的混沌实体，以及
+                    一张纸条。
+                </p>
+
+                <p>
+                    艾欧捡起纸条，脸色变得苍白。
+                </p>
+
+                <p>
+                    "这不是结束，"纸条上写道，"这只是开始。混沌已经渗透到
+                    你们的每一个角落。当你们互相猜疑时，我们已经赢了。"
+                </p>
+
+                <p>
+                    内部的背叛虽然被揭穿，但它留下的伤痕却难以愈合。信任
+                    的危机比任何混沌攻击都更加危险。守护者们知道，他们
+                    不仅要对抗外部的敌人，还要警惕内部的威胁。
+                </p>
+
+                <p class="text-center text-gray-400 mt-8 pt-8 border-t border-gray-700">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    本节完
+                </p>
+            </div>
+        </article>
+
+        <!-- 导航按钮 -->
+        <div class="mt-12 flex justify-between items-center">
+            <a href="chapter-5-section-2.html" class="flex items-center space-x-2 px-6 py-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一节：第一场胜利</span>
+            </a>
+            <a href="chapter-6-section-1.html" class="flex items-center space-x-2 px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                <span>下一节：混沌之源</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 container mx-auto px-6 py-12 max-w-4xl">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-3 text-purple-400"></i>
+                读者评论
+            </h3>
+            
+            <div id="commentSection" class="comment-system space-y-4">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <h4 class="text-lg font-semibold mb-4">发表评论</h4>
+                <form id="commentForm" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" id="commentName" placeholder="你的名字" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="email" id="commentEmail" placeholder="邮箱（可选）" 
+                               class="px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <textarea id="commentContent" rows="4" placeholder="分享你的想法..." 
+                              class="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                    <button type="submit" class="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-paper-plane mr-2"></i>发布评论
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                几何境域：形态之战 | 故事持续创作中
+            </p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="../index.html" class="hover:text-white transition">返回主页</a>
+                <a href="index.html" class="hover:text-white transition">章节目录</a>
+                <a href="../world-lore.html" class="hover:text-white transition">世界观</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 进度条
+        function updateProgressBar() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        }
+        
+        window.addEventListener('scroll', updateProgressBar);
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // 字体大小调整
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const storyContent = document.getElementById('storyContent');
+        let currentFontSize = parseInt(localStorage.getItem('fontSize')) || 16;
+        
+        fontSizeDisplay.textContent = currentFontSize + 'px';
+        storyContent.style.fontSize = currentFontSize + 'px';
+        
+        document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                updateFontSize();
+            }
+        });
+        
+        document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                updateFontSize();
+            }
+        });
+        
+        function updateFontSize() {
+            fontSizeDisplay.textContent = currentFontSize + 'px';
+            storyContent.style.fontSize = currentFontSize + 'px';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+
+        // 评论系统
+        const comments = [
+            {
+                name: '悬疑爱好者',
+                content: '内部的背叛这个转折太精彩了！让人想起现实中的人性考验。',
+                time: '4小时前',
+                avatar: '🕵️'
+            },
+            {
+                name: '心理学学生',
+                content: '信任的崩塌确实是最可怕的。这个故事很好地展现了团队合作的脆弱性。',
+                time: '8小时前',
+                avatar: '🧠'
+            },
+            {
+                name: '剧情分析师',
+                content: '混沌的渗透策略很高明，从内部瓦解比外部攻击更有效。期待看到如何重建信任。',
+                time: '1天前',
+                avatar: '📊'
+            }
+        ];
+        
+        function loadComments() {
+            const commentSection = document.getElementById('commentSection');
+            commentSection.innerHTML = comments.map(comment => `
+                <div class="bg-gray-700/50 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-lg">
+                            ${comment.avatar}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h5 class="font-semibold">${comment.name}</h5>
+                                <span class="text-sm text-gray-500">${comment.time}</span>
+                            </div>
+                            <p class="text-gray-300">${comment.content}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        loadComments();
+        
+        // 提交评论
+        document.getElementById('commentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('commentName').value;
+            const content = document.getElementById('commentContent').value;
+            
+            if (name && content) {
+                const newComment = {
+                    name: name,
+                    content: content,
+                    time: '刚刚',
+                    avatar: name.charAt(0).toUpperCase()
+                };
+                
+                comments.unshift(newComment);
+                loadComments();
+                
+                // 清空表单
+                document.getElementById('commentName').value = '';
+                document.getElementById('commentEmail').value = '';
+                document.getElementById('commentContent').value = '';
+                
+                // 显示成功提示
+                alert('评论发布成功！');
+            }
+        });
+
+        // 添加背叛场景的动态效果
+        document.addEventListener('DOMContentLoaded', () => {
+            // 为背叛场景添加更动态的效果
+            const betrayalScene = document.querySelector('.betrayal-scene');
+            
+            // 创建信任崩塌效果
+            setInterval(() => {
+                const trustEffect = document.createElement('div');
+                trustEffect.className = 'absolute inset-0 bg-purple-500/10 trust-fade';
+                betrayalScene.appendChild(trustEffect);
+                
+                setTimeout(() => {
+                    trustEffect.remove();
+                }, 3000);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

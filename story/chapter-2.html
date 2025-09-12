@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章：分裂的世界 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+        }
+        
+        .chapter-bg {
+            background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .section-card {
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .section-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(168, 85, 247, 0.6);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+        }
+        
+        .theme-dark {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #a855f7;
+        }
+        
+        .theme-light {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #7c3aed;
+        }
+        
+        @media (max-width: 768px) {
+            .chapter-hero {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <!-- Background -->
+    <div class="chapter-bg"></div>
+    
+    <!-- Header -->
+    <header class="bg-slate-900/80 backdrop-blur-sm border-b border-purple-500/20 sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <nav class="flex items-center space-x-4 text-sm">
+                    <a href="index.html" class="text-purple-400 hover:text-purple-300 transition">
+                        <i class="fas fa-home mr-1"></i>首页
+                    </a>
+                    <span class="text-gray-500">/</span>
+                    <span class="text-gray-400">第二章</span>
+                </nav>
+                <button onclick="toggleTheme()" class="text-gray-400 hover:text-purple-400 transition">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <!-- Chapter Hero -->
+        <section class="chapter-hero bg-gradient-to-b from-purple-900/20 to-transparent py-16">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    第二章：分裂的世界
+                </h1>
+                <p class="text-xl text-gray-400 mb-8">探索各族群的理念与偏见</p>
+                <div class="flex justify-center space-x-8 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-book-open mr-2 text-purple-400"></i>
+                        <span>3 个章节</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2 text-green-400"></i>
+                        <span>已完成</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Chapter Sections -->
+        <section class="container mx-auto px-4 py-12 max-w-6xl">
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Section 1 -->
+                <a href="chapter-2-section-1.html" class="group">
+                    <div class="section-card rounded-xl p-6 h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-play text-red-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-purple-300 group-hover:text-purple-200 transition">
+                                    第一节
+                                </h3>
+                                <p class="text-sm text-gray-500">已完成</p>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-bold mb-3 text-white">三角的傲慢</h2>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            艾欧和维克多来到三角议会，面对军事激进派的绝对三角形理念。凯拉领导的派系相信只有纯粹的三角形力量才能对抗混沌。
+                        </p>
+                        <div class="mt-4 flex items-center text-purple-400 text-sm group-hover:text-purple-300">
+                            <span>开始阅读</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Section 2 -->
+                <a href="chapter-2-section-2.html" class="group">
+                    <div class="section-card rounded-xl p-6 h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-cube text-cyan-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-purple-300 group-hover:text-purple-200 transition">
+                                    第二节
+                                </h3>
+                                <p class="text-sm text-gray-500">已完成</p>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-bold mb-3 text-white">方碑的秩序</h2>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            矩阵城邦的完美秩序背后隐藏着危机。拉克和方碑盟约执着于消除一切不规则，却不知道混沌已经渗透进他们的秩序立方体。
+                        </p>
+                        <div class="mt-4 flex items-center text-purple-400 text-sm group-hover:text-purple-300">
+                            <span>开始阅读</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- Section 3 -->
+                <a href="chapter-2-section-3.html" class="group">
+                    <div class="section-card rounded-xl p-6 h-full">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-teal-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-spinner text-teal-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-purple-300 group-hover:text-purple-200 transition">
+                                    第三节
+                                </h3>
+                                <p class="text-sm text-gray-500">已完成</p>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-bold mb-3 text-white">螺旋的进化</h2>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            生命之巢的进化实验已经失控。薇拉和科尔文追求无限制的变化，却忘记了进化需要平衡，最终艾欧展示了真正的进化之道。
+                        </p>
+                        <div class="mt-4 flex items-center text-purple-400 text-sm group-hover:text-purple-300">
+                            <span>开始阅读</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+        
+        <!-- Chapter Summary -->
+        <section class="container mx-auto px-4 py-12 max-w-4xl">
+            <div class="bg-slate-800/50 border border-purple-500/20 rounded-xl p-8">
+                <h2 class="text-2xl font-bold mb-4 text-purple-400">章节概要</h2>
+                <p class="text-gray-300 leading-relaxed mb-4">
+                    在第二章中，艾欧和维克多踏上了说服各个种族的旅程。他们发现混沌不仅从外部威胁世界，更从内部利用每个种族最本质的特征进行渗透。
+                </p>
+                <div class="grid md:grid-cols-3 gap-4 mt-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold mb-2">骄傲之罪</h3>
+                        <p class="text-sm text-gray-400">三角议会的傲慢让他们相信只有自己是正确的</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-th text-cyan-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold mb-2">僵化之困</h3>
+                        <p class="text-sm text-gray-400">方碑盟约的秩序变成了无法改变的枷锁</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-infinity text-teal-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold mb-2">激进之险</h3>
+                        <p class="text-sm text-gray-400">螺旋之子为追求进化而忘记了生存的本质</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Navigation -->
+        <section class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center">
+                <a href="chapter-1.html" class="flex items-center text-purple-400 hover:text-purple-300 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    上一章：觉醒
+                </a>
+                <a href="chapter-3.html" class="flex items-center text-purple-400 hover:text-purple-300 transition">
+                    下一章：真相 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.querySelector('.fa-moon, .fa-sun');
+            
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('theme-light');
+                body.classList.add('theme-dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.className = document.body.className.replace(/theme-\w+/, 'theme-' + savedTheme);
+            
+            // Update icon based on theme
+            const icon = document.querySelector('.fa-moon, .fa-sun');
+            if (savedTheme === 'light') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+    </script>
+</body>
+</html>

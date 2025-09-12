@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：真相 - 古老的联盟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes alliance-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.5),
+                           0 0 40px rgba(59, 130, 246, 0.3),
+                           0 0 60px rgba(168, 85, 247, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(16, 185, 129, 0.8),
+                           0 0 80px rgba(59, 130, 246, 0.5),
+                           0 0 120px rgba(168, 85, 247, 0.3);
+            }
+        }
+        
+        @keyframes rune-activate {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .alliance-glow {
+            animation: alliance-glow 4s ease-in-out infinite;
+        }
+        
+        .rune-symbol {
+            animation: rune-activate 2s ease-out forwards;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 3s infinite;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .alliance-ritual {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alliance-ritual::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1), rgba(16, 185, 129, 0.1));
+            animation: rotate-slow 20s linear infinite;
+            opacity: 0.5;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #10b981;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #059669;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .ceremony-text {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-green-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-emerald-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-teal-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-purple-500 rounded-lg rotate-slow" style="animation-duration: 50s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-32 h-32 border-2 border-blue-500 transform rotate-12" style="animation-duration: 15s;"></div>
+        <div class="absolute top-1/3 right-1/4 w-40 h-40 border-2 border-pink-500 rounded-full float-animation"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-green-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第三章：</span>
+                        <span class="font-semibold text-green-400">真相</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-green-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-green-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-green-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第三章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-green-400">古老的联盟</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-green-500 to-emerald-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-green-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第三章 · 第三节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">古老的联盟</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 12 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    静默圆湖的湖心岛上，古老的祭坛正在苏醒。这里的每一块石头都记录着几何守护者联盟的历史，每一道刻痕都诉说着上一次混沌战争的惨烈。艾欧站在祭坛中央，她的双手触摸着那些早已被遗忘的符文。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这就是盟誓仪式的地点，"塞琳长老的声音带着敬畏，"据说在太古时期，四族的祖先就是在这里立下誓言，共同守护这个世界。"
+                </p>
+                
+                <h2>仪式的准备</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    要激活几何守护者联盟的力量，需要四样圣物：圆环族的和谐圆环、三角议会的秩序三角、方碑盟约的结构矩阵、螺旋之子的进化核心。这些圣物代表着各自种族最本质的力量，也是与源初形核连接的媒介。
+                </p>
+                
+                <div class="alliance-ritual bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-blue-400">四大圣物</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold">和谐圆环</h4>
+                                <p class="text-sm text-gray-400">维持着世界的平衡与循环</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-play text-red-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold">秩序三角</h4>
+                                <p class="text-sm text-gray-400">提供着稳定与方向的力量</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-square text-cyan-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold">结构矩阵</h4>
+                                <p class="text-sm text-gray-400">创造着规则与秩序的框架</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-hurricane text-teal-500 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold">进化核心</h4>
+                                <p class="text-sm text-gray-400">驱动着变化与进化的动力</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "但是和谐圆环已经出现了裂缝，"托里克担忧地说，"我们该如何修复它？"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧微笑着摇了摇头："裂缝不是弱点，而是成长的证明。源初形核告诉我，真正的完美不是没有缺陷，而是能够接纳缺陷并从中成长。"
+                </p>
+                
+                <h3>各族的态度</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    虽然在紧急会议上达成了共识，但四大种族内部仍然存在着不同的声音。圆环族中的保守派认为应该维持现状，三角议会的主战派想要独自对抗混沌，方碑盟约的传统派拒绝改变古老的规则，螺旋之子中的激进派则主张彻底的革命。
+                </p>
+                
+                <div class="dialogue">
+                    "改变总是困难的，"拉克说，"但如果我们不改变，就会被时代淘汰。方碑盟约中，像我这样的改革派正在增加。我们看到了旧的规则已经无法应对新的威胁。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    薇拉点点头："螺旋之子明白进化的必要性。虽然过程痛苦，但停滞不前意味着死亡。我们已经准备好迎接改变。"
+                </p>
+                
+                <h2>寻找圣物</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    仪式的第一步是收集四大圣物。每一件圣物都隐藏在各自种族最神圣的地方，只有获得族人的认可，才能将它们带出来。
+                </p>
+                
+                <h3>圆环中央城</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧首先回到了圆环中央城。和谐圆环悬挂在主殿的中央，它的美丽让每一个看到它的人都感到平静。但现在，裂缝的存在让许多族人感到不安。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "长老议会决定暂时保留和谐圆环，"一名守卫告诉艾欧，"他们认为在修复完成之前，不应该移动它。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧深吸一口气，走向长老议会。她知道，要说服这些保守的长老，需要更多的理由。
+                </p>
+                
+                <div class="dialogue">
+                    "尊敬的长老们，"艾欧站在议会中央说道，"裂缝不是和谐圆环的终结，而是新生的开始。就像我们的成长一样，每一次破碎都是为了更好地重建。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她伸出手，轻轻触摸和谐圆环。在她的触碰下，裂缝中开始发出柔和的光芒，就像星星点点的萤火虫。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "看到了吗？"艾欧说，"源初形核正在修复它。但这个过程需要我们的帮助，需要四大种族的力量结合在一起。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    经过长时间的讨论，长老议会终于同意了。和谐圆环被小心翼翼地取下，交给了艾欧。
+                </p>
+                
+                <h3>三角议会</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    托里克面临的挑战更加严峻。秩序三角是三角议会权力的象征，将它交给外人——即使是为了对抗混沌——在议会中引起了巨大的争议。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "我们不能失去秩序三角，"一位资深议员说，"它是我们力量的源泉。如果落入他人之手，三角议会将失去威信。"
+                </p>
+                
+                <div class="dialogue">
+                    "这不是落入他人之手，"托里克坚定地说，"而是将力量分享给需要的人。我们一直以为力量来自于掌控，但现在我明白了，真正的力量来自于合作。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在争论最激烈的时候，边境传来了紧急消息——又一座城市受到了混沌的侵蚀。这个消息让所有议员都沉默了。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "如果我们继续这样自私自利，"托里克说，"很快就没有什么可以守护的了。秩序三角不是为了让我们独占力量，而是为了让我们更好地保护这个世界。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    最终，议会以微弱的优势通过了决议。秩序三角被带到了静默圆湖。
+                </p>
+                
+                <h3>方碑盟约</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    拉克在方碑盟约的处境相对较好。作为改革派的领袖，她早已在盟约内部推广新的理念。结构矩阵——方碑盟约的核心系统——本身就具有适应性，能够根据需要调整规则。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "结构矩阵的代码显示，"拉克向盟约理事会展示，"它的设计者早就预见了这种情况。矩阵中有一个隐藏的协议，专门用于应对大规模的混沌入侵。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    这个发现让所有人都震惊了。原来方碑的祖先们早就知道混沌会再次入侵，他们设计了结构矩阵来应对这个威胁。
+                </p>
+                
+                <div class="ceremony-text">
+                    "协议名称：联盟重生<br>
+                    条件：四大种族达成共识<br>
+                    效果：激活守护者网络<br>
+                    备注：希望永远不会用到这一天"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    带着这个发现，拉克轻松地获得了理事会的支持。结构矩阵的核心组件被封装起来，准备送往仪式地点。
+                </p>
+                
+                <h3>螺旋之子</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    薇拉回到螺旋进化基地时，发现进化树的状况更加恶化了。但令人惊奇的是，在树根处，一颗新的种子正在发芽。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这是希望之种，"一位年长的螺旋先知说，"当进化树濒临死亡时，它会留下种子，准备重新开始。这就是螺旋的本质——死亡不是终结，而是新生的开始。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    进化核心就藏在这颗种子中。螺旋之子们毫不犹豫地同意将它交给艾欧。他们知道，这可能是拯救进化树的唯一希望。
+                </p>
+                
+                <h2>盟誓仪式</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    当四样圣物齐聚静默圆湖时，整个几何境域都感受到了能量的波动。湖面开始发光，源初形核从湖底升起，悬浮在祭坛上方。
+                </p>
+                
+                <div class="alliance-ritual bg-gray-800/50 rounded-lg p-6 my-4">
+                    <h3 class="text-lg font-bold mb-3 text-green-400">仪式步骤</h3>
+                    <ol class="space-y-2 text-sm">
+                        <li>1. 四族代表手持圣物，立于祭坛四角</li>
+                        <li>2. 艾欧作为形素连接者，站在祭坛中央</li>
+                        <li>3. 同步注入形素能量，激活源初形核</li>
+                        <li>4. 诵读古老的盟誓，重建联盟纽带</li>
+                        <li>5. 接受源初形核的祝福，获得守护者之力</li>
+                    </ol>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    仪式开始了。艾欧站在祭坛中央，闭上眼睛，感受着四大圣物散发出的能量。塞琳、托里克、拉克、薇拉分别站在四个方向，将各自的形素注入圣物之中。
+                </p>
+                
+                <div class="dialogue">
+                    "以圆环之名，我许下和谐之誓，"塞琳的声音在夜空中回荡。
+                </div>
+                
+                <div class="dialogue">
+                    "以三角之名，我许下秩序之誓，"托里克的声音坚定有力。
+                </div>
+                
+                <div class="dialogue">
+                    "以方碑之名，我许下结构之誓，"拉克的声音充满了决心。
+                </div>
+                
+                <div class="dialogue">
+                    "以螺旋之名，我许下进化之誓，"薇拉的声音如风般飘荡。
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    四股能量从圣物中涌出，在艾欧的身体中汇聚。她感到自己仿佛变成了一个通道，将四大种族的力量传递给源初形核。
+                </p>
+                
+                <div class="ceremony-text">
+                    "我，形素的见证者，在此宣誓：<br>
+                    将守护和谐，维持平衡；<br>
+                    将坚守秩序，指引方向；<br>
+                    将创造结构，建立规则；<br>
+                    将拥抱变化，推动进化；<br>
+                    四种力量，合而为一，<br>
+                    几何守护者，永世不灭！"
+                </div>
+                
+                <h3>联盟的重生</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    当艾欧念完最后的誓词时，一道巨大的绿色光柱从源初形核中射出，直冲云霄。在云层中，古老的符文开始显现，那是几何守护者联盟的标志。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    更令人惊奇的是，随着光柱的扩散，几何境域中的混沌侵蚀开始减缓。被混沌化的区域虽然没有完全恢复，但侵蚀的速度明显下降了。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "成功了，"塞琳激动地说，"我们重新激活了守护者联盟。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    但艾欧知道，这只是开始。联盟的重生给了他们抵抗混沌的力量，但要彻底消除混沌的威胁，还需要更多的努力。
+                </p>
+                
+                <h2>新的守护者</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    仪式结束后，每个人都感受到了明显的变化。塞琳发现她能够感知到更远处的形素流动，托里克的三角力量变得更加精准，拉克能够理解方碑矩阵中最深层的逻辑，薇拉看到了更多可能的进化路径。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    而艾欧的变化最大。她现在不仅能够看到形素，还能够在一定程度上操控它们。她的身体周围环绕着一层淡淡的光晕，那是四大形素融合的表现。
+                </p>
+                
+                <div class="dialogue">
+                    "你们都成为了新的守护者，"源初形核的声音在每个人心中响起，"但记住，真正的力量不在于个人，而在于团结。只有当你们站在一起时，才能发挥出最大的力量。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    祭坛上，四大圣物开始融合，形成了一个新的标志——四族徽记交织在一起，组成了一个完美的几何图案。这个图案悬浮在空中，散发着柔和的光芒。
+                </p>
+                
+                <h3>前进的道路</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "现在我们该怎么办？"托里克问道。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧看着远方，她的眼中闪烁着决心。"我们必须继续前进，说服更多的族人加入我们的行列。虽然我们现在有了守护者的力量，但要彻底对抗混沌，还需要整个几何境域的团结。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    拉克点点头："我会回到方碑盟约，说服更多的人加入改革派。结构矩阵的发现让许多盟约成员开始反思。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    薇拉说："螺旋之子已经准备好了。我们将用进化的眼光看待这次危机，这是我们种族成长的机会。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    塞琳微笑着说："圆环族也会改变。和谐不是停滞不前，而是要在变化中保持平衡。"
+                </p>
+                
+                <h2>希望的曙光</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    当第一缕阳光照在静默圆湖上时，新的几何守护者联盟正式成立了。虽然前路依然充满挑战，但他们已经找到了前进的方向。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    混沌的威胁依然存在，但现在，他们有了希望。四大种族重新团结在一起，共同守护这个由几何形态构成的世界。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧站在湖边，看着远方。她知道，这只是一个开始。真正的挑战还在后面，但只要他们团结一心，就没有什么是不可能的。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    几何守护者联盟的故事，才刚刚开始......
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-3-section-2.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：混沌的入侵</span>
+                    </a>
+                    <a href="../index.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition">
+                        <span>返回故事首页</span>
+                        <i class="fas fa-home"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-green-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader6/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">仪式控</span>
+                                <span class="text-sm text-gray-500">30分钟前</span>
+                            </div>
+                            <p class="text-gray-300">盟誓仪式的描写太震撼了！四大种族的誓言，源初形核的觉醒，看得我热血沸腾！这就是团结的力量啊！</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 67
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader7/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">成长的意义</span>
+                                <span class="text-sm text-gray-500">2小时前</span>
+                            </div>
+                            <p class="text-gray-300">"真正的完美不是没有缺陷，而是能够接纳缺陷并从中成长"——这句话太深刻了。作者对完美的理解超越了简单的几何概念，上升到了哲学的高度。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 45
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader8/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">迫不及待</span>
+                                <span class="text-sm text-gray-500">4小时前</span>
+                            </div>
+                            <p class="text-gray-300">第三章太精彩了！从发现源初形核到重建联盟，整个故事的发展逻辑清晰，情感真挚。期待第四章，看看他们如何说服更多族人加入！</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 38
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 第四章更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何境域：形态之战 - 故事</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chapter-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .character-card {
+            transition: all 0.3s ease;
+        }
+        
+        .character-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .timeline-line {
+            background: linear-gradient(180deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+        
+        .story-content {
+            line-height: 1.8;
+        }
+        
+        .story-content p {
+            margin-bottom: 1rem;
+            text-indent: 2em;
+        }
+        
+        .dialogue {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回游戏主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">故事</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#overview" class="hover:text-blue-400 transition">故事概览</a>
+                    <a href="#worldview" class="hover:text-blue-400 transition">世界观</a>
+                    <a href="#chapters" class="hover:text-blue-400 transition">章节</a>
+                    <a href="characters.html" class="hover:text-blue-400 transition">角色</a>
+                    <a href="world-building.html" class="hover:text-blue-400 transition">世界设定</a>
+                    <a href="media-resources.html" class="hover:text-blue-400 transition">媒体资源</a>
+                    <a href="timeline.html" class="hover:text-blue-400 transition">时间线</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">几何境域：形态之战</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">一个关于平衡、团结与成长的故事</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                当混沌入侵打破世界的几何秩序，四个分裂的种族必须放下成见，
+                重新组建古老的守护者联盟，共同守护这个由形状构成的世界。
+            </p>
+            
+            <div class="mt-12 flex justify-center space-x-4">
+                <a href="#chapters" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                    开始阅读
+                </a>
+                <a href="#overview" class="px-8 py-3 border border-gray-600 rounded-full font-semibold hover:bg-gray-800 transition duration-300">
+                    了解更多
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 故事概览 -->
+    <section id="overview" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">故事概览</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-blue-500/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-eye text-3xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">觉醒</h3>
+                    <p class="text-gray-400">一个普通的圆环族学者意外获得看见形素的能力，发现混沌入侵的征兆</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-purple-500/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-globe text-3xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">分裂</h3>
+                    <p class="text-gray-400">四大种族各自为政，追求着不同的理念，无人相信混沌的威胁</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-green-500/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-3xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">守护</h3>
+                    <p class="text-gray-400">重新组建几何守护者联盟，团结所有力量对抗混沌入侵</p>
+                </div>
+            </div>
+            
+            <!-- 核心主题 -->
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <h3 class="text-2xl font-bold mb-6 text-center">核心主题</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <i class="fas fa-balance-scale text-3xl text-yellow-400 mb-3"></i>
+                        <h4 class="font-semibold mb-2">平衡与和谐</h4>
+                        <p class="text-sm text-gray-400">多样性是最强的力量</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-seedling text-3xl text-green-400 mb-3"></i>
+                        <h4 class="font-semibold mb-2">成长与改变</h4>
+                        <p class="text-sm text-gray-400">即使是完美也需要进化</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-hands-helping text-3xl text-blue-400 mb-3"></i>
+                        <h4 class="font-semibold mb-2">团结与合作</h4>
+                        <p class="text-sm text-gray-400">不同理念可以互补</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-heart text-3xl text-red-400 mb-3"></i>
+                        <h4 class="font-semibold mb-2">责任与牺牲</h4>
+                        <p class="text-sm text-gray-400">力量越大责任越大</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 章节列表 -->
+    <section id="chapters" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">章节目录</span>
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- 第一章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第一章：觉醒</h3>
+                            <p class="text-gray-400 mb-4">圆环族学者艾欧在维护中央圆环时意外获得看见形素的能力，发现混沌入侵的征兆。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-1-prologue.html" class="text-blue-400 hover:text-blue-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>序章：破碎的圆环
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-1-section-2.html" class="text-blue-400 hover:text-blue-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>预言之梦
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-1-section-3.html" class="text-blue-400 hover:text-blue-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>三角之旅
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第二章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第二章：分裂的世界</h3>
+                            <p class="text-gray-400 mb-4">艾欧踏上旅程，发现四大种族各自为政，无人相信混沌的威胁。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-2-section-1.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>三角的傲慢
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-2-section-2.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>方碑的秩序
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-2-section-3.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>螺旋的进化
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第三章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-green-500/50 transition-all">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第三章：真相</h3>
+                            <p class="text-gray-400 mb-4">在静默圆湖深处，艾欧发现了失落的源初形核和混沌入侵的真相。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-3-section-1.html" class="text-green-400 hover:text-green-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>源初形核的呼唤
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-3-section-2.html" class="text-green-400 hover:text-green-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>混沌的入侵
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-3-section-3.html" class="text-green-400 hover:text-green-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>古老的联盟
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第四章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-yellow-500/50 transition-all">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">4</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第四章：联盟之路</h3>
+                            <p class="text-gray-400 mb-4">艾欧必须说服分裂的四大种族放下成见，重新组建几何守护者联盟。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-4-section-1.html" class="text-yellow-400 hover:text-yellow-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>说服圆环族
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-4-section-2.html" class="text-yellow-400 hover:text-yellow-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>联合三角议会
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-4-section-3.html" class="text-yellow-400 hover:text-yellow-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>争取方碑盟约
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-4-section-4.html" class="text-yellow-400 hover:text-yellow-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>引导螺旋之子
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第五章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-red-500/50 transition-all">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">5</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第五章：形态守护者</h3>
+                            <p class="text-gray-400 mb-4">古老的仪式重新激活几何守护者的力量，联军迎击混沌。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-5-section-1.html" class="text-red-400 hover:text-red-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>盟誓仪式
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-5-section-2.html" class="text-red-400 hover:text-red-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>第一场胜利
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-5-section-3.html" class="text-red-400 hover:text-red-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>内部的背叛
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第六章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-all">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold">6</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">第六章：终极对决</h3>
+                            <p class="text-gray-400 mb-4">面对混沌之源，守护者们必须做出最终的牺牲。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="chapter-6-section-1.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>混沌之源
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-6-section-2.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>终极形态
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="chapter-6-section-3.html" class="text-purple-400 hover:text-purple-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>牺牲与重生
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 终章 -->
+                <div class="chapter-card bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-cyan-500/50 transition-all">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-2xl font-bold"><i class="fas fa-infinity"></i></span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">终章：新的开始</h3>
+                            <p class="text-gray-400 mb-4">世界恢复平衡，但新的挑战永远存在。</p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="epilogue-section-1.html" class="text-cyan-400 hover:text-cyan-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>均衡时代
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="epilogue-section-2.html" class="text-cyan-400 hover:text-cyan-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>新的威胁
+                                </a>
+                                <span class="text-gray-500">|</span>
+                                <a href="epilogue-section-3.html" class="text-cyan-400 hover:text-cyan-300 transition">
+                                    <i class="fas fa-book-open mr-1"></i>无尽的故事
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="inline-flex items-center px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                100% 完成
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 创作进度 -->
+            <div class="mt-12 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                <h3 class="text-xl font-bold mb-4">创作进度</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm">总体进度</span>
+                            <span class="text-sm">100%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-500 to-cyan-600 h-2 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mt-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">100%</div>
+                            <div class="text-xs text-gray-500">第一章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-400">100%</div>
+                            <div class="text-xs text-gray-500">第二章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">100%</div>
+                            <div class="text-xs text-gray-500">第三章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">100%</div>
+                            <div class="text-xs text-gray-500">第四章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-400">100%</div>
+                            <div class="text-xs text-gray-500">第五章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-400">100%</div>
+                            <div class="text-xs text-gray-500">第六章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-cyan-400">100%</div>
+                            <div class="text-xs text-gray-500">终章</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        🎉 故事已全部完成！感谢您的阅读和支持。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 世界观介绍 -->
+    <section id="worldview" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">世界观设定</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- 世界起源 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-400">世界起源</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        几何境域是一个由纯粹几何形态构成的世界。在太初之时，源初形核创造了四种基础几何形态：
+                        圆环、三角、方碑和螺旋。这四种形态相互依存，共同维持着世界的平衡。
+                    </p>
+                </div>
+                
+                <!-- 形素体系 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400">形素体系</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        形素是构成世界的基本能量，每种几何形态都有其独特的形素特性。
+                        圆环形素代表和谐与循环，三角象征力量与方向，方碑体现秩序与结构，
+                        螺旋则蕴含变化与进化。
+                    </p>
+                </div>
+                
+                <!-- 四大种族 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4 text-green-400">四大种族</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300"><strong>圆环族</strong>：和谐与平衡的守护者</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span class="text-gray-300"><strong>三角议会</strong>：力量与方向的追求者</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                            <span class="text-gray-300"><strong>方碑盟约</strong>：秩序与结构的维护者</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-teal-500 rounded-full"></div>
+                            <span class="text-gray-300"><strong>螺旋之子</strong>：变化与进化的探索者</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 混沌威胁 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4 text-red-400">混沌威胁</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        混沌是秩序的对立面，它不遵循任何几何法则。混沌形素会侵蚀和扭曲
+                        现有的形态，将其变成不规则的存在。当混沌完全入侵时，整个几何境域
+                        都将面临崩溃的危险。
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 详细世界观链接 -->
+            <div class="text-center">
+                <a href="../world-lore.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                    <i class="fas fa-book mr-2"></i>
+                    查看详细世界观设定
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 主要角色 -->
+    <section id="characters" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">主要角色</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 艾欧 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-blue-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">艾欧</h3>
+                    <p class="text-sm text-gray-400 mb-3">圆环族学者</p>
+                    <p class="text-sm text-gray-500">故事的主角，意外获得看见形素的能力</p>
+                </div>
+                
+                <!-- 塞琳 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-purple-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">塞琳</h3>
+                    <p class="text-sm text-gray-400 mb-3">圆环族长老</p>
+                    <p class="text-sm text-gray-500">智慧的导师，掌握古老的知识</p>
+                </div>
+                
+                <!-- 托里克 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-purple-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">托里克</h3>
+                    <p class="text-sm text-gray-400 mb-3">三角议会将军</p>
+                    <p class="text-sm text-gray-500">正直勇敢，代表三角的力量</p>
+                </div>
+                
+                <!-- 拉克 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-cyan-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">拉克</h3>
+                    <p class="text-sm text-gray-400 mb-3">矩阵长</p>
+                    <p class="text-sm text-gray-500">方碑盟约改革派领袖</p>
+                </div>
+                
+                <!-- 薇拉 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-green-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="fas fa-user text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">薇拉</h3>
+                    <p class="text-sm text-gray-400 mb-3">螺旋先知</p>
+                    <p class="text-sm text-gray-500">富有远见，代表螺旋的变化</p>
+                </div>
+                
+                <!-- 不规则者 -->
+                <div class="character-card bg-gray-800/50 rounded-xl p-6 text-center border border-red-500/30">
+                    <div class="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full mx-auto mb-4 flex items-center justify-center morph-shape">
+                        <i class="fas fa-ghost text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">不规则者</h3>
+                    <p class="text-sm text-gray-400 mb-3">混沌实体</p>
+                    <p class="text-sm text-gray-500">故事的反派，扭曲的化身</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 世界观链接 -->
+    <section class="relative py-20 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="text-3xl font-bold mb-8">
+                <span class="gradient-text">探索更多</span>
+            </h2>
+            <p class="text-lg text-gray-400 mb-8">
+                想要了解更多关于几何境域的世界观设定？
+            </p>
+            <a href="../world-lore.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                <i class="fas fa-globe mr-2"></i>
+                查看世界观介绍
+            </a>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="../game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 章节卡片悬停效果
+        document.querySelectorAll('.chapter-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (this.classList.contains('opacity-60')) {
+                    this.style.transform = 'translateY(-3px)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (this.classList.contains('opacity-60')) {
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

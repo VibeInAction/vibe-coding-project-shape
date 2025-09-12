@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界观设定 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes pulse-ring {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .world-card {
+            transition: all 0.3s ease;
+        }
+        
+        .world-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3B82F6;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 24px;
+            width: 2px;
+            height: calc(100% + 16px);
+            background: linear-gradient(180deg, #3B82F6, #8B5CF6);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .map-container {
+            position: relative;
+            background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%);
+        }
+        
+        /* 城市形状样式 */
+        .city-illustration {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* 中央圆环城 */
+        .central-ring-city {
+            position: relative;
+            width: 250px;
+            height: 250px;
+        }
+        
+        .ring {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse-ring 3s ease-in-out infinite;
+        }
+        
+        .ring-1 {
+            width: 100%;
+            height: 100%;
+            border-color: #3B82F6;
+            opacity: 0.8;
+        }
+        
+        .ring-2 {
+            width: 75%;
+            height: 75%;
+            border-color: #60A5FA;
+            opacity: 0.7;
+            animation-delay: 0.5s;
+        }
+        
+        .ring-3 {
+            width: 50%;
+            height: 50%;
+            border-color: #93C5FD;
+            opacity: 0.6;
+            animation-delay: 1s;
+        }
+        
+        .ring-4 {
+            width: 25%;
+            height: 25%;
+            border-color: #DBEAFE;
+            background: #DBEAFE;
+            opacity: 0.8;
+            animation-delay: 1.5s;
+        }
+        
+        .energy-flow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FBBF24;
+            opacity: 0.7;
+            animation: orbit-ring 8s linear infinite;
+        }
+        
+        @keyframes orbit-ring {
+            0% { transform: rotate(0deg) translateX(125px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(125px) rotate(-360deg); }
+        }
+        
+        /* 三角尖塔 */
+        .triangle-spires {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        
+        .spire {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        
+        .spire-1 {
+            left: 50%;
+            top: 20%;
+            transform: translateX(-50%);
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 150px solid #8B5CF6;
+        }
+        
+        .spire-2 {
+            left: 20%;
+            top: 40%;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 120px solid #A78BFA;
+        }
+        
+        .spire-3 {
+            right: 20%;
+            top: 40%;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 120px solid #A78BFA;
+        }
+        
+        .energy-bridge {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #C084FC, transparent);
+            animation: energy-pulse 2s ease-in-out infinite;
+        }
+        
+        .bridge-1 {
+            top: 55%;
+            left: 20%;
+            width: 60%;
+            transform: rotate(-10deg);
+        }
+        
+        .bridge-2 {
+            top: 60%;
+            right: 20%;
+            width: 60%;
+            transform: rotate(10deg);
+        }
+        
+        @keyframes energy-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* 矩阵之都 */
+        .matrix-city {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            transform: rotate(45deg);
+        }
+        
+        .cube {
+            background: #06B6D4;
+            opacity: 0.8;
+            animation: cube-shift 6s ease-in-out infinite;
+        }
+        
+        .cube:nth-child(odd) {
+            background: #67E8F9;
+            animation-delay: 0.5s;
+        }
+        
+        @keyframes cube-shift {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 生命螺旋城 */
+        .life-spiral {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        
+        .spiral-path {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: #10B981;
+            border-radius: 50%;
+            animation: spiral-rotate 10s linear infinite;
+        }
+        
+        .spiral-path-1 {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .spiral-path-2 {
+            width: 75%;
+            height: 75%;
+            top: 12.5%;
+            left: 12.5%;
+            border-top-color: #34D399;
+            animation-duration: 8s;
+            animation-direction: reverse;
+        }
+        
+        .spiral-path-3 {
+            width: 50%;
+            height: 50%;
+            top: 25%;
+            left: 25%;
+            border-top-color: #6EE7B7;
+            animation-duration: 6s;
+        }
+        
+        .life-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #10B981;
+            border-radius: 50%;
+            animation: life-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes spiral-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes life-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 10px #10B981;
+            }
+            50% { 
+                transform: scale(1.5);
+                box-shadow: 0 0 20px #34D399;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-blue-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-purple-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-cyan-500 rotate-slow" style="animation-duration: 40s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="relative z-10 bg-gray-800/80 backdrop-blur-md border-b border-gray-700 sticky top-0">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-blue-400 transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回故事主页</span>
+                    </a>
+                    <div class="w-px h-8 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-globe text-white text-sm"></i>
+                        </div>
+                        <span class="text-lg font-bold">世界观设定</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#races" class="hover:text-blue-400 transition">种族</a>
+                    <a href="#cities" class="hover:text-blue-400 transition">城市</a>
+                    <a href="#locations" class="hover:text-blue-400 transition">重要地点</a>
+                    <a href="#timeline" class="hover:text-blue-400 transition">历史</a>
+                    <a href="#concepts" class="hover:text-blue-400 transition">核心概念</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <header class="relative py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900"></div>
+        
+        <div class="relative z-10 container mx-auto max-w-4xl text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">几何境域世界</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">探索由形状构成的奇妙世界</p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto">
+                在这个世界里，几何不仅仅是数学概念，而是构成万物的本源。
+                形素流动于天地之间，维持着宇宙的平衡与秩序。
+            </p>
+        </div>
+    </header>
+
+    <!-- 种族概览 -->
+    <section id="races" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">四大种族</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 圆环族 -->
+                <div class="world-card bg-gray-800/50 rounded-2xl p-8 border-2 border-blue-500/30 hover:border-blue-500/60">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center float-animation">
+                            <i class="fas fa-circle text-4xl text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">圆环族</h3>
+                            <p class="text-blue-400 mb-4">和谐与循环的守护者</p>
+                            <div class="space-y-3 text-sm text-gray-400">
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>崇尚完美与和谐</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>擅长能量操控</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>重视传统与智慧</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i><strong>主城：</strong>中央圆环城</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 三角议会 -->
+                <div class="world-card bg-gray-800/50 rounded-2xl p-8 border-2 border-purple-500/30 hover:border-purple-500/60">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-play text-4xl text-white transform rotate-90"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">三角议会</h3>
+                            <p class="text-purple-400 mb-4">力量与效率的追求者</p>
+                            <div class="space-y-3 text-sm text-gray-400">
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>追求力量与效率</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>军事化组织</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>重视结构与稳定</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i><strong>主城：</strong>三角尖塔</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 方碑盟约 -->
+                <div class="world-card bg-gray-800/50 rounded-2xl p-8 border-2 border-cyan-500/30 hover:border-cyan-500/60">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-cube text-4xl text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">方碑盟约</h3>
+                            <p class="text-cyan-400 mb-4">秩序与规则的维护者</p>
+                            <div class="space-y-3 text-sm text-gray-400">
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>崇尚秩序与规则</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>重视逻辑与理性</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>擅长技术与创新</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i><strong>主城：</strong>矩阵之都</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 螺旋之子 -->
+                <div class="world-card bg-gray-800/50 rounded-2xl p-8 border-2 border-green-500/30 hover:border-green-500/60">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-hurricane text-4xl text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">螺旋之子</h3>
+                            <p class="text-green-400 mb-4">变化与成长的追随者</p>
+                            <div class="space-y-3 text-sm text-gray-400">
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>拥抱变化与进化</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>崇尚自然与生命</p>
+                                <p><i class="fas fa-check-circle mr-2 text-green-400"></i>适应力极强</p>
+                                <p><i class="fas fa-map-marker-alt mr-2"></i><strong>主城：</strong>生命螺旋城</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 城市详情 -->
+    <section id="cities" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">主要城市</span>
+            </h2>
+            
+            <div class="space-y-8">
+                <!-- 中央圆环城 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-blue-500/30">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <div class="city-illustration">
+                                <div class="central-ring-city">
+                                    <div class="ring ring-1"></div>
+                                    <div class="ring ring-2"></div>
+                                    <div class="ring ring-3"></div>
+                                    <div class="ring ring-4"></div>
+                                    <div class="energy-flow"></div>
+                                    <div class="energy-flow" style="animation-delay: 2s"></div>
+                                    <div class="energy-flow" style="animation-delay: 4s"></div>
+                                    <div class="energy-flow" style="animation-delay: 6s"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="text-2xl font-bold mb-4 text-blue-400">中央圆环城</h3>
+                            <p class="text-gray-300 mb-4">圆环族的首都，一座由无数同心圆环构成的宏伟城市。每一层环都有其独特的功能和意义，象征着宇宙的和谐与完美。</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">城市特色</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 能量回廊：连接各个环层的能量通道</li>
+                                        <li>• 预言圆顶：存放古老预言的圣地</li>
+                                        <li>• 和谐广场：城市中心的集会场所</li>
+                                        <li>• 形态图书馆：收藏世界知识的宝库</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">重要建筑</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 长老议会厅：最高决策机构</li>
+                                        <li>• 中央能量核心：城市动力源</li>
+                                        <li>· 形素研究院：研究形素本质</li>
+                                        <li>• 守护者神殿：供奉古老守护者</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 三角尖塔 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-2">
+                            <h3 class="text-2xl font-bold mb-4 text-purple-400">三角尖塔</h3>
+                            <p class="text-gray-300 mb-4">三角议会的军事要塞，由三座巨大的三角形尖塔组成，通过能量桥梁相互连接。整个城市呈现出强烈的几何美感，每一座塔都有其特定的功能。</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">三塔功能</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 力量之塔：军事训练和武器研发</li>
+                                        <li>• 智慧之塔：战略规划和战术研究</li>
+                                        <li>• 防御之塔：城市防护系统控制中心</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">军事设施</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 战争学院：培养精英战士</li>
+                                        <li>• 棱镜兵工厂：制造先进武器</li>
+                                        <li>• 三角训练场：实战演练场地</li>
+                                        <li>• 要塞护盾：城市防御系统</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-1">
+                            <div class="city-illustration">
+                                <div class="triangle-spires">
+                                    <div class="spire spire-1"></div>
+                                    <div class="spire spire-2"></div>
+                                    <div class="spire spire-3"></div>
+                                    <div class="energy-bridge bridge-1"></div>
+                                    <div class="energy-bridge bridge-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 矩阵之都 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-cyan-500/30">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <div class="city-illustration">
+                                <div class="matrix-city">
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                    <div class="cube"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="text-2xl font-bold mb-4 text-cyan-400">矩阵之都</h3>
+                            <p class="text-gray-300 mb-4">方碑盟约的技术中心，城市由无数个立方体模块组成，可以根据需要重新组合。这里是整个世界最先进的城市，充满了科技的奇迹。</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">技术奇迹</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 量子计算中心：处理海量数据</li>
+                                        <li>• 空间折叠站：实现瞬间传送</li>
+                                        <li>· 物质重组工厂：改变物质结构</li>
+                                        <li>· 矩阵网络：城市的信息系统</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">研究机构</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 几何研究院：研究形状本质</li>
+                                        <li>• 能量研究所：开发新能源</li>
+                                        <li>• 空间研究所：探索多维空间</li>
+                                        <li>• 生物实验室：研究生命形态</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 生命螺旋城 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-green-500/30">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-2">
+                            <h3 class="text-2xl font-bold mb-4 text-green-400">生命螺旋城</h3>
+                            <p class="text-gray-300 mb-4">螺旋之子的生态城市，建筑与自然完美融合。整座城市呈现出螺旋上升的形态，象征着生命的进化与成长。这里是世界上最生机勃勃的城市。</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4 mt-6">
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">生态特色</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 生命花园：培育各种奇珍植物</li>
+                                        <li>• 进化穹顶：研究生命进化</li>
+                                        <li>• 螺旋农场：可持续农业生产</li>
+                                        <li>· 生态保护区：维护生物多样性</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-2 text-gray-300">自然奇观</h4>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>• 瀑布广场：自然水源中心</li>
+                                        <li>· 飞翔花园：空中植物群落</li>
+                                        <li>· 晶洞森林：发光植物森林</li>
+                                        <li>· 藤蔓桥梁：活体植物桥梁</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-1">
+                            <div class="city-illustration">
+                                <div class="life-spiral">
+                                    <div class="spiral-path spiral-path-1"></div>
+                                    <div class="spiral-path spiral-path-2"></div>
+                                    <div class="spiral-path spiral-path-3"></div>
+                                    <div class="life-node" style="top: 20%; left: 80%"></div>
+                                    <div class="life-node" style="top: 50%; left: 20%; animation-delay: 0.5s"></div>
+                                    <div class="life-node" style="top: 80%; left: 50%; animation-delay: 1s"></div>
+                                    <div class="life-node" style="top: 30%; left: 70%; animation-delay: 1.5s"></div>
+                                    <div class="life-node" style="top: 60%; left: 30%; animation-delay: 2s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 重要地点 -->
+    <section id="locations" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">重要地点</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 源初形核 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-yellow-500/30 hover:border-yellow-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-sun text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">源初形核</h3>
+                        <p class="text-yellow-400 text-sm">世界中心</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        世界的能量核心，所有形素的源头。传说中这里是世界诞生的地点，也是混沌最终的目标。
+                    </p>
+                </div>
+                
+                <!-- 混沌裂隙 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-red-500/30 hover:border-red-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mx-auto mb-3 flex items-center justify-center pulse-animation">
+                            <i class="fas fa-radiation text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">混沌裂隙</h3>
+                        <p class="text-red-400 text-sm">危险区域</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        混沌力量入侵世界的通道，不断侵蚀着周围的秩序。需要持续的能量封印来阻止其扩大。
+                    </p>
+                </div>
+                
+                <!-- 守护者遗迹 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-purple-500/30 hover:border-purple-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-landmark text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">守护者遗迹</h3>
+                        <p class="text-purple-400 text-sm">古代文明</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        古老守护者文明的遗迹，隐藏着对抗混沌的秘密知识。许多谜团等待后人解开。
+                    </p>
+                </div>
+                
+                <!-- 形态荒原 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-500/30 hover:border-gray-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-mountain text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">形态荒原</h3>
+                        <p class="text-gray-400 text-sm">无人之地</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        被混沌严重破坏的区域，形态场极不稳定。这里是混沌奴仆的聚集地，也是战斗的前线。
+                    </p>
+                </div>
+                
+                <!-- 和谐峡谷 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-blue-500/30 hover:border-blue-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-water text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">和谐峡谷</h3>
+                        <p class="text-blue-400 text-sm">中立地带</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        四大种族的会议场所，这里的形态场异常和谐。重要的联盟协议都是在这里签署的。
+                    </p>
+                </div>
+                
+                <!-- 无尽图书馆 -->
+                <div class="bg-gray-800/50 rounded-xl p-6 border border-indigo-500/30 hover:border-indigo-500/50 transition">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-book-open text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1">无尽图书馆</h3>
+                        <p class="text-indigo-400 text-sm">知识宝库</p>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        收藏着世界所有知识的神秘建筑，据说每一本书都是活的，会根据读者的需要展现内容。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 历史时间线 -->
+    <section id="timeline" class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">历史时间线</span>
+            </h2>
+            
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <div class="space-y-8">
+                    <!-- 远古时代 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2">远古时代</h3>
+                        <p class="text-sm text-gray-500 mb-2">时间：未知</p>
+                        <p class="text-gray-400">
+                            世界诞生，源初形核形成。最初的形素开始流动，几何法则确立。古老守护者文明兴起，建立了高度发达的文明。
+                        </p>
+                    </div>
+                    
+                    <!-- 第一次混沌战争 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2">第一次混沌战争</h3>
+                        <p class="text-sm text-gray-500 mb-2">约10000年前</p>
+                        <p class="text-gray-400">
+                            混沌首次入侵世界。古老守护者团结一致，经过艰苦战斗最终将混沌封印。但守护者文明也因此衰落，大部分知识失传。
+                        </p>
+                    </div>
+                    
+                    <!-- 大分裂时期 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2">大分裂时期</h3>
+                        <p class="text-sm text-gray-500 mb-2">约5000年前</p>
+                        <p class="text-gray-400">
+                            守护者文明消失后，幸存者逐渐分化为四个种族，各自发展出独特的文化和理念。种族间的隔阂开始形成。
+                        </p>
+                    </div>
+                    
+                    <!-- 四族崛起 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2">四族崛起</h3>
+                        <p class="text-sm text-gray-500 mb-2">约3000年前</p>
+                        <p class="text-gray-400">
+                            四大种族分别建立了自己的城市和文明。圆环族建造中央圆环城，三角议会建立三角尖塔，方碑盟约构建矩阵之都，螺旋之子创造生命螺旋城。
+                        </p>
+                    </div>
+                    
+                    <!-- 和平时代 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2">和平时代</h3>
+                        <p class="text-sm text-gray-500 mb-2">最近1000年</p>
+                        <p class="text-gray-400">
+                            虽然偶有小摩擦，但总体维持和平。各种族专注于自身发展，渐渐忘记了混沌的威胁和古老的联盟。
+                        </p>
+                    </div>
+                    
+                    <!-- 故事开始 -->
+                    <div class="timeline-item">
+                        <h3 class="text-xl font-bold mb-2 text-blue-400">故事开始：混沌归来</h3>
+                        <p class="text-sm text-gray-500 mb-2">现在</p>
+                        <p class="text-gray-400">
+                            混沌再次入侵，艾欧觉醒形素视觉能力。在塞琳的指引下，开始重新组建守护者联盟，准备迎接最终的决战。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心概念 -->
+    <section id="concepts" class="relative py-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">核心概念</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 形素系统 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-blue-500/30">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-400">
+                        <i class="fas fa-atom mr-2"></i>形素系统
+                    </h3>
+                    <p class="text-gray-300 mb-4">
+                        构成世界的基本粒子，具有几何特性。不同的几何形状由不同类型的形素组成，形素的流动形成了形态场。
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">形素密度</span>
+                            <span class="text-gray-300">影响生物和建筑的强度</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">形素流动</span>
+                            <span class="text-gray-300">决定能量传输效率</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">形素共振</span>
+                            <span class="text-gray-300">相同形状产生共鸣</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 形态场 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-400">
+                        <i class="fas fa-project-diagram mr-2"></i>形态场
+                    </h3>
+                    <p class="text-gray-300 mb-4">
+                        笼罩整个世界的能量场，由形素的流动形成。形态场的强度和特性会影响区域内的所有几何实体。
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">场强度</span>
+                            <span class="text-gray-300">决定能力施展效果</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">场稳定性</span>
+                            <span class="text-gray-300">影响混沌侵蚀程度</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">场干涉</span>
+                            <span class="text-gray-300">不同场域相互作用</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 几何法则 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-cyan-500/30">
+                    <h3 class="text-2xl font-bold mb-4 text-cyan-400">
+                        <i class="fas fa-shapes mr-2"></i>几何法则
+                    </h3>
+                    <p class="text-gray-300 mb-4">
+                        维持世界秩序的基本规则，决定了不同几何形状之间的关系和相互作用。混沌的本质就是破坏这些法则。
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">和谐法则</span>
+                            <span class="text-gray-300">圆环的平衡特性</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">稳定法则</span>
+                            <span class="text-gray-300">三角的结构优势</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">秩序法则</span>
+                            <span class="text-gray-300">方块的规整特性</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">变化法则</span>
+                            <span class="text-gray-300">螺旋的进化本质</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 混沌理论 -->
+                <div class="bg-gray-800/50 rounded-2xl p-8 border border-red-500/30">
+                    <h3 class="text-2xl font-bold mb-4 text-red-400">
+                        <i class="fas fa-infinity mr-2"></i>混沌理论
+                    </h3>
+                    <p class="text-gray-300 mb-4">
+                        与秩序对立的力量，试图将一切变成无序的状态。混沌不完全是邪恶，而是代表着过度的自由和变化。
+                    </p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">混沌侵蚀</span>
+                            <span class="text-gray-300">扭曲几何形态</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">形态崩溃</span>
+                            <span class="text-gray-300">失去原有特性</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">秩序与混沌</span>
+                            <span class="text-gray-300">需要动态平衡</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 世界地图概念 -->
+    <section class="relative py-20 px-6 bg-gray-800/20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                <span class="gradient-text">世界概览</span>
+            </h2>
+            
+            <div class="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
+                <div class="map-container rounded-lg h-96 flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-map text-6xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400 mb-2">世界地图概念图</p>
+                        <p class="text-sm text-gray-500">（实际开发中将展示完整的交互式地图）</p>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-4 gap-4 mt-8">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-circle text-blue-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-400">圆环族领域</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-purple-500/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-play text-purple-400 transform rotate-90"></i>
+                        </div>
+                        <p class="text-sm text-gray-400">三角议会领域</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-cyan-500/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-cube text-cyan-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-400">方碑盟约领域</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                            <i class="fas fa-hurricane text-green-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-400">螺旋之子领域</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 增强的页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <!-- 世界观与故事 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-blue-400">世界观与故事</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../world-lore.html" class="hover:text-white transition">世界背景设定</a></li>
+                        <li><a href="index.html" class="hover:text-white transition">主线故事剧情</a></li>
+                        <li><a href="characters.html" class="hover:text-white transition">角色介绍</a></li>
+                        <li><a href="world-building.html" class="hover:text-white transition">世界构建详情</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 游戏内容 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-purple-400">游戏内容</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="../game/index.html" class="hover:text-white transition">游戏原型体验</a></li>
+                        <li><a href="../game-modes.html" class="hover:text-white transition">游戏模式介绍</a></li>
+                        <li><a href="media-resources.html" class="hover:text-white transition">媒体资源</a></li>
+                        <li><a href="timeline.html" class="hover:text-white transition">历史时间线</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 种族阵营 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-green-400">种族阵营</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">圆环族 - 和谐与循环</a></li>
+                        <li><a href="#" class="hover:text-white transition">三角议会 - 力量与效率</a></li>
+                        <li><a href="#" class="hover:text-white transition">方碑盟约 - 秩序与规则</a></li>
+                        <li><a href="#" class="hover:text-white transition">螺旋之子 - 变化与成长</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 关于项目 -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-yellow-400">关于项目</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">项目介绍</a></li>
+                        <li><a href="#" class="hover:text-white transition">开发日志</a></li>
+                        <li><a href="#" class="hover:text-white transition">联系我们</a></li>
+                        <li><a href="#" class="hover:text-white transition">参与贡献</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        <p>&copy; 2025 几何境域. 由形状构成的奇幻世界 - 形状即命运，几何定乾坤</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 卡片悬停效果
+        document.querySelectorAll('.world-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 时间线动画
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        const timelineObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '0';
+                        entry.target.style.transform = 'translateX(-20px)';
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                        
+                        requestAnimationFrame(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateX(0)';
+                        });
+                    }, index * 150);
+                    timelineObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        timelineItems.forEach(item => {
+            timelineObserver.observe(item);
+        });
+    </script>
+</body>
+</html>

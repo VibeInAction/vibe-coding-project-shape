@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：真相 - 混沌的入侵</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes chaos-flow {
+            0% { transform: translateX(-100%) skewX(-20deg); }
+            100% { transform: translateX(100vw) skewX(-20deg); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 30s linear infinite;
+        }
+        
+        .morph-shape {
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chaos-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #7c2d12 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 3s infinite;
+        }
+        
+        .chaos-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.8), transparent);
+            animation: chaos-flow 3s linear infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .geometry-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .chaos-corruption {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chaos-corruption::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        .reading-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .reading-content h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: #10b981;
+        }
+        
+        .reading-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+            color: #059669;
+        }
+        
+        .reading-content p {
+            text-indent: 2em;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .reading-content .dialogue {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .chaos-dialogue {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 4px solid #dc2626;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .reading-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .reading-content h3 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- 混沌流动效果 -->
+    <div class="chaos-stream"></div>
+    
+    <!-- 几何背景装饰 -->
+    <div class="geometry-bg">
+        <div class="absolute top-20 left-10 w-64 h-64 border-2 border-green-500 rounded-full rotate-slow"></div>
+        <div class="absolute top-40 right-20 w-48 h-48 border-2 border-emerald-500 transform rotate-45 float-animation"></div>
+        <div class="absolute bottom-20 left-1/4 w-96 h-96 border-2 border-teal-500 rotate-slow" style="animation-duration: 40s;"></div>
+        <div class="absolute bottom-40 right-1/3 w-72 h-72 border-2 border-red-500 rounded-lg morph-shape"></div>
+        <div class="absolute top-1/2 left-1/2 w-32 h-32 border-2 border-red-600 transform rotate-12" style="animation-duration: 15s;"></div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-md border-b border-gray-700">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- 左侧导航 -->
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-2 hover:text-green-400 transition">
+                        <i class="fas fa-book"></i>
+                        <span>返回故事首页</span>
+                    </a>
+                    <div class="w-px h-6 bg-gray-600"></div>
+                    <div class="text-sm">
+                        <span class="text-gray-400">第三章：</span>
+                        <span class="font-semibold text-green-400">真相</span>
+                    </div>
+                </div>
+                
+                <!-- 右侧功能按钮 -->
+                <div class="flex items-center space-x-4">
+                    <!-- 字体大小调整 -->
+                    <div class="flex items-center space-x-2">
+                        <button onclick="adjustFontSize(-0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="text-sm">A</span>
+                        <button onclick="adjustFontSize(0.1)" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主题切换 -->
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-gray-700 rounded-lg transition">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 面包屑导航 -->
+        <div class="bg-gray-800/60 border-t border-gray-700">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center space-x-2 text-sm">
+                    <a href="../index.html" class="hover:text-green-400 transition">首页</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="../world-lore.html" class="hover:text-green-400 transition">世界观</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <a href="index.html" class="hover:text-green-400 transition">故事</a>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span>第三章</span>
+                    <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                    <span class="text-green-400">混沌的入侵</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-gray-800 z-50">
+        <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-green-500 to-emerald-500" style="width: 0%"></div>
+    </div>
+
+    <!-- 主内容 -->
+    <main class="relative z-10 py-8 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <!-- 章节标题 -->
+            <header class="text-center mb-12">
+                <div class="inline-flex items-center px-4 py-2 bg-green-500/20 rounded-full text-sm mb-4">
+                    <i class="fas fa-book-open mr-2"></i>
+                    第三章 · 第二节
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">混沌的入侵</span>
+                </h1>
+                <div class="flex items-center justify-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-clock"></i>
+                    <span>阅读时间约 10 分钟</span>
+                    <span>|</span>
+                    <span>发布时间：2024年12月</span>
+                </div>
+            </header>
+
+            <!-- 阅读内容 -->
+            <div class="reading-content" id="reading-content" style="font-size: 1rem;">
+                <p class="text-gray-300 leading-relaxed">
+                    静默圆湖的征象传遍了整个几何境域，但反应却各不相同。圆环中央城陷入了激烈的争论，三角议会召开了紧急会议，方碑盟约内部出现了严重的分歧，而螺旋之子则开始了他们的预言仪式。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在四大种族还在观望的时候，混沌的入侵已经悄然加速。在几何境域的边缘地带，第一个受害者出现了。
+                </p>
+                
+                <h2>边境的危机</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    三角边境的前哨站曾经是几何境域最坚固的防线之一。高耸的三角塔楼构成了完美的防御矩阵，每一个角度都经过精确计算，确保没有盲区。但现在，这一切都变了。
+                </p>
+                
+                <div class="chaos-corruption bg-gray-800/50 rounded-lg p-4 my-4">
+                    <h3 class="text-lg font-bold mb-2 text-red-400">三角边境的沦陷</h3>
+                    <p class="text-gray-300">
+                        塔楼的边缘开始变得模糊，尖锐的角度被扭曲成不规则的曲线。守卫们发现，他们的武器——那些完美的几何箭矢——在离开弓弦的瞬间就开始变形，无法保持原有的飞行轨迹。
+                    </p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "报告！第七塔楼的西侧墙体出现了异常变形！"一名年轻的三角士兵跑向指挥官，声音中带着恐慌。"我们试图修复，但修复材料在接触墙体后立即被同化了！"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    指挥官托里克站在主塔的顶部，通过望远镜观察着远方。他看到了更可怕的东西——一股红色的能量正从地平线蔓延过来，所到之处，所有的几何形态都被扭曲成混沌的形态。
+                </p>
+                
+                <div class="dialogue">
+                    "这不是普通的攻击，"托里克对身边的副官说，"混沌正在侵蚀现实本身。我们面对的不是一个敌人，而是一种现象。"
+                </div>
+                
+                <h3>圆环的变形</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    与此同时，在圆环中央城，塞琳长老感受到了前所未有的恐惧。和谐圆环——圆环族最神圣的圣物，开始出现了细微的裂缝。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "不可能，"塞琳颤抖着说，"和谐圆环已经存在了数千年，它代表着完美的平衡。没有任何力量能够破坏它。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    但事实就在眼前。圆环上完美的弧度开始出现不自然的波动，就像水面被投入了石子。更可怕的是，这些波动正在扩散，影响着周围的一切。圆环族的孩子们发现，他们画出的圆不再完美，总是会出现无法解释的偏差。
+                </p>
+                
+                <div class="chaos-dialogue">
+                    "我能感觉到，"一个年轻的圆环族学者说，她的眼中充满了恐惧，"圆环想要回归到最原始的状态——没有形状的状态。"
+                </div>
+                
+                <h2>方碑的混乱</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    方碑盟约总部的大厅里，拉克正在紧急处理一个又一个的危机报告。方碑城市的矩阵系统——那个维持着整个城市秩序的复杂网络——开始出现混乱。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "第三区的主矩阵出现了逻辑错误，"一名技术员报告道，"它开始生成随机的规则，完全违背了我们的设计初衷。更糟糕的是，这些错误正在向其他区域扩散。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    拉克知道这意味着什么。方碑盟约的力量来自于秩序和规则，当规则本身开始混乱时，他们的力量就会被削弱。她想起了艾欧的话——混沌不是要毁灭他们，而是要同化他们。
+                </p>
+                
+                <div class="dialogue">
+                    "启动应急协议，"拉克命令道，"切断受感染区域的矩阵连接。我们必须阻止混乱蔓延到核心系统。"
+                </div>
+                
+                <h3>螺旋的枯萎</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在螺旋进化基地，最古老的进化树正在枯萎。这棵巨大的螺旋形树木代表了螺旋之子的生命力和进化潜力，但现在，它的枝条开始下垂，螺旋的纹理变得模糊不清。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这不是疾病，"薇拉先知说，她的手轻轻抚摸着枯萎的树皮，"混沌正在剥夺它的进化能力。在混沌眼中，变化本身就是一种威胁。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    螺旋之子们陷入了恐慌。他们的整个文明都建立在不断进化的理念上，如果失去了进化能力，他们就会停滞，最终消亡。
+                </p>
+                
+                <h2>混沌的本质</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在四大种族各自为战的时候，艾欧正在静默圆湖深入研究源初形核的记忆。她看到了混沌的真正面目——那不是一种邪恶的力量，而是一种回归原始状态的趋势。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "混沌是宇宙的默认状态，"源初形核的声音在艾欧心中响起，"在没有规则和秩序的世界里，一切都是可能的，但也意味着一切都没有意义。几何形态的出现，是对这种混沌状态的第一次反抗。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    艾欧明白了。四大种族的形素特性，本质上是对混沌的防御机制。圆环的和谐维持着平衡，三角的稳定提供着结构，方碑的秩序创造着规则，螺旋的变化推动着进化。只有当这四种力量结合在一起时，才能有效地抵抗混沌的侵蚀。
+                </p>
+                
+                <h3>第一个牺牲者</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    悲剧在一个小村庄上演了。这个位于三角边境的村庄是第一个被完全混沌化的区域。当艾欧和托里克赶到时，他们看到了令人心碎的景象。
+                </p>
+                
+                <div class="chaos-corruption bg-gray-800/50 rounded-lg p-4 my-4">
+                    <p class="text-gray-300">
+                        村庄的建筑已经失去了所有几何特征，墙壁变得弯曲起伏，屋顶扭曲成奇怪的形状。更可怕的是村民们——他们的身体也开始变形，圆润的面部变得棱角分明，却又在瞬间变得柔和，永远无法保持一个固定的形态。
+                    </p>
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "救命..."一个村民艰难地说道，他的声音因为声带的变形而断断续续，"我们...我们正在失去...自我..."
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    托里克震惊地看着这一切。作为三角议会的将军，他见过无数战争的场面，但从未见过如此可怕的景象。这不是死亡，而是比死亡更可怕的命运——失去定义自我的能力。
+                </p>
+                
+                <div class="chaos-dialogue">
+                    "混沌不是要杀死我们，"托里克低声说，"它要让我们变成它的一部分。这就是为什么它如此可怕。"
+                </div>
+                
+                <h2>紧急召集</h2>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    惨剧的消息传遍了整个几何境域。那些还在争论是否相信混沌威胁的种族们终于意识到，这不是一个传说，而是正在发生的现实。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    在静默圆湖边，第一次四大种族的紧急会议召开了。圆环族代表塞琳、三角议会将军托里克、方碑盟约改革派领袖拉克、螺旋先知薇拉，还有获得了源初形核认可的艾欧。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "我们不能继续这样各自为战了，"艾欧站在所有人面前说道，她的声音中带着源初形核的力量，"混沌正在从四面八方入侵，如果我们不团结起来，所有人都会被同化。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    她展开了一幅地图，上面标注着混沌入侵的路径。"看这里，混沌的侵蚀正在形成一个包围圈。它想要切断四大种族之间的联系，让我们各自孤立，然后逐一击破。"
+                </p>
+                
+                <div class="dialogue">
+                    "但是要重新组建几何守护者联盟，我们需要激活古老仪式，"塞琳长老说，"而这个仪式需要四大种族共同的力量。"
+                </div>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "那就这么做，"托里克坚定地说，"三角议会会全力配合。我已经看到了混沌的可怕，我们不能让更多的人民受害。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    拉克和薇拉也表示同意。四大种族终于达成了共识，但时间已经不多了。混沌的侵蚀速度正在加快，他们必须在三个月内完成仪式的准备。
+                </p>
+                
+                <h3>希望的火种</h3>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    就在会议结束时，源初形核再次发出了光芒。这一次，光芒不仅照亮了静默圆湖，还形成了一道桥梁，连接向四个方向——圆环中央城、三角议会、方碑盟约总部、螺旋进化基地。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    "这是希望的象征，"艾欧说，"源初形核在告诉我们，只要我们团结一心，就没有什么是不可能的。"
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    混沌的阴影确实可怕，但希望的火种已经重新点燃。四大种族的代表们各自返回自己的领地，开始为古老的仪式做准备。虽然前路依然充满挑战，但他们终于迈出了团结的第一步。
+                </p>
+                
+                <p class="text-gray-300 leading-relaxed">
+                    而艾欧，作为连接所有形素的守护者，她的使命才刚刚开始。她必须在仪式完成之前，确保四大种族能够真正放下成见，重新找回失落的联盟精神。
+                </p>
+            </div>
+            
+            <!-- 上一节/下一节导航 -->
+            <nav class="mt-12 pt-8 border-t border-gray-700">
+                <div class="flex justify-between">
+                    <a href="chapter-3-section-1.html" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>上一节：源初形核的呼唤</span>
+                    </a>
+                    <a href="chapter-3-section-3.html" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition">
+                        <span>下一节：古老的联盟</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </main>
+
+    <!-- 评论区 -->
+    <section class="relative z-10 py-12 px-4 bg-gray-800/30">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-comments mr-2 text-green-400"></i>
+                读者评论
+            </h2>
+            
+            <!-- 评论输入区 -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="flex space-x-4">
+                    <img src="https://picsum.photos/seed/user/40/40.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <textarea 
+                            id="comment-input"
+                            placeholder="分享你的想法..." 
+                            class="w-full bg-gray-700 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                            rows="3"
+                        ></textarea>
+                        <div class="mt-2 flex justify-end">
+                            <button onclick="submitComment()" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition">
+                                发布评论
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 评论列表 -->
+            <div id="comments-list" class="space-y-4">
+                <!-- 示例评论 -->
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader3/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">恐惧与希望</span>
+                                <span class="text-sm text-gray-500">1小时前</span>
+                            </div>
+                            <p class="text-gray-300">混沌的设定太深刻了！不是简单的毁灭，而是同化，这比死亡更可怕。三角边境的描写让我感到不寒而栗。</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 42
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader4/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">几何哲学</span>
+                                <span class="text-sm text-gray-500">3小时前</span>
+                            </div>
+                            <p class="text-gray-300">作者对混沌的理解很有深度。混沌不是邪恶，而是宇宙的默认状态。几何形态是对混沌的第一次反抗，这个设定太棒了！</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 28
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-item bg-gray-800 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <img src="https://picsum.photos/seed/reader5/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="font-semibold">故事爱好者</span>
+                                <span class="text-sm text-gray-500">5小时前</span>
+                            </div>
+                            <p class="text-gray-300">四大种族终于开始团结了！虽然过程很艰难，但看到他们放下成见共同面对威胁，真的很感动。期待下一节的古老联盟仪式！</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm">
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-heart"></i> 35
+                                </button>
+                                <button class="text-gray-400 hover:text-green-400 transition">
+                                    <i class="fas fa-reply"></i> 回复
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-400">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                故事持续创作中 | 下一节更新时间：待定
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // 字体大小调整
+        let currentFontSize = 1;
+        
+        function adjustFontSize(delta) {
+            currentFontSize = Math.max(0.8, Math.min(1.4, currentFontSize + delta));
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+            localStorage.setItem('fontSize', currentFontSize);
+        }
+        
+        // 恢复字体大小
+        const savedFontSize = localStorage.getItem('fontSize');
+        if (savedFontSize) {
+            currentFontSize = parseFloat(savedFontSize);
+            document.getElementById('reading-content').style.fontSize = currentFontSize + 'rem';
+        }
+        
+        // 主题切换
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.add('bg-gray-900', 'text-gray-100');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gray-900', 'text-gray-100');
+                body.classList.add('bg-gray-100', 'text-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 恢复主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            toggleTheme();
+        }
+        
+        // 阅读进度条
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+        
+        // 评论功能
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const commentText = input.value.trim();
+            
+            if (commentText === '') {
+                alert('请输入评论内容');
+                return;
+            }
+            
+            const commentsList = document.getElementById('comments-list');
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item bg-gray-800 rounded-lg p-4';
+            
+            const now = new Date();
+            const timeStr = '刚刚';
+            
+            newComment.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <img src="https://picsum.photos/seed/newuser/40/40.jpg" alt="读者头像" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="font-semibold">我</span>
+                            <span class="text-sm text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-gray-300">${commentText}</p>
+                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-heart"></i> 0
+                            </button>
+                            <button class="text-gray-400 hover:text-green-400 transition">
+                                <i class="fas fa-reply"></i> 回复
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.insertBefore(newComment, commentsList.firstChild);
+            input.value = '';
+            
+            // 添加成功提示
+            showNotification('评论发布成功！');
+        }
+        
+        // 通知提示
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
