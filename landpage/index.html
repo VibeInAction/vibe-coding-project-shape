@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何境域：形态之战 - 创新几何 RTS 游戏</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Geometric Background -->
+    <div class="geometric-background">
+        <div class="shape-circle"></div>
+        <div class="shape-triangle"></div>
+        <div class="shape-square"></div>
+        <div class="shape-hexagon"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-shape">◈</span>
+                <span class="logo-text">几何境域</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#mechanics">游戏机制</a></li>
+                <li><a href="#races">种族介绍</a></li>
+                <li><a href="#modes">游戏模式</a></li>
+                <li><a href="#news">最新资讯</a></li>
+                <li><a href="../game/index.html" class="btn-cta">立即体验</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">几何境域</span>
+                    <span class="title-line subtitle">形态之战</span>
+                </h1>
+                <p class="hero-subtitle">掌控四大几何种族，重塑宇宙秩序</p>
+                <p class="hero-description">
+                    在这个由形素和形态场构成的独特世界中，体验前所未有的即时战略游戏。
+                    每个种族都拥有独特的几何美学和战术玩法，带来全新的战略体验。
+                </p>
+                <div class="hero-buttons">
+                    <a href="../game/index.html" class="btn-primary">
+                        <span class="btn-shape">▲</span>
+                        立即体验
+                    </a>
+                    <a href="#races" class="btn-secondary">
+                        <span class="btn-shape">◆</span>
+                        了解更多
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="central-core">
+                    <div class="core-ring"></div>
+                    <div class="core-pulse"></div>
+                    <div class="race-icons">
+                        <div class="race-icon circle-icon" data-race="circle">○</div>
+                        <div class="race-icon triangle-icon" data-race="triangle">△</div>
+                        <div class="race-icon square-icon" data-race="square">□</div>
+                        <div class="race-icon spiral-icon" data-race="spiral">◎</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Banner -->
+    <section class="features-banner">
+        <div class="banner-container">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <div class="icon-shape rotating-square"></div>
+                </div>
+                <h3>创新几何系统</h3>
+                <p>独特的几何世界观，每个种族都有专属的建筑和单位设计</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <div class="icon-shape morphing-triangle"></div>
+                </div>
+                <h3>形态场机制</h3>
+                <p>动态的能量场系统，影响单位移动和战斗效果</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <div class="icon-shape pulsing-circle"></div>
+                </div>
+                <h3>四种游戏模式</h3>
+                <p>从征服到生存，满足不同玩家的游戏需求</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <div class="icon-shape hexagon-spin"></div>
+                </div>
+                <h3>深度策略玩法</h3>
+                <p>丰富的科技树和英雄系统，打造专属战术</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Game Mechanics Section -->
+    <section id="mechanics" class="game-mechanics">
+        <div class="section-header">
+            <h2>核心游戏机制</h2>
+            <p>探索几何世界的独特玩法</p>
+        </div>
+        <div class="mechanics-grid">
+            <div class="mechanic-item">
+                <div class="mechanic-visual">
+                    <div class="energy-flow">
+                        <div class="energy-particle"></div>
+                        <div class="energy-particle"></div>
+                        <div class="energy-particle"></div>
+                    </div>
+                </div>
+                <h3>形魄能量系统</h3>
+                <ul>
+                    <li>基础形魄：主要资源，通过几何采集器提取</li>
+                    <li>纯净形魄：高级资源，用于高级单位和科技</li>
+                    <li>几何共鸣：相邻建筑产生共鸣，提升效率</li>
+                </ul>
+            </div>
+            <div class="mechanic-item">
+                <div class="mechanic-visual">
+                    <div class="field-waves">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                </div>
+                <h3>形态场影响</h3>
+                <ul>
+                    <li>地图形态场强度影响单位移动和技能</li>
+                    <li>地形增强或减弱特定几何形态</li>
+                    <li>通过建筑改变局部形态场</li>
+                </ul>
+            </div>
+            <div class="mechanic-item">
+                <div class="mechanic-visual">
+                    <div class="formation-grid">
+                        <div class="formation-unit"></div>
+                        <div class="formation-unit"></div>
+                        <div class="formation-unit"></div>
+                        <div class="formation-unit"></div>
+                    </div>
+                </div>
+                <h3>几何组合系统</h3>
+                <ul>
+                    <li>不同单位组合成战术阵型</li>
+                    <li>特定组合触发协同效果</li>
+                    <li>阵型可升级和解锁新组合</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Races Section -->
+    <section id="races" class="races">
+        <div class="section-header">
+            <h2>四大几何种族</h2>
+            <p>选择你的种族，掌控几何之力</p>
+        </div>
+        <div class="races-container">
+            <!-- Circle Race -->
+            <div class="race-card circle-race">
+                <div class="race-header">
+                    <div class="race-shape">○</div>
+                    <h3>圆环族</h3>
+                    <span class="race-trait">和谐与循环</span>
+                </div>
+                <div class="race-content">
+                    <div class="race-description">
+                        <p>擅长防御和恢复，拥有强大的能量操控能力。建筑可旋转优化能量流动。</p>
+                    </div>
+                    <div class="race-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">🛡️</span>
+                            <span>共鸣护盾</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <span>能量转移</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔄</span>
+                            <span>循环理论</span>
+                        </div>
+                    </div>
+                    <div class="race-units">
+                        <div class="unit-preview">
+                            <div class="unit-shape circle-unit"></div>
+                            <span>共鸣者</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape guardian-unit"></div>
+                            <span>守护者</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape orbital-unit"></div>
+                            <span>轨道战士</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="race-visual">
+                    <div class="circle-formation">
+                        <div class="circle-orbit"></div>
+                        <div class="circle-orbit"></div>
+                        <div class="circle-orbit"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Triangle Race -->
+            <div class="race-card triangle-race">
+                <div class="race-header">
+                    <div class="race-shape">△</div>
+                    <h3>三角议会</h3>
+                    <span class="race-trait">力量与效率</span>
+                </div>
+                <div class="race-content">
+                    <div class="race-description">
+                        <p>攻击力强，建造速度快。建筑必须连接形成三角结构才能获得最大效益。</p>
+                    </div>
+                    <div class="race-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">⚔️</span>
+                            <span>三角攻击</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔺</span>
+                            <span>力量聚焦</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🏗️</span>
+                            <span>瞬间建造</span>
+                        </div>
+                    </div>
+                    <div class="race-units">
+                        <div class="unit-preview">
+                            <div class="unit-shape triangle-warrior"></div>
+                            <span>三角战士</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape prism-shooter"></div>
+                            <span>棱镜射手</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape pyramid-unit"></div>
+                            <span>金字塔</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="race-visual">
+                    <div class="triangle-formation">
+                        <div class="triangle-shape"></div>
+                        <div class="triangle-shape"></div>
+                        <div class="triangle-shape"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Square Race -->
+            <div class="race-card square-race">
+                <div class="race-header">
+                    <div class="race-shape">□</div>
+                    <h3>方碑盟约</h3>
+                    <span class="race-trait">秩序与规则</span>
+                </div>
+                <div class="race-content">
+                    <div class="race-description">
+                        <p>高度模块化，建筑可以自由组合。拥有最强的经济和技术研究能力。</p>
+                    </div>
+                    <div class="race-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">📐</span>
+                            <span>空间折叠</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⚙️</span>
+                            <span>物质重组</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔢</span>
+                            <span>量子建造</span>
+                        </div>
+                    </div>
+                    <div class="race-units">
+                        <div class="unit-preview">
+                            <div class="unit-shape cube-infantry"></div>
+                            <span>方块步兵</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape grid-shooter"></div>
+                            <span>网格炮手</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape matrix-golem"></div>
+                            <span>矩阵巨像</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="race-visual">
+                    <div class="square-formation">
+                        <div class="square-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spiral Race -->
+            <div class="race-card spiral-race">
+                <div class="race-header">
+                    <div class="race-shape">◎</div>
+                    <h3>螺旋之子</h3>
+                    <span class="race-trait">变化与成长</span>
+                </div>
+                <div class="race-content">
+                    <div class="race-description">
+                        <p>单位会随时间成长进化，建筑可以移动和重组。擅长伏击和机动战。</p>
+                    </div>
+                    <div class="race-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">🌱</span>
+                            <span>生命绽放</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🌀</span>
+                            <span>形态进化</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🏃</span>
+                            <span>螺旋冲刺</span>
+                        </div>
+                    </div>
+                    <div class="race-units">
+                        <div class="unit-preview">
+                            <div class="unit-shape spiral-larva"></div>
+                            <span>螺旋幼体</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape vine-crawler"></div>
+                            <span>藤蔓爬行者</span>
+                        </div>
+                        <div class="unit-preview">
+                            <div class="unit-shape spiral-dragon"></div>
+                            <span>螺旋飞龙</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="race-visual">
+                    <div class="spiral-formation">
+                        <div class="spiral-path"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Game Modes Section -->
+    <section id="modes" class="game-modes">
+        <div class="section-header">
+            <h2>游戏模式</h2>
+            <p>多种玩法，无限可能</p>
+        </div>
+        <div class="modes-grid">
+            <div class="mode-card">
+                <div class="mode-icon conquest-icon">
+                    <div class="mode-shape castle-shape"></div>
+                </div>
+                <h3>征服模式</h3>
+                <p>传统RTS体验，通过资源管理、基地建设和战术指挥击败对手</p>
+                <div class="mode-details">
+                    <span class="player-count">1v1 - 4v4</span>
+                    <span class="duration">15-60分钟</span>
+                </div>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon form-battle-icon">
+                    <div class="mode-shape node-shape"></div>
+                </div>
+                <h3>形态争夺</h3>
+                <p>快节奏的据点控制，争夺地图上的形态节点获得积分</p>
+                <div class="mode-details">
+                    <span class="player-count">2v2 - 3v3</span>
+                    <span class="duration">10分钟</span>
+                </div>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon campaign-icon">
+                    <div class="mode-shape story-shape"></div>
+                </div>
+                <h3>种族战争</h3>
+                <p>深度剧情体验，探索每个种族的独特故事线</p>
+                <div class="mode-details">
+                    <span class="player-count">单人</span>
+                    <span class="duration">10-15小时</span>
+                </div>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon survival-icon">
+                    <div class="mode-shape tower-shape"></div>
+                </div>
+                <h3>生存挑战</h3>
+                <p>塔防生存模式，抵御混沌入侵者，挑战极限</p>
+                <div class="mode-details">
+                    <span class="player-count">1-4人</span>
+                    <span class="duration">无限</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section id="news" class="news">
+        <div class="section-header">
+            <h2>最新资讯</h2>
+            <p>了解游戏最新动态</p>
+        </div>
+        <div class="news-grid">
+            <article class="news-item">
+                <div class="news-date">2024-01-15</div>
+                <h3>α测试即将开启</h3>
+                <p>几何境域α测试将于下月开启，现在预约即可获得专属奖励</p>
+                <a href="#" class="read-more">了解更多 →</a>
+            </article>
+            <article class="news-item">
+                <div class="news-date">2024-01-10</div>
+                <h3>新种族预览：螺旋之子</h3>
+                <p>第四个种族螺旋之子设计公布，带来全新的成长进化玩法</p>
+                <a href="#" class="read-more">了解更多 →</a>
+            </article>
+            <article class="news-item">
+                <div class="news-date">2024-01-05</div>
+                <h3>形态场系统详解</h3>
+                <p>深入解析游戏独特的形态场机制，了解地形对战斗的影响</p>
+                <a href="#" class="read-more">了解更多 →</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>准备好重塑宇宙秩序了吗？</h2>
+            <p>加入几何境域，开启你的战略之旅</p>
+            <div class="cta-buttons">
+                <a href="../game/index.html" class="btn-primary large">立即体验</a>
+                <a href="#" class="btn-secondary large">加入社区</a>
+            </div>
+            <div class="social-links">
+                <a href="#" class="social-link">微博</a>
+                <a href="#" class="social-link">B站</a>
+                <a href="#" class="social-link">QQ群</a>
+                <a href="#" class="social-link">Discord</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <span class="logo-shape">◈</span>
+                    <span class="logo-text">几何境域</span>
+                </div>
+                <p>创新几何RTS游戏</p>
+            </div>
+            <div class="footer-section">
+                <h4>游戏</h4>
+                <ul>
+                    <li><a href="#">游戏介绍</a></li>
+                    <li><a href="#">游戏模式</a></li>
+                    <li><a href="#">种族介绍</a></li>
+                    <li><a href="#">开发日志</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>社区</h4>
+                <ul>
+                    <li><a href="#">官方论坛</a></li>
+                    <li><a href="#">玩家攻略</a></li>
+                    <li><a href="#">同人创作</a></li>
+                    <li><a href="#">赛事活动</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>支持</h4>
+                <ul>
+                    <li><a href="#">帮助中心</a></li>
+                    <li><a href="#">联系我们</a></li>
+                    <li><a href="#">Bug反馈</a></li>
+                    <li><a href="#">商务合作</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
