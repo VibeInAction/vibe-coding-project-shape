@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何境域：形态之战 - 概念设计展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape-circle {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid var(--primary-red);
+            top: 65%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape-square {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--primary-green);
+            top: 35%;
+            left: 80%;
+            animation-delay: 10s;
+        }
+
+        .shape-spiral {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--primary-purple);
+            border-radius: 50%;
+            border-style: dashed;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-40px) rotate(90deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg) scale(0.9);
+            }
+            75% { 
+                transform: translateY(-60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* 概念卡片样式 */
+        .concept-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .concept-card:hover::before {
+            opacity: 1;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 种族特色边框 */
+        .race-border-circle {
+            border-top: 3px solid var(--primary-blue);
+        }
+
+        .race-border-triangle {
+            border-top: 3px solid var(--primary-red);
+        }
+
+        .race-border-square {
+            border-top: 3px solid var(--primary-green);
+        }
+
+        .race-border-spiral {
+            border-top: 3px solid var(--primary-purple);
+        }
+
+        /* 几何图标 */
+        .geo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .geo-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .geo-icon-circle {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+            color: var(--primary-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .geo-icon-triangle {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+            color: var(--primary-red);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .geo-icon-square {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            color: var(--primary-green);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .geo-icon-spiral {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+            color: var(--primary-purple);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        /* 特性标签 */
+        .feature-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .feature-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* 动画文字 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 脉冲效果 */
+        .pulse-effect {
+            position: relative;
+        }
+
+        .pulse-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            background: inherit;
+            opacity: 0;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 滚动显示动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-spiral"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl pulse-effect">◈</span>
+                    <h1 class="font-orbitron text-xl font-bold gradient-text">几何境域：形态之战</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#overview" class="text-gray-300 hover:text-white transition">游戏概览</a>
+                    <a href="#races" class="text-gray-300 hover:text-white transition">种族展示</a>
+                    <a href="#mechanics" class="text-gray-300 hover:text-white transition">核心机制</a>
+                    <a href="#artstyle" class="text-gray-300 hover:text-white transition">艺术风格</a>
+                    <a href="#world" class="text-gray-300 hover:text-white transition">世界观</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- Hero Section -->
+        <section id="overview" class="text-center mb-16 reveal">
+            <h2 class="font-orbitron text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                概念设计展示
+            </h2>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                探索《几何境域：形态之战》的独特概念设计，体验基于几何美学的创新RTS游戏世界
+            </p>
+            <div class="flex justify-center space-x-6">
+                <div class="text-center">
+                    <div class="geo-icon geo-icon-circle mb-2">○</div>
+                    <span class="text-sm text-gray-400">和谐</span>
+                </div>
+                <div class="text-center">
+                    <div class="geo-icon geo-icon-triangle mb-2">△</div>
+                    <span class="text-sm text-gray-400">力量</span>
+                </div>
+                <div class="text-center">
+                    <div class="geo-icon geo-icon-square mb-2">□</div>
+                    <span class="text-sm text-gray-400">秩序</span>
+                </div>
+                <div class="text-center">
+                    <div class="geo-icon geo-icon-spiral mb-2">◎</div>
+                    <span class="text-sm text-gray-400">进化</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心概念展示 -->
+        <section class="mb-16 reveal">
+            <div class="concept-card rounded-2xl p-8">
+                <h3 class="font-orbitron text-3xl font-bold mb-6 text-center">核心设计理念</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🎨</div>
+                        <h4 class="font-bold mb-2">几何美学</h4>
+                        <p class="text-sm text-gray-400">基于基础几何形状构建独特视觉体系</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">⚡</div>
+                        <h4 class="font-bold mb-2">形态场机制</h4>
+                        <p class="text-sm text-gray-400">动态能量场影响战斗和战略</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🔄</div>
+                        <h4 class="font-bold mb-2">种族多样性</h4>
+                        <p class="text-sm text-gray-400">四个独特种族，截然不同的玩法</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">🎯</div>
+                        <h4 class="font-bold mb-2">策略深度</h4>
+                        <p class="text-sm text-gray-400">丰富的战术组合和战略选择</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 四大种族展示 -->
+        <section id="races" class="mb-16 reveal">
+            <h3 class="font-orbitron text-4xl font-bold mb-8 text-center">四大几何种族</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 圆环族 -->
+                <div class="concept-card rounded-2xl p-6 race-border-circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="geo-icon geo-icon-circle">○</div>
+                        <div class="flex space-x-2">
+                            <span class="feature-tag">防御专精</span>
+                            <span class="feature-tag">能量操控</span>
+                        </div>
+                    </div>
+                    <h4 class="font-orbitron text-2xl font-bold mb-2">圆环族</h4>
+                    <p class="text-gray-400 mb-3">和谐与循环的守护者</p>
+                    <p class="text-sm text-gray-500">
+                        追求完美与永恒，擅长防御和能量控制。建筑可旋转优化能量流动，
+                        单位间产生共鸣效应，是团队协作的典范。
+                    </p>
+                </div>
+
+                <!-- 三角议会 -->
+                <div class="concept-card rounded-2xl p-6 race-border-triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="geo-icon geo-icon-triangle">△</div>
+                        <div class="flex space-x-2">
+                            <span class="feature-tag">高攻击力</span>
+                            <span class="feature-tag">快速建造</span>
+                        </div>
+                    </div>
+                    <h4 class="font-orbitron text-2xl font-bold mb-2">三角议会</h4>
+                    <p class="text-gray-400 mb-3">力量与效率的追求者</p>
+                    <p class="text-sm text-gray-500">
+                        崇尚力量与效率，攻击力强大。建筑必须连接成三角结构，
+                        单位可以牺牲自己增强友军，是进攻型玩家的首选。
+                    </p>
+                </div>
+
+                <!-- 方碑盟约 -->
+                <div class="concept-card rounded-2xl p-6 race-border-square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="geo-icon geo-icon-square">□</div>
+                        <div class="flex space-x-2">
+                            <span class="feature-tag">科技领先</span>
+                            <span class="feature-tag">模块化</span>
+                        </div>
+                    </div>
+                    <h4 class="font-orbitron text-2xl font-bold mb-2">方碑盟约</h4>
+                    <p class="text-gray-400 mb-3">秩序与规则的维护者</p>
+                    <p class="text-sm text-gray-500">
+                        追求绝对秩序，拥有最强的经济和科技能力。
+                        建筑可以自由组合，单位标准化生产，是策略大师的选择。
+                    </p>
+                </div>
+
+                <!-- 螺旋之子 -->
+                <div class="concept-card rounded-2xl p-6 race-border-spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="geo-icon geo-icon-spiral">◎</div>
+                        <div class="flex space-x-2">
+                            <span class="feature-tag">有机成长</span>
+                            <span class="feature-tag">机动突击</span>
+                        </div>
+                    </div>
+                    <h4 class="font-orbitron text-2xl font-bold mb-2">螺旋之子</h4>
+                    <p class="text-gray-400 mb-3">变化与成长的适应者</p>
+                    <p class="text-sm text-gray-500">
+                        拥抱变化与成长，单位会随时间进化。建筑可以移动重组，
+                        擅长伏击和机动战，是喜欢变化玩家的最爱。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心机制 -->
+        <section id="mechanics" class="mb-16 reveal">
+            <h3 class="font-orbitron text-4xl font-bold mb-8 text-center">创新游戏机制</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="concept-card rounded-xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h4 class="font-bold mb-2">形魄能量系统</h4>
+                    <p class="text-sm text-gray-400">
+                        三层资源体系，几何共鸣效应，能量可视化流动
+                    </p>
+                </div>
+                <div class="concept-card rounded-xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🌊</span>
+                    </div>
+                    <h4 class="font-bold mb-2">形态场机制</h4>
+                    <p class="text-sm text-gray-400">
+                        动态战场环境，地形影响，种族优势区域
+                    </p>
+                </div>
+                <div class="concept-card rounded-xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🔗</span>
+                    </div>
+                    <h4 class="font-bold mb-2">几何组合系统</h4>
+                    <p class="text-sm text-gray-400">
+                        战术阵型，协同效应，动态组合变化
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 艺术风格 -->
+        <section id="artstyle" class="mb-16 reveal">
+            <div class="concept-card rounded-2xl p-8">
+                <h3 class="font-orbitron text-3xl font-bold mb-6 text-center">视觉艺术风格</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold mb-4 text-lg">色彩体系</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded bg-blue-500"></div>
+                                <span class="text-sm">圆环族 - 蓝色系（和谐、平静）</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded bg-red-500"></div>
+                                <span class="text-sm">三角议会 - 红色系（力量、激情）</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded bg-green-500"></div>
+                                <span class="text-sm">方碑盟约 - 绿色系（秩序、稳定）</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded bg-purple-500"></div>
+                                <span class="text-sm">螺旋之子 - 紫色系（神秘、变化）</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold mb-4 text-lg">设计特点</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li class="flex items-start">
+                                <span class="mr-2">•</span>
+                                <span>简洁的几何美学，避免过度复杂</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="mr-2">•</span>
+                                <span>明亮的色彩对比，强烈的视觉冲击</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="mr-2">•</span>
+                                <span>流畅的形态变换动画</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="mr-2">•</span>
+                                <span>发光的能量效果和粒子系统</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 世界观 -->
+        <section id="world" class="mb-16 reveal">
+            <div class="concept-card rounded-2xl p-8">
+                <h3 class="font-orbitron text-3xl font-bold mb-6 text-center">几何宇宙世界观</h3>
+                <div class="max-w-4xl mx-auto">
+                    <p class="text-center text-gray-400 mb-8">
+                        在这个由形素和形态场构成的独特世界中，四大几何种族为了争夺源初形核的控制权而战。
+                        每个种族都代表着不同的几何理念，他们之间的冲突将重塑整个宇宙的秩序。
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl mb-2">🌌</div>
+                            <p class="text-sm">形素 - 基础几何元素</p>
+                        </div>
+                        <div>
+                            <div class="text-2xl mb-2">⚡</div>
+                            <p class="text-sm">形态场 - 能量场</p>
+                        </div>
+                        <div>
+                            <div class="text-2xl mb-2">💎</div>
+                            <p class="text-sm">源初形核 - 宇宙起源</p>
+                        </div>
+                        <div>
+                            <div class="text-2xl mb-2">🔄</div>
+                            <p class="text-sm">几何共鸣 - 能量互动</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="text-center reveal">
+            <div class="concept-card rounded-2xl p-8 bg-gradient-to-br from-purple-900/20 to-blue-900/20">
+                <h3 class="font-orbitron text-3xl font-bold mb-4">准备探索几何世界了吗？</h3>
+                <p class="text-gray-400 mb-6">加入我们，一起重塑宇宙秩序</p>
+                <div class="flex justify-center space-x-4">
+                    <a href="../game/index.html" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition">
+                        体验游戏原型
+                    </a>
+                    <a href="../landpage/index.html" class="px-6 py-3 border border-white/20 rounded-lg font-semibold hover:bg-white/10 transition">
+                        了解更多
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2024 几何境域：形态之战. All rights reserved.</p>
+            <p class="text-sm mt-2">创新几何RTS游戏 | 用想象力构建新世界</p>
+        </div>
+    </footer>
+
+    <script>
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 监听滚动事件
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // 初始化
+        revealOnScroll();
+    </script>
+</body>
+</html>
