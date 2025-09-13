@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兵种单位设计 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape-circle {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid var(--primary-red);
+            top: 65%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape-square {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--primary-green);
+            top: 35%;
+            left: 80%;
+            animation-delay: 10s;
+        }
+
+        .shape-spiral {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--primary-purple);
+            border-radius: 50%;
+            border-style: dashed;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-40px) rotate(90deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg) scale(0.9);
+            }
+            75% { 
+                transform: translateY(-60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* 单位卡片样式 */
+        .unit-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .unit-card:hover::before {
+            opacity: 1;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 种族边框 */
+        .race-border-circle {
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .race-border-triangle {
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .race-border-square {
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .race-border-spiral {
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        /* 过滤按钮 */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.05);
+        }
+
+        /* 滚动显示动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 单位属性条 */
+        .stat-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 2px 0;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: currentColor;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        /* 单位类型图标 */
+        .unit-type-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .unit-type-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* 能力标签 */
+        .ability-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 11px;
+            margin: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .ability-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-spiral"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="text-3xl hover:text-purple-400 transition">◈</a>
+                    <h1 class="font-orbitron text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        兵种单位设计
+                    </h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#all-units" class="text-gray-300 hover:text-white transition">全部单位</a>
+                    <a href="#circle-clan" class="text-gray-300 hover:text-white transition">圆环族</a>
+                    <a href="#triangle-council" class="text-gray-300 hover:text-white transition">三角议会</a>
+                    <a href="#square-covenant" class="text-gray-300 hover:text-white transition">方碑盟约</a>
+                    <a href="#spiral-progeny" class="text-gray-300 hover:text-white transition">螺旋之子</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- Hero Section -->
+        <section class="text-center mb-12 reveal">
+            <h2 class="font-orbitron text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                兵种系统展示
+            </h2>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                探索四大几何种族的独特兵种单位，每个单位都拥有独特的战斗能力和种族特性
+            </p>
+            
+            <!-- 过滤器 -->
+            <div class="flex justify-center space-x-4 flex-wrap">
+                <button onclick="filterUnits('all')" class="filter-btn active px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
+                    全部单位
+                </button>
+                <button onclick="filterUnits('circle')" class="filter-btn px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition">
+                    圆环族
+                </button>
+                <button onclick="filterUnits('triangle')" class="filter-btn px-6 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition">
+                    三角议会
+                </button>
+                <button onclick="filterUnits('square')" class="filter-btn px-6 py-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition">
+                    方碑盟约
+                </button>
+                <button onclick="filterUnits('spiral')" class="filter-btn px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition">
+                    螺旋之子
+                </button>
+            </div>
+        </section>
+
+        <!-- 单位统计 -->
+        <section class="mb-12 reveal">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-blue-400">6</div>
+                    <div class="text-sm text-gray-400">圆环族单位</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-red-400">6</div>
+                    <div class="text-sm text-gray-400">三角议会单位</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-green-400">6</div>
+                    <div class="text-sm text-gray-400">方碑盟约单位</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-purple-400">6</div>
+                    <div class="text-sm text-gray-400">螺旋之子单位</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 全部单位列表 -->
+        <section id="all-units" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">全部兵种</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族单位 -->
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">○</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">近战</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">圆环卫士</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的防御型步兵单位，可形成护盾保护友军</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>850/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>45</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 45%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>护甲</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">护盾光环</span>
+                            <span class="ability-tag text-blue-400">能量吸收</span>
+                            <span class="ability-tag text-blue-400">旋转防御</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Circle Guardian</span>
+                        <a href="circle-guardian.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">◯</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">远程</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">能量射手</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的远程攻击单位，发射高能光束</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>600/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 60%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>75</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 75%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>射程</span>
+                            <span>中</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 65%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">穿透射击</span>
+                            <span class="ability-tag text-blue-400">能量聚焦</span>
+                            <span class="ability-tag text-blue-400">光环增强</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Energy Shooter</span>
+                        <a href="energy-shooter.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">◎</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">飞行</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">和谐使徒</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的支援型飞行单位，治疗友军并增强能量</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>550/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 55%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>治疗力</span>
+                            <span>30/秒</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 70%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量增强</span>
+                            <span>+25%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 75%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">群体治疗</span>
+                            <span class="ability-tag text-blue-400">能量灌注</span>
+                            <span class="ability-tag text-blue-400">和谐共鸣</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Harmony Apostle</span>
+                        <a href="harmony-apostle.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">⭕</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">机械</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">共振装甲</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的重型机械单位，可吸收伤害并反弹攻击</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>1200/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>85</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>护甲</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">伤害反弹</span>
+                            <span class="ability-tag text-blue-400">共振护盾</span>
+                            <span class="ability-tag text-blue-400">群体减速</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Resonance Armor</span>
+                        <a href="resonance-armor.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">◌</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">法师</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">时空法师</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的精英法师单位，操控时间与空间的力量</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>500/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 50%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>魔法攻击</span>
+                            <span>120</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>400/400</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">时间减速</span>
+                            <span class="ability-tag text-blue-400">空间传送</span>
+                            <span class="ability-tag text-blue-400">时光回溯</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Time Mage</span>
+                        <a href="time-mage.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-circle unit-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-blue-500/20 text-blue-400">⚡</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">英雄</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">圆环领主</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的英雄单位，掌握完美和谐的终极形态</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>2500/2500</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>150</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 95%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>500/500</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-blue-400">完美护盾</span>
+                            <span class="ability-tag text-blue-400">能量风暴</span>
+                            <span class="ability-tag text-blue-400">时空裂隙</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Circle Lord</span>
+                        <a href="circle-lord.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 三角议会单位 -->
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">△</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">近战</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角战士</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的基础近战单位，攻击力强但生命值较低</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>450/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 45%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>65</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 65%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻速</span>
+                            <span>快</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">锐利穿刺</span>
+                            <span class="ability-tag text-red-400">冲锋</span>
+                            <span class="ability-tag text-red-400">三角阵型</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Warrior</span>
+                        <a href="triangle-warrior.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">▲</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">远程</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">棱镜射手</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的远程单位，发射聚焦的光束</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>400/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 40%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>80</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>射程</span>
+                            <span>远</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">穿透光束</span>
+                            <span class="ability-tag text-red-400">能量聚焦</span>
+                            <span class="ability-tag text-red-400">范围爆炸</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Prism Shooter</span>
+                        <a href="prism-shooter.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">△̅</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">潜行</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">暗影刺客</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的潜行单位，可以隐形并进行致命一击</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span="380/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 38%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>100</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>暴击率</span>
+                            <span>40%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">隐形</span>
+                            <span class="ability-tag text-red-400">背刺</span>
+                            <span class="ability-tag text-red-400">暗影步</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Shadow Assassin</span>
+                        <a href="shadow-assassin.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">▽</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">飞行</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角战鹰</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的飞行单位，速度极快，可俯冲攻击</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>550/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 55%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>70</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 70%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>速度</span>
+                            <span>极快</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 95%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">俯冲攻击</span>
+                            <span class="ability-tag text-red-400">三角突袭</span>
+                            <span class="ability-tag text-red-400">空中优势</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Hawk</span>
+                        <a href="triangle-hawk.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">△△</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">机械</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">攻城三角</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的攻城单位，对建筑造成巨大伤害</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>900/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>120</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻城伤害</span>
+                            <span>+200%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">穿甲弹</span>
+                            <span class="ability-tag text-red-400">爆炸弹头</span>
+                            <span class="ability-tag text-red-400">三角聚焦</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Siege Triangle</span>
+                        <a href="siege-triangle.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-triangle unit-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-red-500/20 text-red-400">⚔</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">英雄</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角大祭司</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的精神领袖，掌握牺牲与力量的奥秘</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>2200/2500</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 88%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>130</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>500/500</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-red-400">血祭</span>
+                            <span class="ability-tag text-red-400">三角圣光</span>
+                            <span class="ability-tag text-red-400">牺牲强化</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle High Priest</span>
+                        <a href="triangle-high-priest.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 方碑盟约单位 -->
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">□</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">步兵</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">模块步兵</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的标准步兵单位，可装备不同模块</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>500/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 50%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>50</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 50%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>护甲</span>
+                            <span>60%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 60%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">模块装备</span>
+                            <span class="ability-tag text-green-400">维修</span>
+                            <span class="ability-tag text-green-400">方阵</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Module Infantry</span>
+                        <a href="module-infantry.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">■</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">机械</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">矩阵战车</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的装甲单位，可变换形态适应战场</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>1100/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>80</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>护甲</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">形态变换</span>
+                            <span class="ability-tag text-green-400">模块武器</span>
+                            <span class="ability-tag text-green-400">能量护盾</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Matrix Tank</span>
+                        <a href="matrix-tank.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">▢</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">工程师</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">量子工程师</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的支援单位，修理建筑并强化友军</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>400/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 40%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>修理速度</span>
+                            <span>40/秒</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>强化效果</span>
+                            <span>+30%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">快速修理</span>
+                            <span class="ability-tag text-green-400">量子护盾</span>
+                            <span class="ability-tag text-green-400">模块升级</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Quantum Engineer</span>
+                        <a href="quantum-engineer.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">▣</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">飞行</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方碑无人机</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的侦查单位，可隐形并收集情报</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>200/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 20%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>30</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 30%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>视野</span>
+                            <span>超大</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 95%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">隐形</span>
+                            <span class="ability-tag text-green-400">扫描</span>
+                            <span class="ability-tag text-green-400">信号干扰</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk Drone</span>
+                        <a href="obelisk-drone.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">▥</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">传送</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">量子传送者</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的战略单位，可进行空间传送</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>700/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 70%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>300/300</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 75%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>传送范围</span>
+                            <span>远</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">群体传送</span>
+                            <span class="ability-tag text-green-400">空间稳定</span>
+                            <span class="ability-tag text-green-400">量子纠缠</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Quantum Teleporter</span>
+                        <a href="quantum-teleporter.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-square unit-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-green-500/20 text-green-400">◈</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">英雄</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方碑主脑</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的AI指挥官，操控整个战场</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>2400/2500</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 96%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>600/600</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>控制范围</span>
+                            <span>超大</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-green-400">矩阵控制</span>
+                            <span class="ability-tag text-green-400">量子风暴</span>
+                            <span class="ability-tag text-green-400">时空折叠</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk Overmind</span>
+                        <a href="obelisk-overmind.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 螺旋之子单位 -->
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">◎</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">近战</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">孢子战士</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的基础步兵，可自愈并产生毒素</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>550/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 55%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>55</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 55%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>自愈</span>
+                            <span>10/秒</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 70%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">毒素攻击</span>
+                            <span class="ability-tag text-purple-400">再生</span>
+                            <span class="ability-tag text-purple-400">孢子扩散</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spore Warrior</span>
+                        <a href="spore-warrior.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">◯</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">远程</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">藤蔓射手</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的远程单位，发射带刺的藤蔓</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>450/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 45%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>60</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 60%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>减速</span>
+                            <span>30%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 60%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">藤蔓缠绕</span>
+                            <span class="ability-tag text-purple-400">毒素</span>
+                            <span class="ability-tag text-purple-400">地形控制</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Vine Shooter</span>
+                        <a href="vine-shooter.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">◉</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">飞行</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生命蜂鸟</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的飞行单位，治疗友军并散播生命孢子</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>300/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 30%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>治疗力</span>
+                            <span>35/秒</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 75%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>速度</span>
+                            <span>极快</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 95%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">群体治疗</span>
+                            <span class="ability-tag text-purple-400">生命孢子</span>
+                            <span class="ability-tag text-purple-400">净化</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Life Hummingbird</span>
+                        <a href="life-hummingbird.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">⚗</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">巨兽</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">螺旋巨兽</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的巨型生物单位，吞噬敌人并成长</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>1800/1800</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>攻击力</span>
+                            <span>110</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 85%; color: #ef4444;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>护甲</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 75%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">吞噬</span>
+                            <span class="ability-tag text-purple-400">成长</span>
+                            <span class="ability-tag text-purple-400">践踏</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spiral Behemoth</span>
+                        <a href="spiral-behemoth.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">🌿</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">进化</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">进化体</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的适应型单位，可进化成不同形态</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>650/1000</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 65%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>适应力</span>
+                            <span>可变</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>进化速度</span>
+                            <span>快</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 80%; color: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">形态适应</span>
+                            <span class="ability-tag text-purple-400">快速进化</span>
+                            <span class="ability-tag text-purple-400">基因吸收</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Evolved Form</span>
+                        <a href="evolved-form.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="unit-card rounded-lg p-6 race-border-spiral unit-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="unit-type-icon bg-purple-500/20 text-purple-400">🌳</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">英雄</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生命之母</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的生命女神，掌控所有生物的生死</p>
+                    
+                    <!-- 属性 -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>生命值</span>
+                            <span>2600/2600</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #3b82f6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>能量</span>
+                            <span>700/700</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>治疗范围</span>
+                            <span>超大</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 100%; color: #10b981;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能力 -->
+                    <div class="mb-3">
+                        <div class="text-xs text-gray-500 mb-1">能力</div>
+                        <div>
+                            <span class="ability-tag text-purple-400">生命绽放</span>
+                            <span class="ability-tag text-purple-400">进化浪潮</span>
+                            <span class="ability-tag text-purple-400">生命轮回</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Mother of Life</span>
+                        <a href="mother-of-life.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 按种族分类 -->
+        <section id="circle-clan" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-blue-400">圆环族兵种</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族兵种卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="triangle-council" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-red-400">三角议会兵种</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 三角议会兵种卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="square-covenant" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-green-400">方碑盟约兵种</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 方碑盟约兵种卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="spiral-progeny" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-purple-400">螺旋之子兵种</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 螺旋之子兵种卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+      </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2024 几何境域：形态之战. All rights reserved.</p>
+            <p class="text-sm mt-2">兵种单位设计 | 24个独特单位，4个几何种族</p>
+        </div>
+    </footer>
+
+    <script>
+        // 过滤单位
+        function filterUnits(race) {
+            const units = document.querySelectorAll('.unit-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(getRaceName(race)) || (race === 'all' && btn.textContent.includes('全部'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 显示/隐藏单位
+            units.forEach(unit => {
+                if (race === 'all' || unit.dataset.race === race) {
+                    unit.style.display = 'block';
+                } else {
+                    unit.style.display = 'none';
+                }
+            });
+        }
+        
+        function getRaceName(race) {
+            const names = {
+                'circle': '圆环族',
+                'triangle': '三角议会',
+                'square': '方碑盟约',
+                'spiral': '螺旋之子'
+            };
+            return names[race] || '';
+        }
+        
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // 初始化
+        revealOnScroll();
+        
+        // 动态填充种族分类单位
+        function populateRaceSections() {
+            const raceSections = {
+                'circle-clan': 'circle',
+                'triangle-council': 'triangle',
+                'square-covenant': 'square',
+                'spiral-progeny': 'spiral'
+            };
+            
+            Object.entries(raceSections).forEach(([sectionId, race]) => {
+                const section = document.querySelector(`#${sectionId} .grid`);
+                if (section) {
+                    const units = document.querySelectorAll(`#all-units .unit-item[data-race="${race}"]`);
+                    units.forEach(unit => {
+                        // 使用 insertAdjacentHTML 创建深拷贝
+                        section.insertAdjacentHTML('beforeend', unit.outerHTML);
+                    });
+                }
+            });
+        }
+        
+        populateRaceSections();
+    </script>
+</body>
+</html>

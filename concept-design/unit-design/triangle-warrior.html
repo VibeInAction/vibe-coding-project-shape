@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角战士 - 三角议会兵种单位</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid var(--primary-red);
+            top: 65%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-40px) rotate(90deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg) scale(0.9);
+            }
+            75% { 
+                transform: translateY(-60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* 3D 单位展示 */
+        .unit-3d-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            perspective: 1000px;
+            margin: 0 auto;
+        }
+
+        .unit-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3d 20s infinite linear;
+        }
+
+        @keyframes rotate3d {
+            0% { transform: rotateY(0deg) rotateX(10deg); }
+            100% { transform: rotateY(360deg) rotateX(10deg); }
+        }
+
+        .unit-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid var(--primary-red);
+            background: rgba(239, 68, 68, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .unit-face-front { transform: translateZ(100px); }
+        .unit-face-back { transform: translateZ(-100px) rotateY(180deg); }
+        .unit-face-left { transform: translateX(-100px) rotateY(-90deg); }
+        .unit-face-right { transform: translateX(100px) rotateY(90deg); }
+        .unit-face-top { transform: translateY(-100px) rotateX(90deg); }
+        .unit-face-bottom { transform: translateY(100px) rotateX(-90deg); }
+
+        /* 能力展示 */
+        .ability-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary-red);
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 属性条 */
+        .stat-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-red), #f97316);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* 技能图标 */
+        .skill-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-icon:hover {
+            transform: scale(1.1) rotate(10deg);
+            border-color: #f97316;
+        }
+
+        /* 战术建议 */
+        .tactic-tip {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tactic-tip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-red);
+        }
+
+        /* 对抗策略 */
+        .counter-strategy {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 24px 0;
+        }
+
+        .upgrade-node {
+            width: 120px;
+            height: 120px;
+            border: 2px solid var(--primary-red);
+            border-radius: 12px;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.05);
+            border-color: #f97316;
+        }
+
+        .upgrade-arrow {
+            width: 60px;
+            height: 2px;
+            background: var(--primary-red);
+            position: relative;
+        }
+
+        .upgrade-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid var(--primary-red);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
+        /* 滚动显示动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 三角突刺效果 */
+        .triangle-spike {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid var(--primary-red);
+            opacity: 0.6;
+            animation: spike-attack 2s infinite;
+        }
+
+        @keyframes spike-attack {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 0.8; }
+            100% { transform: translateY(-40px) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="shape shape-triangle"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="text-3xl hover:text-red-400 transition">◈</a>
+                    <h1 class="font-orbitron text-xl font-bold bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent">
+                        三角战士
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-red-400 bg-red-500/20 px-3 py-1 rounded-full">三角议会</span>
+                    <span class="text-sm text-gray-400 bg-white/10 px-3 py-1 rounded-full">近战单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- Hero Section -->
+        <section class="mb-12 reveal">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h2 class="font-orbitron text-5xl font-bold mb-4 bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent">
+                        三角战士
+                    </h2>
+                    <p class="text-xl text-gray-400 mb-6">
+                        Triangle Warrior
+                    </p>
+                    <p class="text-gray-300 mb-6">
+                        三角议会的基础近战单位，以锐利的三角结构著称。他们攻击力强但生命值较低，
+                        依靠快速的攻击速度和三角阵型优势在战场上立足。
+                    </p>
+                    
+                    <!-- 基础属性 -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">生命值</div>
+                            <div class="text-2xl font-bold text-blue-400">450</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">攻击力</div>
+                            <div class="text-2xl font-bold text-red-400">65</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">攻速</div>
+                            <div class="text-2xl font-bold text-yellow-400">快</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">移速</div>
+                            <div class="text-2xl font-bold text-yellow-400">3.8</div>
+                            <div class="stat-bar">
+                                <div class="stat-fill" style="width: 76%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3D 单位展示 -->
+                <div class="unit-3d-container">
+                    <div class="triangle-spike" style="top: 30%; left: 40%; animation-delay: 0s;"></div>
+                    <div class="triangle-spike" style="top: 50%; right: 35%; animation-delay: 0.7s;"></div>
+                    <div class="triangle-spike" style="bottom: 40%; left: 45%; animation-delay: 1.4s;"></div>
+                    <div class="unit-3d">
+                        <div class="unit-face unit-face-front flex items-center justify-center">
+                            <span class="text-6xl text-red-400">△</span>
+                        </div>
+                        <div class="unit-face unit-face-back flex items-center justify-center">
+                            <span class="text-6xl text-red-400">▲</span>
+                        </div>
+                        <div class="unit-face unit-face-left"></div>
+                        <div class="unit-face unit-face-right"></div>
+                        <div class="unit-face unit-face-top"></div>
+                        <div class="unit-face unit-face-bottom"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技能展示 -->
+        <section class="mb-12 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">核心技能</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="ability-card rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="skill-icon mr-4">🗡️</div>
+                        <div>
+                            <h4 class="font-bold text-lg">锐利穿刺</h4>
+                            <p class="text-sm text-gray-400">Sharp Pierce</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        每次攻击有25%几率触发穿刺效果，造成150%的额外伤害。
+                        对护甲单位效果加倍。
+                    </p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">触发率</span>
+                        <span class="text-red-400">25%</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却</span>
+                        <span class="text-red-400">被动</span>
+                    </div>
+                </div>
+
+                <div class="ability-card rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="skill-icon mr-4">💨</div>
+                        <div>
+                            <h4 class="font-bold text-lg">冲锋</h4>
+                            <p class="text-sm text-gray-400">Charge</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        向目标冲锋，造成50点伤害并使其减速30%，持续3秒。
+                        冲锋期间免疫减速效果。
+                    </p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">伤害</span>
+                        <span class="text-red-400">50</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却</span>
+                        <span class="text-red-400">10秒</span>
+                    </div>
+                </div>
+
+                <div class="ability-card rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="skill-icon mr-4">🔺</div>
+                        <div>
+                            <h4 class="font-bold text-lg">三角阵型</h4>
+                            <p class="text-sm text-gray-400">Triangle Formation</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        当至少3个三角战士相邻时，自动组成三角阵型。
+                        阵型内的单位获得15%攻击速度和10%伤害减免。
+                    </p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">攻速加成</span>
+                        <span class="text-red-400">+15%</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">减伤</span>
+                        <span class="text-red-400">10%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 战术指南 -->
+        <section class="mb-12 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">战术指南</h3>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-red-400">使用技巧</h4>
+                    
+                    <div class="tactic-tip">
+                        <h5 class="font-bold mb-2">数量优势</h5>
+                        <p class="text-sm text-gray-300">
+                            大量生产三角战士，利用三角阵型获得群体加成。
+                        </p>
+                    </div>
+                    
+                    <div class="tactic-tip">
+                        <h5 class="font-bold mb-2">快速突袭</h5>
+                        <p class="text-sm text-gray-300">
+                            利用高移速和冲锋技能快速切入敌方后排。
+                        </p>
+                    </div>
+                    
+                    <div class="tactic-tip">
+                        <h5 class="font-bold mb-2">集火目标</h5>
+                        <p class="text-sm text-gray-300">
+                            集中攻击单个目标，最大化穿刺效果的触发。
+                        </p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-blue-400">对抗策略</h4>
+                    
+                    <div class="counter-strategy">
+                        <h5 class="font-bold mb-2">范围伤害</h5>
+                        <p class="text-sm text-gray-300">
+                            使用范围伤害技能同时打击多个三角战士。
+                        </p>
+                    </div>
+                    
+                    <div class="counter-strategy">
+                        <h5 class="font-bold mb-2">控制技能</h5>
+                        <p class="text-sm text-gray-300">
+                            使用眩晕或冰冻技能阻止冲锋和穿刺。
+                        </p>
+                    </div>
+                    
+                    <div class="counter-strategy">
+                        <h5 class="font-bold mb-2">分散阵型</h5>
+                        <p class="text-sm text-gray-300">
+                            避免让他们组成三角阵型，降低群体加成效果。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 升级路径 -->
+        <section class="mb-12 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">升级路径</h3>
+            
+            <div class="upgrade-path">
+                <div class="upgrade-node">
+                    <span class="text-3xl mb-2">△</span>
+                    <span class="text-sm">新兵</span>
+                    <span class="text-xs text-gray-500">450 生命</span>
+                </div>
+                
+                <div class="upgrade-arrow"></div>
+                
+                <div class="upgrade-node">
+                    <span class="text-3xl mb-2">▲</span>
+                    <span class="text-sm">老兵</span>
+                    <span class="text-xs text-gray-500">600 生命</span>
+                </div>
+                
+                <div class="upgrade-arrow"></div>
+                
+                <div class="upgrade-node">
+                    <span class="text-3xl mb-2">△▲</span>
+                    <span class="text-sm">精英战士</span>
+                    <span class="text-xs text-gray-500">800 生命</span>
+                </div>
+            </div>
+            
+            <div class="bg-white/5 rounded-lg p-6">
+                <h4 class="font-bold mb-4">升级效果</h4>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">•</span>
+                        <span>老兵：穿刺触发率提升至35%，冲锋伤害增至80</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">•</span>
+                        <span>精英战士：获得新技能"三角突袭"，可瞬间移动到目标背后</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">•</span>
+                        <span>每次升级：攻击力+10，生命值+75</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 相关单位 -->
+        <section class="mb-12 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">相关单位</h3>
+            
+            <div class="grid md:grid-cols-4 gap-4">
+                <a href="prism-shooter.html" class="block bg-white/5 rounded-lg p-4 hover:bg-white/10 transition">
+                    <div class="text-center">
+                        <span class="text-4xl mb-2 block">▲</span>
+                        <h5 class="font-bold">棱镜射手</h5>
+                        <p class="text-xs text-gray-400">远程单位</p>
+                    </div>
+                </a>
+                
+                <a href="shadow-assassin.html" class="block bg-white/5 rounded-lg p-4 hover:bg-white/10 transition">
+                    <div class="text-center">
+                        <span class="text-4xl mb-2 block">△̅</span>
+                        <h5 class="font-bold">暗影刺客</h5>
+                        <p class="text-xs text-gray-400">潜行单位</p>
+                    </div>
+                </a>
+                
+                <a href="triangle-hawk.html" class="block bg-white/5 rounded-lg p-4 hover:bg-white/10 transition">
+                    <div class="text-center">
+                        <span class="text-4xl mb-2 block">▽</span>
+                        <h5 class="font-bold">三角战鹰</h5>
+                        <p class="text-xs text-gray-400">飞行单位</p>
+                    </div>
+                </a>
+                
+                <a href="triangle-fortress.html" class="block bg-white/5 rounded-lg p-4 hover:bg-white/10 transition">
+                    <div class="text-center">
+                        <span class="text-4xl mb-2 block">△</span>
+                        <h5 class="font-bold">三角堡垒</h5>
+                        <p class="text-xs text-gray-400">主基地</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2024 几何境域：形态之战. All rights reserved.</p>
+            <p class="text-sm mt-2">三角议会 | 基础近战单位</p>
+        </div>
+    </footer>
+
+    <script>
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // 初始化
+        revealOnScroll();
+        
+        // 动态更新属性条
+        setTimeout(() => {
+            document.querySelectorAll('.stat-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }, 500);
+    </script>
+</body>
+</html>

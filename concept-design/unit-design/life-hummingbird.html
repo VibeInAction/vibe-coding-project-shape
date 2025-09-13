@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命蜂鸟 - 螺旋之子单位</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #8b5cf6;
+            --secondary-color: #7c3aed;
+            --accent-color: #a78bfa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary-color);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .spiral {
+            position: absolute;
+            border: 2px solid rgba(139, 92, 246, 0.1);
+            border-radius: 50%;
+            animation: spiral 20s linear infinite;
+        }
+
+        .spiral::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(139, 92, 246, 0.05);
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+
+        .spiral:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+
+        .spiral:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            top: 60%;
+            right: 15%;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+
+        .spiral:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            bottom: 20%;
+            left: 20%;
+            animation-duration: 20s;
+        }
+
+        .spiral:nth-child(4) {
+            width: 400px;
+            height: 400px;
+            top: 30%;
+            left: 50%;
+            animation-duration: 35s;
+            opacity: 0.05;
+        }
+
+        @keyframes spiral {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.05) 100%);
+            border-radius: 20px;
+            margin-bottom: 4rem;
+        }
+
+        .unit-title {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .unit-subtitle {
+            font-size: 1.5rem;
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+
+        /* 3D模型展示 */
+        .model-display {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 3rem;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .hummingbird-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: birdFly 10s ease-in-out infinite;
+        }
+
+        @keyframes birdFly {
+            0%, 100% {
+                transform: translateY(0) rotateY(0deg);
+            }
+            25% {
+                transform: translateY(-30px) rotateY(90deg);
+            }
+            50% {
+                transform: translateY(0) rotateY(180deg);
+            }
+            75% {
+                transform: translateY(30px) rotateY(270deg);
+            }
+        }
+
+        .bird-body {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 40px 40px 20px 20px;
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+        }
+
+        .bird-head {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        .bird-beak {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 0 50% 50% 0;
+        }
+
+        .bird-wing {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 30px 10px 10px 30px;
+            top: 40%;
+            transform-origin: right center;
+        }
+
+        .bird-wing.left {
+            left: 40px;
+            animation: wingFlapLeft 0.2s ease-in-out infinite;
+        }
+
+        .bird-wing.right {
+            right: 40px;
+            transform: scaleX(-1);
+            animation: wingFlapRight 0.2s ease-in-out infinite;
+        }
+
+        @keyframes wingFlapLeft {
+            0%, 100% {
+                transform: rotate(-20deg);
+            }
+            50% {
+                transform: rotate(20deg);
+            }
+        }
+
+        @keyframes wingFlapRight {
+            0%, 100% {
+                transform: scaleX(-1) rotate(-20deg);
+            }
+            50% {
+                transform: scaleX(-1) rotate(20deg);
+            }
+        }
+
+        .bird-tail {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            left: 50%;
+            bottom: 15%;
+            transform: translateX(-50%);
+            border-radius: 0 20px 20px 0;
+        }
+
+        .life-orb {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #10b981, #059669);
+            border-radius: 50%;
+            left: 50%;
+            bottom: -30px;
+            transform: translateX(-50%);
+            animation: orbPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+        }
+
+        @keyframes orbPulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateX(-50%) scale(1.5);
+                opacity: 0.4;
+            }
+        }
+
+        /* 属性条 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(55, 65, 81, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+            transition: width 2s ease;
+        }
+
+        /* 技能卡片 */
+        .abilities-section {
+            margin-bottom: 4rem;
+        }
+
+        .abilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .ability-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ability-card:hover::before {
+            opacity: 1;
+        }
+
+        .ability-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .ability-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 战术指南 */
+        .tactics-section {
+            margin-bottom: 4rem;
+        }
+
+        .tactics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .tactic-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .tactic-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tactic-list {
+            list-style: none;
+        }
+
+        .tactic-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .tactic-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        /* 升级路径 */
+        .upgrade-section {
+            margin-bottom: 4rem;
+        }
+
+        .upgrade-path {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .upgrade-path::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            z-index: 0;
+        }
+
+        .upgrade-node {
+            width: 200px;
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+
+        /* 相关单位 */
+        .related-units {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .related-unit-card {
+            background: rgba(31, 41, 55, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-unit-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .unit-title {
+                font-size: 2.5rem;
+            }
+
+            .model-display {
+                width: 300px;
+                height: 300px;
+            }
+
+            .abilities-grid,
+            .tactics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upgrade-path {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .upgrade-path::before {
+                width: 2px;
+                height: 80%;
+                top: 10%;
+                left: 50%;
+                right: auto;
+            }
+        }
+
+        /* 滚动显示动画 */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="../index.html" class="text-2xl font-bold text-purple-400 hover:text-purple-300 transition-colors">
+                <i class="fas fa-cube mr-2"></i>几何战争
+            </a>
+            <div class="flex items-center gap-4">
+                <span class="text-gray-300">生命蜂鸟</span>
+                <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-sm">螺旋之子</span>
+                <span class="px-3 py-1 bg-gray-600 text-white rounded-full text-sm">飞行支援</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section scroll-reveal">
+            <h1 class="unit-title">生命蜂鸟</h1>
+            <p class="unit-subtitle">Life Hummingbird | 自然治愈，灵动支援</p>
+            
+            <!-- 3D模型展示 -->
+            <div class="model-display">
+                <div class="hummingbird-model">
+                    <div class="bird-body"></div>
+                    <div class="bird-head">
+                        <div class="bird-beak"></div>
+                    </div>
+                    <div class="bird-wing left"></div>
+                    <div class="bird-wing right"></div>
+                    <div class="bird-tail"></div>
+                    <div class="life-orb"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 基础属性 -->
+        <section class="scroll-reveal">
+            <h2 class="text-3xl font-bold mb-4 text-purple-400">基础属性</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">生命值</span>
+                        <span class="text-purple-400">280/280</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">攻击力</span>
+                        <span class="text-purple-400">25-35</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">护甲</span>
+                        <span class="text-purple-400">5</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 10%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">移速</span>
+                        <span class="text-purple-400">6.0</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">治疗效率</span>
+                        <span class="text-purple-400">40/秒</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 70%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-lg font-semibold">能量</span>
+                        <span class="text-purple-400">200/200</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技能展示 -->
+        <section class="abilities-section scroll-reveal">
+            <h2 class="text-3xl font-bold mb-4 text-purple-400">核心技能</h2>
+            <div class="abilities-grid">
+                <div class="ability-card">
+                    <div class="ability-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">生命之吻</h3>
+                    <p class="text-gray-300 mb-3">为目标友方单位恢复80点生命值，并附加5秒的持续恢复</p>
+                    <div class="text-sm text-gray-400">
+                        <p><i class="fas fa-clock mr-1"></i>冷却时间: 3秒</p>
+                        <p><i class="fas fa-bolt mr-1"></i>能量消耗: 30</p>
+                        <p><i class="fas fa-arrows-alt mr-1"></i>作用范围: 单体</p>
+                    </div>
+                </div>
+                <div class="ability-card">
+                    <div class="ability-icon">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">自然之愈</h3>
+                    <p class="text-gray-300 mb-3">在指定区域创造生命光环，范围内友军每秒恢复20点生命值</p>
+                    <div class="text-sm text-gray-400">
+                        <p><i class="fas fa-clock mr-1"></i>冷却时间: 10秒</p>
+                        <p><i class="fas fa-bolt mr-1"></i>能量消耗: 60</p>
+                        <p><i class="fas fa-arrows-alt mr-1"></i>作用范围: 半径200</p>
+                    </div>
+                </div>
+                <div class="ability-card">
+                    <div class="ability-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">蜂群召唤</h3>
+                    <p class="text-gray-300 mb-3">召唤5只治疗蜂，自动寻找并治疗受伤的友方单位</p>
+                    <div class="text-sm text-gray-400">
+                        <p><i class="fas fa-clock mr-1"></i>冷却时间: 15秒</p>
+                        <p><i class="fas fa-bolt mr-1"></i>能量消耗: 80</p>
+                        <p><i class="fas fa-arrows-alt mr-1"></i>作用范围: 全场</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 战术指南 -->
+        <section class="tactics-section scroll-reveal">
+            <h2 class="text-3xl font-bold mb-4 text-purple-400">战术指南</h2>
+            <div class="tactics-grid">
+                <div class="tactic-card">
+                    <h3><i class="fas fa-chess-knight mr-2"></i>使用技巧</h3>
+                    <ul class="tactic-list">
+                        <li>利用高速移动能力在战场快速穿梭，支援需要治疗的单位</li>
+                        <li>在激烈的战斗中部署自然之愈，最大化群体治疗效果</li>
+                        <li>蜂群召唤可以在关键时刻扭转战局，保持队伍持续作战</li>
+                    </ul>
+                </div>
+                <div class="tactic-card">
+                    <h3><i class="fas fa-chess-king mr-2"></i>对抗策略</h3>
+                    <ul class="tactic-list">
+                        <li>使用对空技能或单位优先击杀脆弱的生命蜂鸟</li>
+                        <li>施加沉默效果阻止其释放治疗技能</li>
+                        <li>集中火力快速击杀目标，使其治疗跟不上伤害</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 升级路径 -->
+        <section class="upgrade-section scroll-reveal">
+            <h2 class="text-3xl font-bold mb-4 text-purple-400">升级路径</h2>
+            <div class="upgrade-path">
+                <div class="upgrade-node">
+                    <h3 class="text-lg font-bold mb-2">幼鸟</h3>
+                    <p class="text-sm text-gray-400">基础形态</p>
+                    <p class="text-xs text-gray-500 mt-1">治疗: 25/秒</p>
+                </div>
+                <div class="upgrade-node">
+                    <h3 class="text-lg font-bold mb-2">成熟蜂鸟</h3>
+                    <p class="text-sm text-gray-400">强化治愈</p>
+                    <p class="text-xs text-gray-500 mt-1">治疗: 40/秒<br>+1 移速</p>
+                </div>
+                <div class="upgrade-node">
+                    <h3 class="text-lg font-bold mb-2">精灵蜂鸟</h3>
+                    <p class="text-sm text-gray-400">自然眷顾</p>
+                    <p class="text-xs text-gray-500 mt-1">治疗: 60/秒<br>+50% 技能效果<br>治疗附加护盾</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 相关单位 -->
+        <section class="scroll-reveal">
+            <h2 class="text-3xl font-bold mb-4 text-purple-400">相关单位</h2>
+            <div class="related-units">
+                <a href="spore-warrior.html" class="related-unit-card">
+                    <i class="fas fa-fist-raised text-3xl text-purple-400 mb-2"></i>
+                    <h3 class="font-bold">孢子战士</h3>
+                    <p class="text-sm text-gray-400">基础近战单位</p>
+                </a>
+                <a href="vine-shooter.html" class="related-unit-card">
+                    <i class="fas fa-crosshairs text-3xl text-purple-400 mb-2"></i>
+                    <h3 class="font-bold">藤蔓射手</h3>
+                    <p class="text-sm text-gray-400">远程攻击单位</p>
+                </a>
+                <a href="spiral-behemoth.html" class="related-unit-card">
+                    <i class="fas fa-mountain text-3xl text-purple-400 mb-2"></i>
+                    <h3 class="font-bold">螺旋巨兽</h3>
+                    <p class="text-sm text-gray-400">巨型生物单位</p>
+                </a>
+                <a href="mother-of-life.html" class="related-unit-card">
+                    <i class="fas fa-meteor text-3xl text-purple-400 mb-2"></i>
+                    <h3 class="font-bold">生命之母</h3>
+                    <p class="text-sm text-gray-400">终极生物单位</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.scroll-reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        // 属性条动画
+        function animateStats() {
+            const statFills = document.querySelectorAll('.stat-fill');
+            statFills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0%';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 500);
+            });
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            revealOnScroll();
+            animateStats();
+        });
+
+        window.addEventListener('scroll', revealOnScroll);
+    </script>
+</body>
+</html>
