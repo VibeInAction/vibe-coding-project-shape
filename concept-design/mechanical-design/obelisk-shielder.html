@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方碑护盾者 - 方碑盟约机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes shield-pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        @keyframes shield-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes energy-beam {
+            0% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+        
+        .obelisk-shielder {
+            width: 320px;
+            height: 340px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .shielder-base {
+            position: absolute;
+            width: 160px;
+            height: 180px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            bottom: 60px;
+            left: 80px;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.5);
+        }
+        
+        .shield-generator {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #34d399, #10b981);
+            border-radius: 50%;
+            top: 100px;
+            left: 110px;
+            animation: shield-pulse 2s ease-in-out infinite;
+        }
+        
+        .shield-core {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #6ee7b7, #34d399);
+            border-radius: 50%;
+            top: 120px;
+            left: 130px;
+            animation: shield-rotate 10s linear infinite;
+        }
+        
+        .shield-projection {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border: 3px solid rgba(16, 185, 129, 0.3);
+            border-radius: 50%;
+            top: 30px;
+            left: 20px;
+            animation: shield-pulse 3s ease-in-out infinite;
+        }
+        
+        .energy-orb {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #6ee7b7, #34d399);
+            border-radius: 50%;
+        }
+        
+        .orb-1 { top: 80px; left: 100px; animation: energy-beam 3s ease-in-out infinite; }
+        .orb-2 { top: 120px; left: 200px; animation: energy-beam 3s ease-in-out infinite 1s; }
+        .orb-3 { top: 180px; left: 120px; animation: energy-beam 3s ease-in-out infinite 2s; }
+        
+        .shield-segment {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        }
+        
+        .segment-1 { top: 50px; left: 60px; animation: shield-rotate 15s linear infinite reverse; }
+        .segment-2 { top: 150px; right: 60px; animation: shield-rotate 15s linear infinite; }
+        .segment-3 { bottom: 80px; left: 100px; animation: shield-rotate 15s linear infinite 5s; }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-green-500 hover:text-green-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">方碑盟约</span>
+                    <span class="text-green-500">|</span>
+                    <span class="text-gray-300">防护机械</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                方碑护盾者
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Obelisk Shielder</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-green-900 px-3 py-1 rounded-full">T3 防护单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">护盾专家</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">领域防护</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="obelisk-shielder" id="shielder-model">
+                    <div class="shield-projection"></div>
+                    <div class="shielder-base"></div>
+                    <div class="shield-generator"></div>
+                    <div class="shield-core"></div>
+                    <div class="shield-segment segment-1"></div>
+                    <div class="shield-segment segment-2"></div>
+                    <div class="shield-segment segment-3"></div>
+                    <div class="energy-orb orb-1"></div>
+                    <div class="energy-orb orb-2"></div>
+                    <div class="energy-orb orb-3"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-green-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-green-400">1600/1600</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="64%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-green-400">50</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="50%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护盾强度</span>
+                            <span class="text-green-400">3000</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护盾范围</span>
+                            <span class="text-green-400">200m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="67%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护盾恢复</span>
+                            <span class="text-green-400">100/秒</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-cyan-600 h-3 rounded-full" style="width: 0%" data-width="50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-shield-alt text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">280资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">75秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shield-virus text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">领域护盾</h3>
+                    <p class="text-gray-400 mb-4">生成200m范围护盾，范围内友军获得2000点额外护盾。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">被动</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bolt text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">护盾强化</h3>
+                    <p class="text-gray-400 mb-4">强化护盾吸收能力，使护盾反弹50%伤害给攻击者。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">30秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">80</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-star text-4xl text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">绝对防御</h3>
+                    <p class="text-gray-400 mb-4">激活后10秒内免疫所有伤害，护盾不消耗。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">90秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">150</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">防御策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>放置在关键建筑周围，提供持续防护</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>在敌方进攻时激活护盾强化</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>关键时刻使用绝对防御保护重要单位</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-green-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>为方碑守卫提供额外防护</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>保护矩阵堡垒免受远程攻击</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础护盾</li>
+                        <li>• 标准防护范围</li>
+                        <li>• 无特殊能力</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁护盾强化</li>
+                        <li>• 护盾强度+1000</li>
+                        <li>• 防护范围+50m</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁绝对防御</li>
+                        <li>• 护盾恢复+50/秒</li>
+                        <li>• 反弹伤害+25%</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-green-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="square-guardian.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shield-alt text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">方碑守卫</p>
+                    <p class="text-sm text-gray-400">防御单位</p>
+                </a>
+                <a href="matrix-fortress.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-fortress text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">矩阵堡垒</p>
+                    <p class="text-sm text-gray-400">重装单位</p>
+                </a>
+                <a href="cube-artisan.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-hammer text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">立方工匠</p>
+                    <p class="text-sm text-gray-400">工程单位</p>
+                </a>
+                <a href="tetrahedron-templar.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-chess-knight text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">四面体圣殿骑士</p>
+                    <p class="text-sm text-gray-400">精英单位</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const shielderModel = document.getElementById('shielder-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        shielderModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            shielderModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            shielderModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            shielderModel.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>

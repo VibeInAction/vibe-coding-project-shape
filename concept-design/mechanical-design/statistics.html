@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机械统计 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 统计卡片动画 */
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 数字动画 */
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        /* 排行榜样式 */
+        .leaderboard-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+
+        .rank-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a1a;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #1a1a1a;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #e6a55c);
+            color: #1a1a1a;
+        }
+
+        /* 趋势图标 */
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #60a5fa;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 过滤标签 */
+        .filter-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .filter-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .filter-tag.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="text-3xl hover:text-purple-400 transition">◈</a>
+                    <h1 class="font-orbitron text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        机械统计分析
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="exportData()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                        <i class="fas fa-download mr-2"></i>导出数据
+                    </button>
+                    <button onclick="refreshData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                        <i class="fas fa-sync-alt mr-2"></i>刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 总览统计 -->
+        <section class="mb-12">
+            <h2 class="font-orbitron text-3xl font-bold mb-8 text-center">总览统计</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <i class="fas fa-robot text-4xl text-blue-400 mb-4"></i>
+                    <div class="stat-number" id="totalMechanicals">24</div>
+                    <p class="text-gray-400 mt-2">机械单位总数</p>
+                    <div class="flex items-center justify-center mt-2 text-sm">
+                        <i class="fas fa-arrow-up trend-up mr-1"></i>
+                        <span class="text-green-400">100%</span>
+                        <span class="text-gray-500 ml-1">完成度</span>
+                    </div>
+                </div>
+
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <i class="fas fa-layer-group text-4xl text-purple-400 mb-4"></i>
+                    <div class="stat-number" id="totalTiers">3</div>
+                    <p class="text-gray-400 mt-2">科技等级</p>
+                    <div class="flex items-center justify-center mt-2 text-sm">
+                        <span class="text-gray-500">T1-T3</span>
+                    </div>
+                </div>
+
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <i class="fas fa-users text-4xl text-green-400 mb-4"></i>
+                    <div class="stat-number" id="totalRaces">4</div>
+                    <p class="text-gray-400 mt-2">几何种族</p>
+                    <div class="flex items-center justify-center mt-2 text-sm">
+                        <span class="text-gray-500">全部解锁</span>
+                    </div>
+                </div>
+
+                <div class="stat-card rounded-lg p-6 text-center">
+                    <i class="fas fa-star text-4xl text-yellow-400 mb-4"></i>
+                    <div class="stat-number" id="avgRating">4.8</div>
+                    <p class="text-gray-400 mt-2">平均评分</p>
+                    <div class="flex items-center justify-center mt-2 text-sm">
+                        <i class="fas fa-arrow-up trend-up mr-1"></i>
+                        <span class="text-green-400">+0.3</span>
+                        <span class="text-gray-500 ml-1">本月</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 图表分析 -->
+        <section class="mb-12">
+            <h2 class="font-orbitron text-3xl font-bold mb-8 text-center">数据分析</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 种族分布图 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">种族分布</h3>
+                    <div class="chart-container">
+                        <canvas id="raceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 等级分布图 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">等级分布</h3>
+                    <div class="chart-container">
+                        <canvas id="tierChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 机械类型分布 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">机械类型分布</h3>
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 战斗力对比 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">种族战斗力对比</h3>
+                    <div class="chart-container">
+                        <canvas id="powerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 排行榜 -->
+        <section class="mb-12">
+            <h2 class="font-orbitron text-3xl font-bold mb-8 text-center">排行榜</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 最强机械 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-trophy text-yellow-400 mr-2"></i>
+                        最强机械 TOP 5
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-1">1</div>
+                            <div class="flex-1">
+                                <div class="font-bold">螺旋泰坦</div>
+                                <div class="text-sm text-gray-400">螺旋之子 · T3旗舰型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-purple-400">9800</div>
+                                <div class="text-xs text-gray-500">战力值</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-2">2</div>
+                            <div class="flex-1">
+                                <div class="font-bold">三角毁灭者</div>
+                                <div class="text-sm text-gray-400">三角议会 · T3毁灭型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-red-400">9200</div>
+                                <div class="text-xs text-gray-500">战力值</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-3">3</div>
+                            <div class="flex-1">
+                                <div class="font-bold">圆环圣像</div>
+                                <div class="text-sm text-gray-400">圆环族 · T3终极型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-blue-400">8900</div>
+                                <div class="text-xs text-gray-500">战力值</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">4</div>
+                            <div class="flex-1">
+                                <div class="font-bold">方碑旗舰</div>
+                                <div class="text-sm text-gray-400">方碑盟约 · T3旗舰型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-green-400">8700</div>
+                                <div class="text-xs text-gray-500">战力值</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">5</div>
+                            <div class="flex-1">
+                                <div class="font-bold">生命进化体</div>
+                                <div class="text-sm text-gray-400">螺旋之子 · T3进化型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-purple-400">8500</div>
+                                <div class="text-xs text-gray-500">战力值</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 人气排行 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-heart text-red-400 mr-2"></i>
+                        人气排行 TOP 5
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-1">1</div>
+                            <div class="flex-1">
+                                <div class="font-bold">螺旋斥候</div>
+                                <div class="text-sm text-gray-400">螺旋之子 · T1侦察型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-purple-400">98%</div>
+                                <div class="text-xs text-gray-500">好评率</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-2">2</div>
+                            <div class="flex-1">
+                                <div class="font-bold">三角突击者</div>
+                                <div class="text-sm text-gray-400">三角议会 · T2突击型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-red-400">96%</div>
+                                <div class="text-xs text-gray-500">好评率</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-3">3</div>
+                            <div class="flex-1">
+                                <div class="font-bold">圆环防御者</div>
+                                <div class="text-sm text-gray-400">圆环族 · T2防御型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-blue-400">95%</div>
+                                <div class="text-xs text-gray-500">好评率</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">4</div>
+                            <div class="flex-1">
+                                <div class="font-bold">龙卷风狙击手</div>
+                                <div class="text-sm text-gray-400">螺旋之子 · T2远程型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-purple-400">94%</div>
+                                <div class="text-xs text-gray-500">好评率</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">5</div>
+                            <div class="flex-1">
+                                <div class="font-bold">棱镜战车</div>
+                                <div class="text-sm text-gray-400">三角议会 · T1火力型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-red-400">93%</div>
+                                <div class="text-xs text-gray-500">好评率</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 性价比排行 -->
+                <div class="stat-card rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-coins text-yellow-400 mr-2"></i>
+                        性价比排行 TOP 5
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-1">1</div>
+                            <div class="flex-1">
+                                <div class="font-bold">能量传输器</div>
+                                <div class="text-sm text-gray-400">圆环族 · T1支援型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-blue-400">9.2</div>
+                                <div class="text-xs text-gray-500">性价比</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-2">2</div>
+                            <div class="flex-1">
+                                <div class="font-bold">方碑守卫</div>
+                                <div class="text-sm text-gray-400">方碑盟约 · T1防御型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-green-400">8.9</div>
+                                <div class="text-xs text-gray-500">性价比</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge rank-3">3</div>
+                            <div class="flex-1">
+                                <div class="font-bold">螺旋斥候</div>
+                                <div class="text-sm text-gray-400">螺旋之子 · T1侦察型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-purple-400">8.7</div>
+                                <div class="text-xs text-gray-500">性价比</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">4</div>
+                            <div class="flex-1">
+                                <div class="font-bold">几何哨兵</div>
+                                <div class="text-sm text-gray-400">方碑盟约 · T1侦察型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-green-400">8.5</div>
+                                <div class="text-xs text-gray-500">性价比</div>
+                            </div>
+                        </div>
+                        <div class="leaderboard-item">
+                            <div class="rank-badge">5</div>
+                            <div class="flex-1">
+                                <div class="font-bold">棱镜战车</div>
+                                <div class="text-sm text-gray-400">三角议会 · T1火力型</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-red-400">8.3</div>
+                                <div class="text-xs text-gray-500">性价比</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详细统计 -->
+        <section>
+            <h2 class="font-orbitron text-3xl font-bold mb-8 text-center">详细统计</h2>
+            <div class="stat-card rounded-lg p-6">
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button onclick="filterDetailed('all')" class="filter-tag active">全部</button>
+                    <button onclick="filterDetailed('circle')" class="filter-tag">圆环族</button>
+                    <button onclick="filterDetailed('triangle')" class="filter-tag">三角议会</button>
+                    <button onclick="filterDetailed('square')" class="filter-tag">方碑盟约</button>
+                    <button onclick="filterDetailed('spiral')" class="filter-tag">螺旋之子</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-3 px-4">机械名称</th>
+                                <th class="text-left py-3 px-4">种族</th>
+                                <th class="text-left py-3 px-4">等级</th>
+                                <th class="text-left py-3 px-4">类型</th>
+                                <th class="text-center py-3 px-4">生命值</th>
+                                <th class="text-center py-3 px-4">攻击力</th>
+                                <th class="text-center py-3 px-4">护甲</th>
+                                <th class="text-center py-3 px-4">移动速度</th>
+                                <th class="text-center py-3 px-4">建造费用</th>
+                                <th class="text-center py-3 px-4">战力值</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailedStats">
+                            <!-- 动态生成内容 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 初始化图表
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#e2e8f0',
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        };
+
+        // 种族分布图
+        const raceCtx = document.getElementById('raceChart').getContext('2d');
+        new Chart(raceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['圆环族', '三角议会', '方碑盟约', '螺旋之子'],
+                datasets: [{
+                    data: [6, 6, 6, 6],
+                    backgroundColor: [
+                        '#3b82f6',
+                        '#ef4444',
+                        '#10b981',
+                        '#8b5cf6'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e2e8f0',
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+
+        // 等级分布图
+        const tierCtx = document.getElementById('tierChart').getContext('2d');
+        new Chart(tierCtx, {
+            type: 'bar',
+            data: {
+                labels: ['T1', 'T2', 'T3'],
+                datasets: [{
+                    label: '机械数量',
+                    data: [8, 8, 8],
+                    backgroundColor: [
+                        '#60a5fa',
+                        '#c084fc',
+                        '#fbbf24'
+                    ]
+                }]
+            },
+            options: chartOptions
+        });
+
+        // 机械类型分布
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['防御型', '攻击型', '支援型', '工程型', '侦察型', '旗舰型'],
+                datasets: [{
+                    data: [4, 5, 3, 4, 4, 4],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                ...chartOptions,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 战斗力对比
+        const powerCtx = document.getElementById('powerChart').getContext('2d');
+        new Chart(powerCtx, {
+            type: 'radar',
+            data: {
+                labels: ['攻击力', '防御力', '机动性', '科技等级', '特殊能力'],
+                datasets: [
+                    {
+                        label: '圆环族',
+                        data: [75, 90, 70, 85, 80],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                    },
+                    {
+                        label: '三角议会',
+                        data: [95, 65, 80, 75, 85],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)'
+                    },
+                    {
+                        label: '方碑盟约',
+                        data: [80, 85, 60, 90, 75],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                    },
+                    {
+                        label: '螺旋之子',
+                        data: [85, 70, 95, 80, 90],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)'
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: '#9ca3af',
+                            stepSize: 20
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 机械统计数据
+        const mechanicalData = [
+            { name: '圆环防御者', race: '圆环族', tier: 'T2', type: '防御型', hp: 1200, atk: 450, armor: 35, speed: 3.2, cost: 180, power: 6500 },
+            { name: '能量传输器', race: '圆环族', tier: 'T1', type: '支援型', hp: 800, atk: 0, armor: 15, speed: 4.0, cost: 120, power: 2800 },
+            { name: '和谐堡垒', race: '圆环族', tier: 'T3', type: '重装型', hp: 2500, atk: 600, armor: 50, speed: 2.0, cost: 320, power: 8200 },
+            { name: '环形工程师', race: '圆环族', tier: 'T2', type: '工程型', hp: 900, atk: 200, armor: 20, speed: 3.5, cost: 150, power: 3500 },
+            { name: '共振干扰器', race: '圆环族', tier: 'T2', type: '控制型', hp: 700, atk: 300, armor: 25, speed: 4.2, cost: 160, power: 4200 },
+            { name: '圆环圣像', race: '圆环族', tier: 'T3', type: '终极型', hp: 3000, atk: 800, armor: 60, speed: 1.5, cost: 400, power: 8900 },
+            
+            { name: '三角突击者', race: '三角议会', tier: 'T2', type: '突击型', hp: 1000, atk: 650, armor: 30, speed: 4.5, cost: 200, power: 5800 },
+            { name: '棱镜战车', race: '三角议会', tier: 'T1', type: '火力型', hp: 900, atk: 500, armor: 20, speed: 3.0, cost: 140, power: 4500 },
+            { name: '三角轰炸机', race: '三角议会', tier: 'T3', type: '轰炸型', hp: 1200, atk: 900, armor: 25, speed: 6.0, cost: 280, power: 7500 },
+            { name: '三角建造机', race: '三角议会', tier: 'T2', type: '工程型', hp: 850, atk: 150, armor: 18, speed: 3.8, cost: 170, power: 3200 },
+            { name: '三角侦察机', race: '三角议会', tier: 'T2', type: '侦察型', hp: 600, atk: 250, armor: 15, speed: 7.0, cost: 130, power: 3800 },
+            { name: '三角毁灭者', race: '三角议会', tier: 'T3', type: '毁灭型', hp: 2000, atk: 1200, armor: 40, speed: 2.5, cost: 380, power: 9200 },
+            
+            { name: '方碑守卫', race: '方碑盟约', tier: 'T1', type: '防御型', hp: 1100, atk: 300, armor: 40, speed: 2.8, cost: 160, power: 4200 },
+            { name: '矩阵堡垒', race: '方碑盟约', tier: 'T3', type: '重装型', hp: 3000, atk: 400, armor: 80, speed: 1.8, cost: 350, power: 7800 },
+            { name: '立方工匠', race: '方碑盟约', tier: 'T2', type: '工程型', hp: 950, atk: 250, armor: 25, speed: 3.2, cost: 180, power: 3800 },
+            { name: '几何哨兵', race: '方碑盟约', tier: 'T1', type: '侦察型', hp: 650, atk: 200, armor: 12, speed: 5.5, cost: 110, power: 2800 },
+            { name: '方碑守护者', race: '方碑盟约', tier: 'T3', type: '守护型', hp: 2800, atk: 500, armor: 70, speed: 2.2, cost: 360, power: 8500 },
+            { name: '四面体圣殿骑士', race: '方碑盟约', tier: 'T3', type: '精英型', hp: 2200, atk: 850, armor: 55, speed: 3.0, cost: 340, power: 8800 },
+            
+            { name: '螺旋斥候', race: '螺旋之子', tier: 'T1', type: '侦察型', hp: 550, atk: 280, armor: 10, speed: 6.5, cost: 100, power: 3200 },
+            { name: '漩涡突击者', race: '螺旋之子', tier: 'T2', type: '突击型', hp: 900, atk: 550, armor: 22, speed: 5.0, cost: 190, power: 5200 },
+            { name: '螺旋毁灭者', race: '螺旋之子', tier: 'T3', type: '毁灭型', hp: 1800, atk: 1000, armor: 35, speed: 3.5, cost: 320, power: 9000 },
+            { name: '旋风轰炸机', race: '螺旋之子', tier: 'T2', type: '轰炸型', hp: 1000, atk: 700, armor: 20, speed: 6.5, cost: 220, power: 6800 },
+            { name: '龙卷风狙击手', race: '螺旋之子', tier: 'T2', type: '远程型', hp: 700, atk: 900, armor: 20, speed: 3.8, cost: 240, power: 7200 },
+            { name: '螺旋泰坦', race: '螺旋之子', tier: 'T3', type: '旗舰型', hp: 3500, atk: 1100, armor: 65, speed: 2.0, cost: 450, power: 9800 }
+        ];
+
+        // 填充详细统计表格
+        function populateDetailedStats(filter = 'all') {
+            const tbody = document.getElementById('detailedStats');
+            const filteredData = filter === 'all' ? mechanicalData : mechanicalData.filter(m => m.race.includes(filter === 'circle' ? '圆环' : filter === 'triangle' ? '三角' : filter === 'square' ? '方碑' : '螺旋'));
+            
+            tbody.innerHTML = filteredData.map(mech => `
+                <tr class="border-b border-gray-700 hover:bg-white/5 transition">
+                    <td class="py-3 px-4 font-medium">${mech.name}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-xs ${
+                            mech.race === '圆环族' ? 'bg-blue-500/20 text-blue-400' :
+                            mech.race === '三角议会' ? 'bg-red-500/20 text-red-400' :
+                            mech.race === '方碑盟约' ? 'bg-green-500/20 text-green-400' :
+                            'bg-purple-500/20 text-purple-400'
+                        }">${mech.race}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded text-xs ${
+                            mech.tier === 'T1' ? 'bg-blue-600/20 text-blue-400' :
+                            mech.tier === 'T2' ? 'bg-purple-600/20 text-purple-400' :
+                            'bg-yellow-600/20 text-yellow-400'
+                        }">${mech.tier}</span>
+                    </td>
+                    <td class="py-3 px-4 text-gray-400">${mech.type}</td>
+                    <td class="py-3 px-4 text-center text-blue-400">${mech.hp}</td>
+                    <td class="py-3 px-4 text-center text-red-400">${mech.atk}</td>
+                    <td class="py-3 px-4 text-center text-green-400">${mech.armor}</td>
+                    <td class="py-3 px-4 text-center text-purple-400">${mech.speed}</td>
+                    <td class="py-3 px-4 text-center">${mech.cost}</td>
+                    <td class="py-3 px-4 text-center font-bold">${mech.power}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 过滤功能
+        function filterDetailed(filter) {
+            const tags = document.querySelectorAll('.filter-tag');
+            tags.forEach(tag => tag.classList.remove('active'));
+            event.target.classList.add('active');
+            populateDetailedStats(filter);
+        }
+
+        // 导出数据
+        function exportData() {
+            const dataStr = JSON.stringify(mechanicalData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'mechanical_stats.json';
+            link.click();
+        }
+
+        // 刷新数据
+        function refreshData() {
+            const refreshBtn = event.target;
+            refreshBtn.innerHTML = '<span class="loading"></span>';
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>刷新';
+                populateDetailedStats();
+                
+                // 显示刷新成功提示
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                toast.textContent = '数据已刷新';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 2000);
+            }, 1000);
+        }
+
+        // 初始化
+        populateDetailedStats();
+
+        // 数字动画效果
+        function animateNumber(elementId, targetValue, duration = 1000) {
+            const element = document.getElementById(elementId);
+            const startValue = 0;
+            const increment = targetValue / (duration / 16);
+            let currentValue = startValue;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(currentValue);
+            }, 16);
+        }
+
+        // 页面加载时触发动画
+        window.addEventListener('load', () => {
+            animateNumber('totalMechanicals', 24);
+            animateNumber('totalTiers', 3);
+            animateNumber('totalRaces', 4);
+        });
+    </script>
+</body>
+</html>

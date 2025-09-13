@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙卷风狙击手 - 螺旋之子机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes tornado-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes scope-pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        @keyframes wind-flow {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(20px) translateY(-10px); }
+        }
+        
+        .tornado-sniper {
+            width: 300px;
+            height: 340px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .sniper-base {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: conic-gradient(from 0deg, #7c3aed, #a855f7, #c084fc, #e9d5ff, #c084fc, #a855f7, #7c3aed);
+            border-radius: 50% 50% 40% 40%;
+            top: 80px;
+            left: 60px;
+            box-shadow: 0 15px 40px rgba(124, 58, 237, 0.5);
+            animation: tornado-spin 20s linear infinite;
+        }
+        
+        .sniper-body {
+            position: absolute;
+            width: 120px;
+            height: 200px;
+            background: linear-gradient(135deg, #6d28d9, #7c3aed);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            top: 60px;
+            left: 90px;
+        }
+        
+        .sniper-barrel {
+            position: absolute;
+            width: 280px;
+            height: 40px;
+            background: linear-gradient(90deg, #374151, #6b7280, #9ca3af, #6b7280, #374151);
+            top: 130px;
+            left: 10px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+        }
+        
+        .sniper-scope {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 50%;
+            top: 110px;
+            left: 110px;
+            z-index: 10;
+        }
+        
+        .sniper-scope::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #e9d5ff, #a855f7);
+            border-radius: 50%;
+            top: 15px;
+            left: 15px;
+            animation: scope-pulse 2s ease-in-out infinite;
+        }
+        
+        .wind-vortex {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            border-radius: 50%;
+            top: 20px;
+            left: 0;
+            animation: tornado-spin 15s linear infinite reverse;
+        }
+        
+        .wind-vortex::before {
+            content: '';
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 50%;
+            top: -20px;
+            left: -20px;
+        }
+        
+        .energy-bolt {
+            position: absolute;
+            width: 6px;
+            height: 30px;
+            background: linear-gradient(180deg, #e9d5ff, transparent);
+            border-radius: 3px;
+            opacity: 0;
+        }
+        
+        .energy-bolt.b1 { top: 100px; left: 100px; animation: wind-flow 3s ease-in-out infinite; }
+        .energy-bolt.b2 { top: 150px; right: 100px; animation: wind-flow 3s ease-in-out infinite 1s; }
+        .energy-bolt.b3 { bottom: 120px; left: 120px; animation: wind-flow 3s ease-in-out infinite 2s; }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #7c3aed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-purple-500 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">螺旋之子</span>
+                    <span class="text-purple-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+                龙卷风狙击手
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Tornado Sniper</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-purple-900 px-3 py-1 rounded-full">T2 远程单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">精确打击</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">风能武器</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="tornado-sniper" id="sniper-model">
+                    <div class="wind-vortex"></div>
+                    <div class="sniper-base"></div>
+                    <div class="sniper-body"></div>
+                    <div class="sniper-barrel"></div>
+                    <div class="sniper-scope"></div>
+                    <div class="energy-bolt b1"></div>
+                    <div class="energy-bolt b2"></div>
+                    <div class="energy-bolt b3"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-purple-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-purple-400">700/700</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="45%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-purple-400">20</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-indigo-600 h-3 rounded-full" style="width: 0%" data-width="10%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">攻击力</span>
+                            <span class="text-purple-400">900</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="95%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">攻击范围</span>
+                            <span class="text-purple-400">1500m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">暴击率</span>
+                            <span class="text-purple-400">35%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-pink-600 h-3 rounded-full" style="width: 0%" data-width="70%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">240资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">65秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-crosshairs text-4xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">穿风射击</h3>
+                    <p class="text-gray-400 mb-4">发射穿透一切的风能箭矢，造成1800点伤害，无视护甲，并可穿透最多3个目标。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">8秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">80</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-wind text-4xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">风墙屏障</h3>
+                    <p class="text-gray-400 mb-4">创造持续6秒的风墙，阻挡所有飞行道具，并为友军提供20%伤害加成。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">18秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">100</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-eye-slash text-4xl text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">幻影突袭</h3>
+                    <p class="text-gray-400 mb-4">进入隐身状态并传送到最佳射击位置，下一次攻击必定暴击且伤害提升100%。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">25秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">120</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>占据高地位置，最大化射程和视野优势</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>穿风射击用于击杀高价值重装单位</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>风墙屏障保护友军免受远程攻击</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>幻影突袭用于重新部署或击杀关键目标</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-purple-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>与螺旋斥候配合，获取精确目标信息</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>需要近战单位保护，防止被突袭</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础狙击能力</li>
+                        <li>• 标准射程</li>
+                        <li>• 常规弹药</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁穿风射击</li>
+                        <li>• 暴击率+15%</li>
+                        <li>• 射程+300m</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-pink-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁幻影突袭</li>
+                        <li>• 移动速度+0.5</li>
+                        <li>• 攻击力+150</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="spiral-scout.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-user-ninja text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋斥候</p>
+                    <p class="text-sm text-gray-400">侦察单位</p>
+                </a>
+                <a href="helix-destroyer.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-dna text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋毁灭者</p>
+                    <p class="text-sm text-gray-400">重型单位</p>
+                </a>
+                <a href="cyclone-bomber.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-rocket text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">旋风轰炸机</p>
+                    <p class="text-sm text-gray-400">空中单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-skull text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">螺旋泰坦</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const sniperModel = document.getElementById('sniper-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        sniperModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            sniperModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            sniperModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            sniperModel.style.cursor = 'grab';
+        });
+
+        // Energy bolt animation
+        const bolts = document.querySelectorAll('.energy-bolt');
+        setInterval(() => {
+            bolts.forEach(bolt => {
+                bolt.style.opacity = Math.random() * 0.5 + 0.5;
+            });
+        }, 100);
+
+        // Scope pulsing effect
+        const scope = document.querySelector('.sniper-scope::before');
+        setInterval(() => {
+            const scopeElement = document.querySelector('.sniper-scope');
+            if (scopeElement) {
+                const scale = Math.random() * 0.2 + 0.9;
+                scopeElement.style.transform = `scale(${scale})`;
+            }
+        }, 300);
+    </script>
+</body>
+</html>

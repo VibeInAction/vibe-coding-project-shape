@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何哨兵 - 方碑盟约机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes sentry-scan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes eye-pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @key float-sentry {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .geometric-sentry {
+            width: 300px;
+            height: 280px;
+            position: relative;
+            margin: 0 auto;
+            animation: float-sentry 3s ease-in-out infinite;
+        }
+        
+        .sentry-body {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            background: linear-gradient(135deg, #059669, #10b981, #34d399);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            top: 50px;
+            left: 50px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+        
+        .sentry-eye {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #6ee7b7, #10b981);
+            border-radius: 50%;
+            top: 80px;
+            left: 110px;
+            z-index: 10;
+            animation: eye-pulse 2s ease-in-out infinite;
+        }
+        
+        .sentry-eye::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #1f2937, #111827);
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .sentry-wing {
+            position: absolute;
+            width: 60px;
+            height: 120px;
+            background: linear-gradient(135deg, #047857, #059669);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+        
+        .sentry-wing.left {
+            left: 20px;
+            top: 70px;
+            transform: rotate(-30deg);
+        }
+        
+        .sentry-wing.right {
+            right: 20px;
+            top: 70px;
+            transform: rotate(30deg);
+        }
+        
+        .sentry-antenna {
+            position: absolute;
+            width: 4px;
+            height: 40px;
+            background: linear-gradient(180deg, #6b7280, #374151);
+            top: 30px;
+        }
+        
+        .sentry-antenna.left {
+            left: 100px;
+            transform: rotate(-15deg);
+        }
+        
+        .sentry-antenna.right {
+            right: 100px;
+            transform: rotate(15deg);
+        }
+        
+        .sentry-antenna::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #6ee7b7, #34d399);
+            border-radius: 50%;
+            top: -6px;
+            left: -4px;
+            animation: eye-pulse 1.5s ease-in-out infinite;
+        }
+        
+        .scan-beam {
+            position: absolute;
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(180deg, transparent, #6ee7b7, transparent);
+            top: 120px;
+            left: 149px;
+            transform-origin: top center;
+            animation: sentry-scan 4s linear infinite;
+            opacity: 0.6;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-green-500 hover:text-green-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">方碑盟约</span>
+                    <span class="text-green-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                几何哨兵
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Geometric Sentry</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-green-900 px-3 py-1 rounded-full">T1 侦察单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">视野控制</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">隐身探测</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="geometric-sentry" id="sentry-model">
+                    <div class="sentry-body"></div>
+                    <div class="sentry-eye"></div>
+                    <div class="sentry-wing left"></div>
+                    <div class="sentry-wing right"></div>
+                    <div class="sentry-antenna left"></div>
+                    <div class="sentry-antenna right"></div>
+                    <div class="scan-beam"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-green-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-green-400">400/400</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="30%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-green-400">10</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-teal-600 h-3 rounded-full" style="width: 0%" data-width="5%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">视野范围</span>
+                            <span class="text-green-400">1000m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">移动速度</span>
+                            <span class="text-green-400">4.5</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">探测精度</span>
+                            <span class="text-green-400">95%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="95%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">80资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">25秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-eye text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">全息扫描</h3>
+                    <p class="text-gray-400 mb-4">扫描大范围区域，揭露所有隐形单位和陷阱，并为友军提供15秒的视野共享。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">20秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">50</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-project-diagram text-4xl text-teal-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">战术标记</h3>
+                    <p class="text-gray-400 mb-4">标记最多3个敌方单位，被标记单位受到的伤害提升25%，持续12秒。标记可穿透隐身效果。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">15秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">40</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-secret text-4xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">光学迷彩</h3>
+                    <p class="text-gray-400 mb-4">进入隐身状态20秒，移动速度提升30%，但无法攻击。隐身状态下持续消耗能量。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">10秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">5/秒</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>利用高机动性侦察敌方动向和布局</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>全息扫描在遭遇隐形单位时及时使用</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>战术标记高价值目标，协助队友击杀</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>光学迷彩用于潜入敌方阵地或逃脱危险</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-green-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>与狙击单位配合，提供精确的目标信息</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>为进攻部队提前清扫侦察路线</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础侦察能力</li>
+                        <li>• 标准视野</li>
+                        <li>• 基础移动</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-teal-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁全息扫描</li>
+                        <li>• 视野范围+200m</li>
+                        <li>• 移动速度+0.5</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-emerald-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁光学迷彩</li>
+                        <li>• 探测精度+5%</li>
+                        <li>• 生命值+100</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-green-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="square-guardian.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shield-alt text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">方碑守护者</p>
+                    <p class="text-sm text-gray-400">防御单位</p>
+                </a>
+                <a href="cube-artisan.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-tools text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">立方工匠</p>
+                    <p class="text-sm text-gray-400">工程单位</p>
+                </a>
+                <a href="matrix-fortress.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-cube text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">矩阵要塞</p>
+                    <p class="text-sm text-gray-400">重型单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-shield-virus text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">方碑卫士</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const sentryModel = document.getElementById('sentry-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        sentryModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            sentryModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            sentryModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            sentryModel.style.cursor = 'grab';
+        });
+
+        // Eye pulsing effect
+        const eye = document.querySelector('.sentry-eye');
+        setInterval(() => {
+            const scale = Math.random() * 0.3 + 0.9;
+            eye.style.transform = `scale(${scale})`;
+        }, 200);
+
+        // Antenna glow effect
+        const antennas = document.querySelectorAll('.sentry-antenna::before');
+        setInterval(() => {
+            const antennaElements = document.querySelectorAll('.sentry-antenna');
+            antennaElements.forEach(antenna => {
+                const glow = antenna.querySelector('::before') || antenna;
+                const brightness = Math.random() * 0.5 + 0.8;
+                antenna.style.filter = `brightness(${brightness})`;
+            });
+        }, 150);
+    </script>
+</body>
+</html>

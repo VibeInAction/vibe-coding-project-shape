@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角突击者 - 三角议会机械设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #ef4444;
+            --secondary-red: #dc2626;
+            --accent-red: #f87171;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+        }
+
+        .triangle-particle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 26px solid rgba(239, 68, 68, 0.2);
+            animation: triangle-float 15s infinite linear;
+        }
+
+        @keyframes triangle-float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 3D模型容器 */
+        .model-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .assault-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate-assault 15s infinite linear;
+        }
+
+        @keyframes rotate-assault {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        /* 突击者主体 */
+        .assault-body {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.7));
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        }
+
+        /* 钻头 */
+        .drill-bit {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            left: 50%;
+            top: 70px;
+            transform: translateX(-50%);
+            background: linear-gradient(to bottom, rgba(248, 113, 113, 0.9), rgba(239, 68, 68, 0.7));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: drill-spin 0.5s infinite linear;
+        }
+
+        @keyframes drill-spin {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* 履带 */
+        .track {
+            position: absolute;
+            width: 140px;
+            height: 20px;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            background: rgba(220, 38, 38, 0.8);
+            border-radius: 10px;
+        }
+
+        .track::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(248, 113, 113, 0.8) 0px,
+                rgba(248, 113, 113, 0.8) 10px,
+                transparent 10px,
+                transparent 20px
+            );
+            top: 8px;
+            animation: track-move 1s infinite linear;
+        }
+
+        @keyframes track-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(20px); }
+        }
+
+        /* 推进器 */
+        .thruster {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to top, rgba(239, 68, 68, 0.8), rgba(248, 113, 113, 0.6));
+            bottom: 20px;
+        }
+
+        .thruster-left {
+            left: 20px;
+            transform: skewX(-15deg);
+        }
+
+        .thruster-right {
+            right: 20px;
+            transform: skewX(15deg);
+        }
+
+        .thruster-flame {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to bottom, rgba(248, 113, 113, 0.9), transparent);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flame-flicker 0.2s infinite alternate;
+        }
+
+        @keyframes flame-flicker {
+            0% { 
+                height: 25px; 
+                opacity: 0.8;
+            }
+            100% { 
+                height: 35px; 
+                opacity: 1;
+            }
+        }
+
+        /* 统计条 */
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            transition: width 1s ease-out;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 能力卡片 */
+        .ability-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            border-color: rgba(239, 68, 68, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--primary-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        .upgrade-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-red), var(--accent-red));
+            z-index: 1;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(239, 68, 68, 0.4);
+            transform: translateX(-5px);
+        }
+
+        /* 相关机械 */
+        .related-mechanical {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .related-mechanical:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation">
+        <div class="triangle-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="triangle-particle" style="left: 30%; animation-delay: 3s;"></div>
+        <div class="triangle-particle" style="left: 50%; animation-delay: 6s;"></div>
+        <div class="triangle-particle" style="left: 70%; animation-delay: 9s;"></div>
+        <div class="triangle-particle" style="left: 90%; animation-delay: 12s;"></div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>返回机械列表
+    </a>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="font-orbitron text-5xl font-bold mb-4 text-red-400">三角突击者</h1>
+            <p class="text-xl text-gray-400">三角议会的突击型机械单位</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">T2单位</span>
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">高速突击</span>
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">破甲专家</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D模型展示 -->
+            <div>
+                <div class="bg-gray-800/50 rounded-2xl p-8">
+                    <h2 class="font-orbitron text-2xl font-bold mb-6 text-center">机械模型</h2>
+                    <div class="model-container">
+                        <div class="assault-model">
+                            <div class="track"></div>
+                            <div class="thruster thruster-left">
+                                <div class="thruster-flame"></div>
+                            </div>
+                            <div class="thruster thruster-right">
+                                <div class="thruster-flame"></div>
+                            </div>
+                            <div class="drill-bit"></div>
+                            <div class="assault-body"></div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 text-gray-400">
+                        三角突击者采用三角流线型设计，配备高速旋转的破甲钻头。
+                        其强大的推进系统使其能够快速突入敌阵，摧毁敌方防御工事。
+                    </p>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mt-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础属性</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span>600/600</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-red-500" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击力</span>
+                                <span>95-115（对建筑+50%）</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-orange-500" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击速度</span>
+                                <span>1.0秒/次</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-yellow-500" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>移动速度</span>
+                                <span>3.5（冲刺时5.0）</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-red-500" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护甲穿透</span>
+                                <span>15</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-purple-500" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详细信息 -->
+            <div>
+                <!-- 单位介绍 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">机械介绍</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        三角突击者是三角议会最勇猛的突击单位。它专为突破敌方防线而设计，
+                        高速旋转的钻头能够轻松撕裂最坚固的装甲。突击者的出现往往
+                        标志着总攻的开始，是三角议会"力量至上"理念的完美体现。
+                    </p>
+                </div>
+
+                <!-- 核心能力 -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold">核心能力</h3>
+                    
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-drill text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">破甲钻击</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    使用高速旋转的钻头攻击，造成95-115点伤害，
+                                    并无视目标15点护甲。对建筑造成额外50%伤害。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    攻击时有25%几率造成1秒眩晕
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-rocket text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">三角冲锋</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    向目标方向冲锋5格，速度提升到5.0，
+                                    冲刺期间免疫控制效果，对路径上的敌人造成50点伤害。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    冷却时间15秒
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-bomb text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">爆破装药</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    在目标位置安装爆破装药，3秒后爆炸，
+                                    对3格范围内的敌人造成200点伤害，并摧毁地形。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    对建筑造成400点伤害
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战术指南 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战术指南</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">优先攻击敌方建筑和防御工事</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">利用冲锋快速切入敌方后排</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">多个突击者集中突破薄弱点</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">避免单独面对反装甲单位</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">注意控制冲锋时机，避免深入敌阵</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级路径 -->
+        <div class="mt-12 bg-gray-800/50 rounded-2xl p-8">
+            <h3 class="font-orbitron text-2xl font-bold mb-6 text-center">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node">
+                    <span class="text-sm">基础型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">进阶型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">精英型</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">三角突击者</h4>
+                    <p class="text-xs text-gray-400">基础突击单位</p>
+                    <p class="text-xs text-red-400 mt-1">资源：200形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">重装突击者</h4>
+                    <p class="text-xs text-gray-400">生命+200，穿透+5</p>
+                    <p class="text-xs text-red-400 mt-1">升级：150形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">毁灭突击者</h4>
+                    <p class="text-xs text-gray-400">获得范围伤害，攻击+30</p>
+                    <p class="text-xs text-red-400 mt-1">升级：250形素</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相关机械 -->
+        <div class="mt-8">
+            <h3 class="font-orbitron text-xl font-bold mb-4">相关机械</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="prism-tank.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <p class="text-sm font-bold">棱镜战车</p>
+                    <p class="text-xs text-gray-400">火力型</p>
+                </a>
+                <a href="triangle-bomber.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🚀</div>
+                    <p class="text-sm font-bold">三角轰炸机</p>
+                    <p class="text-xs text-gray-400">轰炸型</p>
+                </a>
+                <a href="triangle-constructor.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🛠️</div>
+                    <p class="text-sm font-bold">三角建造机</p>
+                    <p class="text-xs text-gray-400">工程型</p>
+                </a>
+                <a href="triangle-destroyer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">💥</div>
+                    <p class="text-sm font-bold">三角毁灭者</p>
+                    <p class="text-xs text-gray-400">毁灭型</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-fill');
+            statBars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100 * index);
+            });
+        });
+
+        // 3D模型交互
+        const assaultModel = document.querySelector('.assault-model');
+        let isMouseDown = false;
+        let mouseX = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+
+        assaultModel.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            assaultModel.style.animationPlayState = 'paused';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            rotationY += deltaX * 0.5;
+            
+            assaultModel.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            mouseX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            assaultModel.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

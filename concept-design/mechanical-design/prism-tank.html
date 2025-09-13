@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>棱镜战车 - 三角议会机械设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #ef4444;
+            --secondary-red: #dc2626;
+            --accent-red: #f87171;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+        }
+
+        .energy-burst {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(248, 113, 113, 0.8), transparent);
+            border-radius: 50%;
+            animation: burst-expand 2s infinite ease-out;
+        }
+
+        @keyframes burst-expand {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* 3D模型容器 */
+        .model-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .tank-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate-tank 20s infinite linear;
+        }
+
+        @keyframes rotate-tank {
+            0% { transform: rotateX(10deg) rotateY(0deg); }
+            100% { transform: rotateX(10deg) rotateY(360deg); }
+        }
+
+        /* 战车底盘 */
+        .tank-chassis {
+            position: absolute;
+            width: 160px;
+            height: 80px;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.7));
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* 履带 */
+        .tank-track {
+            position: absolute;
+            width: 180px;
+            height: 25px;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(220, 38, 38, 0.8);
+            border-radius: 12px;
+        }
+
+        /* 棱镜炮台 */
+        .prism-turret {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to top, rgba(239, 68, 68, 0.9), rgba(248, 113, 113, 0.7));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        /* 棱镜核心 */
+        .prism-core {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(248, 113, 113, 0.7));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: core-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes core-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(248, 113, 113, 0.8);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(248, 113, 113, 1);
+            }
+        }
+
+        /* 能量光束 */
+        .energy-beam {
+            position: absolute;
+            width: 8px;
+            height: 100px;
+            background: linear-gradient(to top, rgba(248, 113, 113, 0.9), rgba(255, 255, 255, 0.8));
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: beam-pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes beam-pulse {
+            0%, 100% { 
+                opacity: 0.6; 
+                height: 80px;
+            }
+            50% { 
+                opacity: 1; 
+                height: 120px;
+            }
+        }
+
+        /* 统计条 */
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            transition: width 1s ease-out;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 能力卡片 */
+        .ability-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            border-color: rgba(239, 68, 68, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--primary-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        .upgrade-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-red), var(--accent-red));
+            z-index: 1;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(239, 68, 68, 0.4);
+            transform: translateX(-5px);
+        }
+
+        /* 相关机械 */
+        .related-mechanical {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .related-mechanical:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation">
+        <div class="energy-burst" style="left: 20%; top: 30%; animation-delay: 0s;"></div>
+        <div class="energy-burst" style="left: 50%; top: 60%; animation-delay: 0.7s;"></div>
+        <div class="energy-burst" style="left: 80%; top: 40%; animation-delay: 1.4s;"></div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>返回机械列表
+    </a>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="font-orbitron text-5xl font-bold mb-4 text-red-400">棱镜战车</h1>
+            <p class="text-xl text-gray-400">三角议会的火力型机械单位</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">T1单位</span>
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">远程火力</span>
+                <span class="px-3 py-1 bg-red-500/20 rounded-full text-sm">能量攻击</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D模型展示 -->
+            <div>
+                <div class="bg-gray-800/50 rounded-2xl p-8">
+                    <h2 class="font-orbitron text-2xl font-bold mb-6 text-center">机械模型</h2>
+                    <div class="model-container">
+                        <div class="tank-model">
+                            <div class="energy-beam"></div>
+                            <div class="prism-turret">
+                                <div class="prism-core"></div>
+                            </div>
+                            <div class="tank-chassis"></div>
+                            <div class="tank-track"></div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 text-gray-400">
+                        棱镜战车搭载三角议会的标志性棱镜炮台，能够发射高能光束。
+                        其三角设计不仅提供了稳定的射击平台，还能增强能量聚焦效果。
+                    </p>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mt-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础属性</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span>450/450</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-red-500" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击力</span>
+                                <span>75-95</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-orange-500" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击速度</span>
+                                <span>1.5秒/次</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-yellow-500" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>移动速度</span>
+                                <span>2.0</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-red-500" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>射程</span>
+                                <span>10格</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-purple-500" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详细信息 -->
+            <div>
+                <!-- 单位介绍 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">机械介绍</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        棱镜战车是三角议会的主力火力支援单位。它采用独特的三角棱镜技术，
+                        将能量聚焦成致命的光束。虽然机动性一般，但其远程火力使其成为
+                        战场上不可忽视的力量。
+                    </p>
+                </div>
+
+                <!-- 核心能力 -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold">核心能力</h3>
+                    
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-laser-beam text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">聚焦光束</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    发射高能光束，造成75-95点能量伤害。
+                                    攻击距离10格，对护盾造成额外25%伤害。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    攻击时有10%几率造成过载效果
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-crosshairs text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">三角锁定</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    锁定单个目标，使其在5秒内受到的伤害增加20%。
+                                    锁定期间，棱镜战车对该目标的攻击速度提升30%。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    冷却时间10秒
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-bolt text-red-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">能量过载</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    短时间内提升攻击力100%，攻击速度提升50%，
+                                    持续8秒。结束后需要5秒充能时间。
+                                </p>
+                                <div class="text-xs text-red-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    过载期间每秒消耗10点能量
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战术指南 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战术指南</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">保持安全距离，利用射程优势</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">优先锁定高价值目标</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">在关键战斗中使用能量过载</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">避免被近战单位接近</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">注意能量管理，合理使用过载</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级路径 -->
+        <div class="mt-12 bg-gray-800/50 rounded-2xl p-8">
+            <h3 class="font-orbitron text-2xl font-bold mb-6 text-center">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node">
+                    <span class="text-sm">基础型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">进阶型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">精英型</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">棱镜战车</h4>
+                    <p class="text-xs text-gray-400">基础火力单位</p>
+                    <p class="text-xs text-red-400 mt-1">资源：120形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">重棱镜战车</h4>
+                    <p class="text-xs text-gray-400">攻击+20，射程+2</p>
+                    <p class="text-xs text-red-400 mt-1">升级：80形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">毁灭棱镜</h4>
+                    <p class="text-xs text-gray-400">获得穿透攻击，攻击+40</p>
+                    <p class="text-xs text-red-400 mt-1">升级：150形素</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相关机械 -->
+        <div class="mt-8">
+            <h3 class="font-orbitron text-xl font-bold mb-4">相关机械</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="triangle-assault.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔺</div>
+                    <p class="text-sm font-bold">三角突击者</p>
+                    <p class="text-xs text-gray-400">突击型</p>
+                </a>
+                <a href="triangle-bomber.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🚀</div>
+                    <p class="text-sm font-bold">三角轰炸机</p>
+                    <p class="text-xs text-gray-400">轰炸型</p>
+                </a>
+                <a href="triangle-scout.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔍</div>
+                    <p class="text-sm font-bold">三角侦察机</p>
+                    <p class="text-xs text-gray-400">侦察型</p>
+                </a>
+                <a href="triangle-destroyer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">💥</div>
+                    <p class="text-sm font-bold">三角毁灭者</p>
+                    <p class="text-xs text-gray-400">毁灭型</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-fill');
+            statBars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100 * index);
+            });
+        });
+
+        // 3D模型交互
+        const tankModel = document.querySelector('.tank-model');
+        let isMouseDown = false;
+        let mouseX = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+
+        tankModel.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            tankModel.style.animationPlayState = 'paused';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            rotationY += deltaX * 0.5;
+            
+            tankModel.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            mouseX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            tankModel.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

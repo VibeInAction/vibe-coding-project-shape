@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能量传输器 - 圆环族机械设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --secondary-blue: #2563eb;
+            --accent-blue: #60a5fa;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .energy-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(59, 130, 246, 0.8);
+            border-radius: 50%;
+            animation: energy-flow 3s infinite linear;
+        }
+
+        @keyframes energy-flow {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* 3D模型容器 */
+        .model-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .transmitter-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate-transmitter 20s infinite linear;
+        }
+
+        @keyframes rotate-transmitter {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        /* 传输器核心 */
+        .transmitter-core {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.9), rgba(59, 130, 246, 0.7));
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+        }
+
+        /* 能量环 */
+        .energy-ring {
+            position: absolute;
+            border: 3px solid rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .energy-ring:nth-child(2) {
+            width: 140px;
+            height: 140px;
+            animation: energy-pulse 2s infinite ease-in-out;
+        }
+
+        .energy-ring:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            animation: energy-pulse 2s infinite ease-in-out 0.5s;
+        }
+
+        .energy-ring:nth-child(4) {
+            width: 260px;
+            height: 260px;
+            animation: energy-pulse 2s infinite ease-in-out 1s;
+        }
+
+        @keyframes energy-pulse {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: translate(-50%, -50%) scale(1.1); 
+            }
+        }
+
+        /* 能量束 */
+        .energy-beam {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(96, 165, 250, 0.8), transparent);
+            left: 50%;
+            top: 50%;
+            transform-origin: bottom;
+            animation: beam-rotate 4s infinite linear;
+        }
+
+        .energy-beam:nth-child(5) { transform: translate(-50%, -100%) rotate(0deg); }
+        .energy-beam:nth-child(6) { transform: translate(-50%, -100%) rotate(60deg); }
+        .energy-beam:nth-child(7) { transform: translate(-50%, -100%) rotate(120deg); }
+        .energy-beam:nth-child(8) { transform: translate(-50%, -100%) rotate(180deg); }
+        .energy-beam:nth-child(9) { transform: translate(-50%, -100%) rotate(240deg); }
+        .energy-beam:nth-child(10) { transform: translate(-50%, -100%) rotate(300deg); }
+
+        @keyframes beam-rotate {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* 统计条 */
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            transition: width 1s ease-out;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 能力卡片 */
+        .ability-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .upgrade-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
+            z-index: 1;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: translateX(-5px);
+        }
+
+        /* 相关机械 */
+        .related-mechanical {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .related-mechanical:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation">
+        <div class="energy-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="energy-particle" style="left: 25%; animation-delay: 0.5s;"></div>
+        <div class="energy-particle" style="left: 40%; animation-delay: 1s;"></div>
+        <div class="energy-particle" style="left: 55%; animation-delay: 1.5s;"></div>
+        <div class="energy-particle" style="left: 70%; animation-delay: 2s;"></div>
+        <div class="energy-particle" style="left: 85%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>返回机械列表
+    </a>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="font-orbitron text-5xl font-bold mb-4 text-blue-400">能量传输器</h1>
+            <p class="text-xl text-gray-400">圆环族的支援型机械单位</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">T1单位</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">能量补给</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">战场支援</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D模型展示 -->
+            <div>
+                <div class="bg-gray-800/50 rounded-2xl p-8">
+                    <h2 class="font-orbitron text-2xl font-bold mb-6 text-center">机械模型</h2>
+                    <div class="model-container">
+                        <div class="transmitter-model">
+                            <div class="energy-ring"></div>
+                            <div class="energy-ring"></div>
+                            <div class="energy-ring"></div>
+                            <div class="energy-beam"></div>
+                            <div class="energy-beam"></div>
+                            <div class="energy-beam"></div>
+                            <div class="energy-beam"></div>
+                            <div class="energy-beam"></div>
+                            <div class="energy-beam"></div>
+                            <div class="transmitter-core"></div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 text-gray-400">
+                        能量传输器通过旋转的能量环收集和传输形魄能量，为友军单位和建筑提供持续的能量补给。
+                        其六向能量束可以同时为多个目标输送能量。
+                    </p>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mt-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础属性</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span>300/300</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>能量传输</span>
+                                <span>20/秒</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-cyan-500" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>传输范围</span>
+                                <span>6格</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-indigo-500" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>移动速度</span>
+                                <span>2.5</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>目标数量</span>
+                                <span>6个</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-teal-500" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详细信息 -->
+            <div>
+                <!-- 单位介绍 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">机械介绍</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        能量传输器是圆环族战场上的生命线。它能够高效地收集环境中的形魄能量，
+                        并将其传输给需要的友军单位。这种支援机械虽然没有直接的战斗能力，
+                        但却是维持部队持续作战的关键。
+                    </p>
+                </div>
+
+                <!-- 核心能力 -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold">核心能力</h3>
+                    
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-battery-full text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">能量补给</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    自动为范围内6个友军单位每秒恢复20点能量，
+                                    优先补给能量低于50%的单位。对建筑效果减半。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    传输距离6格，可视范围内自动选择目标
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-link text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">能量链接</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    可以与其他传输器建立能量链接，形成能量网络。
+                                    链接范围内的传输器共享能量池，传输效率提升25%。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    最多链接3个传输器
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-bolt text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">超载传输</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    激活后，传输效率提升100%，持续8秒，
+                                    但自身每秒损失5点生命值。冷却时间30秒。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    超载期间传输范围扩大到8格
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战术指南 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战术指南</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">部署在后方，保护重要支援单位</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">多个传输器组成网络，提高传输效率</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">配合高耗能单位，维持持续战斗力</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">避免暴露在敌方火力下</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">不要在危险时使用超载传输</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级路径 -->
+        <div class="mt-12 bg-gray-800/50 rounded-2xl p-8">
+            <h3 class="font-orbitron text-2xl font-bold mb-6 text-center">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node">
+                    <span class="text-sm">基础型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">进阶型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">精英型</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">能量传输器</h4>
+                    <p class="text-xs text-gray-400">基础支援机械</p>
+                    <p class="text-xs text-blue-400 mt-1">资源：80形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">高级传输器</h4>
+                    <p class="text-xs text-gray-400">传输+10，范围+1</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：60形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">能量枢纽</h4>
+                    <p class="text-xs text-gray-400">可链接5个，治疗+5/秒</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：100形素</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相关机械 -->
+        <div class="mt-8">
+            <h3 class="font-orbitron text-xl font-bold mb-4">相关机械</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="circle-defender.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">⚙️</div>
+                    <p class="text-sm font-bold">圆环防御者</p>
+                    <p class="text-xs text-gray-400">防御型</p>
+                </a>
+                <a href="harmony-fortress.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🛡️</div>
+                    <p class="text-sm font-bold">和谐堡垒</p>
+                    <p class="text-xs text-gray-400">重装型</p>
+                </a>
+                <a href="ring-engineer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔧</div>
+                    <p class="text-sm font-bold">环形工程师</p>
+                    <p class="text-xs text-gray-400">工程型</p>
+                </a>
+                <a href="circle-sanctum.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">✨</div>
+                    <p class="text-sm font-bold">圆环圣像</p>
+                    <p class="text-xs text-gray-400">终极型</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-fill');
+            statBars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100 * index);
+            });
+        });
+
+        // 3D模型交互
+        const transmitterModel = document.querySelector('.transmitter-model');
+        let isMouseDown = false;
+        let mouseX = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+
+        transmitterModel.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            transmitterModel.style.animationPlayState = 'paused';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            rotationY += deltaX * 0.5;
+            
+            transmitterModel.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            mouseX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            transmitterModel.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

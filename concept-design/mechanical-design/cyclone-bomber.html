@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旋风轰炸机 - 螺旋之子机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes cyclone-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bomber-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes propeller-blur {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(720deg); }
+        }
+        
+        @keyframes bomb-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .cyclone-bomber {
+            width: 340px;
+            height: 280px;
+            position: relative;
+            margin: 0 auto;
+            animation: bomber-float 4s ease-in-out infinite;
+        }
+        
+        .bomber-fuselage {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            background: linear-gradient(90deg, #4c1d95, #7c3aed, #a855f7, #7c3aed, #4c1d95);
+            border-radius: 30px;
+            top: 110px;
+            left: 70px;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+        }
+        
+        .bomber-wing {
+            position: absolute;
+            width: 140px;
+            height: 40px;
+            background: linear-gradient(135deg, #6d28d9, #7c3aed);
+            clip-path: polygon(0% 50%, 25% 0%, 100% 0%, 75% 50%, 100% 100%, 25% 100%);
+        }
+        
+        .bomber-wing.left {
+            left: 20px;
+            top: 120px;
+            transform: rotate(-15deg);
+        }
+        
+        .bomber-wing.right {
+            right: 20px;
+            top: 120px;
+            transform: rotate(15deg);
+        }
+        
+        .bomber-cockpit {
+            position: absolute;
+            width: 80px;
+            height: 50px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 25px;
+            top: 90px;
+            left: 130px;
+            z-index: 10;
+        }
+        
+        .bomber-cockpit::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: radial-gradient(circle, #e9d5ff, #a855f7);
+            border-radius: 50%;
+            top: 10px;
+            left: 20px;
+            animation: bomb-glow 2s ease-in-out infinite;
+        }
+        
+        .bomber-engine {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #7c3aed, #4c1d95);
+            border-radius: 50%;
+            top: 120px;
+        }
+        
+        .bomber-engine.left {
+            left: 10px;
+        }
+        
+        .bomber-engine.right {
+            right: 10px;
+        }
+        
+        .bomber-engine::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #e9d5ff, #a855f7, transparent);
+            top: 23px;
+            left: -5px;
+            animation: propeller-blur 0.1s linear infinite;
+        }
+        
+        .bomb-bay {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(180deg, #374151, #1f2937);
+            border-radius: 10px;
+            bottom: 40px;
+            left: 140px;
+        }
+        
+        .bomb-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #e9d5ff;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #7c3aed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-purple-500 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">螺旋之子</span>
+                    <span class="text-purple-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+                旋风轰炸机
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Cyclone Bomber</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-purple-900 px-3 py-1 rounded-full">T2 空中单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">区域轰炸</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">高速机动</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="cyclone-bomber" id="bomber-model">
+                    <div class="bomber-fuselage"></div>
+                    <div class="bomber-wing left"></div>
+                    <div class="bomber-wing right"></div>
+                    <div class="bomber-cockpit"></div>
+                    <div class="bomber-engine left"></div>
+                    <div class="bomber-engine right"></div>
+                    <div class="bomb-bay"></div>
+                    <div class="bomb-particle" style="bottom: 30px; left: 160px;"></div>
+                    <div class="bomb-particle" style="bottom: 25px; left: 170px;"></div>
+                    <div class="bomb-particle" style="bottom: 20px; left: 150px;"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-purple-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-purple-400">1100/1100</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="70%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-purple-400">40</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-indigo-600 h-3 rounded-full" style="width: 0%" data-width="20%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">轰炸伤害</span>
+                            <span class="text-purple-400">500/颗</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="85%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">移动速度</span>
+                            <span class="text-purple-400">5.0</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">载弹量</span>
+                            <span class="text-purple-400">12枚</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-pink-600 h-3 rounded-full" style="width: 0%" data-width="80%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">200资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">60秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bomb text-4xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">螺旋轰炸</h3>
+                    <p class="text-gray-400 mb-4">投掷6枚螺旋炸弹，每枚造成500点伤害。炸弹呈螺旋轨迹下落，覆盖大范围区域。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">15秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">100</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cloud text-4xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">毒云弥漫</h3>
+                    <p class="text-gray-400 mb-4">释放持续8秒的紫色毒云，使区域内敌人每秒受到80点伤害，并减速40%。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">20秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">80</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-fighter-jet text-4xl text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">紧急规避</h3>
+                    <p class="text-gray-400 mb-4">进行高速桶滚机动，3秒内闪避所有攻击，移动速度提升100%，并留下扰乱尾迹。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">12秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>利用高速机动性快速到达轰炸位置</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>螺旋轰炸对建筑和密集单位效果极佳</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>毒云用于控制区域，迫使敌人移动</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>紧急规避在被锁定时及时使用</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-purple-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>与涡流突击者配合，形成空地打击</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>需要战斗机护航，避免被防空火力击落</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础轰炸能力</li>
+                        <li>• 标准机动性</li>
+                        <li>• 常规炸弹</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁螺旋轰炸</li>
+                        <li>• 载弹量+4</li>
+                        <li>• 移动速度+0.5</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-pink-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁毒云弥漫</li>
+                        <li>• 生命值+200</li>
+                        <li>• 轰炸伤害+100</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="vortex-assault.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-wind text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">涡流突击者</p>
+                    <p class="text-sm text-gray-400">突击单位</p>
+                </a>
+                <a href="helix-destroyer.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-dna text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋毁灭者</p>
+                    <p class="text-sm text-gray-400">重型单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-crosshairs text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">龙卷风狙击手</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-skull text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">螺旋泰坦</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const bomberModel = document.getElementById('bomber-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        bomberModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            bomberModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            bomberModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            bomberModel.style.cursor = 'grab';
+        });
+
+        // Bomb particle animation
+        const particles = document.querySelectorAll('.bomb-particle');
+        particles.forEach((particle, index) => {
+            setInterval(() => {
+                particle.style.opacity = '1';
+                particle.style.transform = `translateY(${-Math.random() * 30 - 10}px) translateX(${Math.random() * 20 - 10}px)`;
+                setTimeout(() => {
+                    particle.style.opacity = '0';
+                    particle.style.transform = 'translateY(0) translateX(0)';
+                }, 1500);
+            }, 3000 + index * 500);
+        });
+
+        // Engine glow effect
+        const engines = document.querySelectorAll('.bomber-engine');
+        setInterval(() => {
+            engines.forEach(engine => {
+                const brightness = Math.random() * 0.5 + 0.8;
+                engine.style.filter = `brightness(${brightness})`;
+            });
+        }, 200);
+    </script>
+</body>
+</html>

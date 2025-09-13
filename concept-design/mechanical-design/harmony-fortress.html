@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和谐堡垒 - 圆环族机械设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --secondary-blue: #2563eb;
+            --accent-blue: #60a5fa;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .fortress-particle {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(59, 130, 246, 0.15);
+            border-radius: 50%;
+            animation: fortress-float 25s infinite ease-in-out;
+        }
+
+        @keyframes fortress-float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 0.15;
+            }
+            25% { 
+                transform: translateY(-30px) rotate(90deg) scale(1.1);
+                opacity: 0.25;
+            }
+            50% { 
+                transform: translateY(-15px) rotate(180deg) scale(0.9);
+                opacity: 0.2;
+            }
+            75% { 
+                transform: translateY(-45px) rotate(270deg) scale(1.05);
+                opacity: 0.3;
+            }
+        }
+
+        /* 3D模型容器 */
+        .model-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .fortress-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate-fortress 30s infinite linear;
+        }
+
+        @keyframes rotate-fortress {
+            0% { transform: rotateX(10deg) rotateY(0deg); }
+            100% { transform: rotateX(10deg) rotateY(360deg); }
+        }
+
+        /* 堡垒主体 */
+        .fortress-base {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%) rotateX(-90deg);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.6));
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .fortress-tower {
+            position: absolute;
+            width: 80px;
+            height: 150px;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.9), rgba(96, 165, 250, 0.7));
+            border-radius: 40px 40px 20px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .fortress-dome {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse at center, rgba(96, 165, 250, 0.8), rgba(59, 130, 246, 0.6));
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* 防御炮台 */
+        .defense-turret {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background: rgba(37, 99, 235, 0.8);
+            border-radius: 15px 15px 5px 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .turret-1 {
+            top: 80px;
+            left: 20px;
+            transform: rotateY(-30deg);
+        }
+
+        .turret-2 {
+            top: 80px;
+            right: 20px;
+            transform: rotateY(30deg);
+        }
+
+        .turret-3 {
+            top: 120px;
+            left: 30px;
+            transform: rotateY(-15deg) rotateX(20deg);
+        }
+
+        .turret-4 {
+            top: 120px;
+            right: 30px;
+            transform: rotateY(15deg) rotateX(20deg);
+        }
+
+        /* 治疗光束 */
+        .healing-beam {
+            position: absolute;
+            width: 3px;
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(96, 165, 250, 0.8), transparent);
+            bottom: 110px;
+            left: 50%;
+            transform-origin: top;
+            animation: beam-sweep 4s infinite ease-in-out;
+        }
+
+        @keyframes beam-sweep {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: translateX(-50%) rotate(-30deg);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateX(-50%) rotate(30deg);
+            }
+        }
+
+        /* 护盾效果 */
+        .shield-dome {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(96, 165, 250, 0.1), transparent 70%);
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            animation: shield-pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes shield-pulse {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: translateX(-50%) scale(1);
+            }
+            50% { 
+                opacity: 0.6; 
+                transform: translateX(-50%) scale(1.05);
+            }
+        }
+
+        /* 统计条 */
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            transition: width 1s ease-out;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 能力卡片 */
+        .ability-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .upgrade-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
+            z-index: 1;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: translateX(-5px);
+        }
+
+        /* 相关机械 */
+        .related-mechanical {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .related-mechanical:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation">
+        <div class="fortress-particle" style="left: 5%; top: 20%; animation-delay: 0s;"></div>
+        <div class="fortress-particle" style="left: 25%; top: 60%; animation-delay: 5s;"></div>
+        <div class="fortress-particle" style="left: 50%; top: 30%; animation-delay: 10s;"></div>
+        <div class="fortress-particle" style="left: 75%; top: 70%; animation-delay: 15s;"></div>
+        <div class="fortress-particle" style="left: 90%; top: 40%; animation-delay: 20s;"></div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>返回机械列表
+    </a>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="font-orbitron text-5xl font-bold mb-4 text-blue-400">和谐堡垒</h1>
+            <p class="text-xl text-gray-400">圆环族的重装型机械单位</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">T3单位</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">移动要塞</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">治疗支援</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D模型展示 -->
+            <div>
+                <div class="bg-gray-800/50 rounded-2xl p-8">
+                    <h2 class="font-orbitron text-2xl font-bold mb-6 text-center">机械模型</h2>
+                    <div class="model-container">
+                        <div class="fortress-model">
+                            <div class="shield-dome"></div>
+                            <div class="healing-beam"></div>
+                            <div class="fortress-base"></div>
+                            <div class="fortress-tower"></div>
+                            <div class="fortress-dome"></div>
+                            <div class="defense-turret turret-1"></div>
+                            <div class="defense-turret turret-2"></div>
+                            <div class="defense-turret turret-3"></div>
+                            <div class="defense-turret turret-4"></div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 text-gray-400">
+                        和谐堡垒是圆环族最强大的移动防御平台，配备多重防御系统和治疗装置。
+                        其圆形设计和能量护盾体现了圆环族追求和谐与平衡的理念。
+                    </p>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mt-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础属性</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span>2500/2500</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span>1000/1000</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-cyan-500" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护甲</span>
+                                <span>25</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-indigo-500" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>移动速度</span>
+                                <span>1.2</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>治疗输出</span>
+                                <span>50/秒</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-green-500" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详细信息 -->
+            <div>
+                <!-- 单位介绍 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">机械介绍</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        和谐堡垒是圆环族工程技术的巅峰之作，集防御、治疗、指挥于一体的大型移动要塞。
+                        它不仅拥有惊人的防御能力，还能为周围的友军提供持续治疗和强化效果，
+                        是战场上的绝对核心。
+                    </p>
+                </div>
+
+                <!-- 核心能力 -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold">核心能力</h3>
+                    
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-shield-alt text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">要塞护盾</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    生成1000点护盾值，每秒恢复20点。
+                                    护盾存在时，周围5格内的友军获得+10护甲。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    护盾被击破后需要30秒完全恢复
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-heart text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">和谐治疗</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    为周围6格内的友军每秒恢复50点生命值，
+                                    同时移除负面状态。治疗效果可叠加。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    对机械单位治疗效果提升50%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-crown text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">指挥光环</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    提升周围8格内友军20%攻击力和30%护甲恢复速度。
+                                    堡垒本身可以作为临时指挥中心使用。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    光环效果对英雄单位额外+10%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战术指南 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战术指南</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">作为部队核心，保护在阵型中央</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">配合防御单位形成坚不可摧的防线</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">推进时作为移动治疗站跟随部队</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">避免单独深入敌后</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">注意护盾恢复时机，适时后撤</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级路径 -->
+        <div class="mt-12 bg-gray-800/50 rounded-2xl p-8">
+            <h3 class="font-orbitron text-2xl font-bold mb-6 text-center">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node">
+                    <span class="text-sm">基础型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">进阶型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">精英型</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">和谐堡垒</h4>
+                    <p class="text-xs text-gray-400">基础移动要塞</p>
+                    <p class="text-xs text-blue-400 mt-1">资源：350形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">强化堡垒</h4>
+                    <p class="text-xs text-gray-400">护盾+500，治疗+20</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：200形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">圣域堡垒</h4>
+                    <p class="text-xs text-gray-400">获得复活能力，全图治疗</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：300形素</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相关机械 -->
+        <div class="mt-8">
+            <h3 class="font-orbitron text-xl font-bold mb-4">相关机械</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="circle-defender.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">⚙️</div>
+                    <p class="text-sm font-bold">圆环防御者</p>
+                    <p class="text-xs text-gray-400">防御型</p>
+                </a>
+                <a href="energy-transmitter.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <p class="text-sm font-bold">能量传输器</p>
+                    <p class="text-xs text-gray-400">支援型</p>
+                </a>
+                <a href="ring-engineer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔧</div>
+                    <p class="text-sm font-bold">环形工程师</p>
+                    <p class="text-xs text-gray-400">工程型</p>
+                </a>
+                <a href="circle-sanctum.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">✨</div>
+                    <p class="text-sm font-bold">圆环圣像</p>
+                    <p class="text-xs text-gray-400">终极型</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-fill');
+            statBars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100 * index);
+            });
+        });
+
+        // 3D模型交互
+        const fortressModel = document.querySelector('.fortress-model');
+        let isMouseDown = false;
+        let mouseX = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+
+        fortressModel.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            fortressModel.style.animationPlayState = 'paused';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            rotationY += deltaX * 0.5;
+            
+            fortressModel.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            mouseX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            fortressModel.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

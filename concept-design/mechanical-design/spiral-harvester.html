@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螺旋收割者 - 螺族后裔机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes harvest-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bio-pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @keyframes resource-flow {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        .spiral-harvester {
+            width: 300px;
+            height: 320px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .harvester-body {
+            position: absolute;
+            width: 140px;
+            height: 160px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            bottom: 80px;
+            left: 80px;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.5);
+        }
+        
+        .harvester-core {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #a78bfa, #8b5cf6);
+            border-radius: 50%;
+            top: 140px;
+            left: 110px;
+            animation: bio-pulse 2s ease-in-out infinite;
+        }
+        
+        .spiral-arm {
+            position: absolute;
+            width: 100px;
+            height: 20px;
+            background: linear-gradient(90deg, #7c3aed, #6d28d9);
+            top: 170px;
+            left: 100px;
+            transform-origin: center;
+            animation: harvest-rotate 8s linear infinite;
+        }
+        
+        .spiral-arm::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 20px;
+            background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+            right: -50px;
+            top: 0;
+            clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+        }
+        
+        .collector-tube {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+            bottom: 0;
+            left: 140px;
+        }
+        
+        .resource-orb {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .orb-1 { bottom: 50px; left: 130px; animation: resource-flow 3s ease-in-out infinite; }
+        .orb-2 { bottom: 70px; left: 155px; animation: resource-flow 3s ease-in-out infinite 1s; }
+        .orb-3 { bottom: 60px; left: 110px; animation: resource-flow 3s ease-in-out infinite 2s; }
+        
+        .bio-lights {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #a78bfa;
+            border-radius: 50%;
+        }
+        
+        .light-1 { top: 120px; left: 100px; animation: bio-pulse 2s ease-in-out infinite; }
+        .light-2 { top: 140px; right: 100px; animation: bio-pulse 2s ease-in-out infinite 0.5s; }
+        .light-3 { bottom: 120px; left: 120px; animation: bio-pulse 2s ease-in-out infinite 1s; }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-purple-500 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">螺族后裔</span>
+                    <span class="text-purple-500">|</span>
+                    <span class="text-gray-300">资源机械</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+                螺旋收割者
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Spiral Harvester</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-purple-900 px-3 py-1 rounded-full">T1 资源单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">资源收集</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">生物转化</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="spiral-harvester" id="harvester-model">
+                    <div class="harvester-body">
+                        <div class="bio-lights light-1"></div>
+                        <div class="bio-lights light-2"></div>
+                        <div class="bio-lights light-3"></div>
+                    </div>
+                    <div class="harvester-core"></div>
+                    <div class="spiral-arm"></div>
+                    <div class="collector-tube"></div>
+                    <div class="resource-orb orb-1"></div>
+                    <div class="resource-orb orb-2"></div>
+                    <div class="resource-orb orb-3"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-purple-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-purple-400">600/600</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="24%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-purple-400">12</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-gray-600 h-3 rounded-full" style="width: 0%" data-width="12%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">收集效率</span>
+                            <span class="text-purple-400">+100%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">携带容量</span>
+                            <span class="text-purple-400">400单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="40%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">转化速度</span>
+                            <span class="text-purple-400">150/秒</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-cyan-600 h-3 rounded-full" style="width: 0%" data-width="75%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-leaf text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">90资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">30秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-seedling text-4xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">生物转化</h3>
+                    <p class="text-gray-400 mb-4">将收集的资源转化为生物能量，转化效率提升50%。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">被动</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-dna text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">加速生长</h3>
+                    <p class="text-gray-400 mb-4">在周围种植生物植物，每秒恢复10点生命值。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">20秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">30</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-spa text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">生命绽放</h3>
+                    <p class="text-gray-400 mb-4">瞬间恢复周围友军200点生命值，并种植生物植物。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">45秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">资源策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>在资源点附近部署，最大化收集效率</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>利用加速生长为前线单位提供持续恢复</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>战斗结束后使用生命绽放快速恢复</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-purple-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>为所有螺族单位提供资源支持</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>需要螺旋侦察机提供安全</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 标准收集效率</li>
+                        <li>• 基础转化能力</li>
+                        <li>• 无特殊技能</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁加速生长</li>
+                        <li>• 收集效率+50%</li>
+                        <li>• 携带容量+100</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁生命绽放</li>
+                        <li>• 转化效率+25%</li>
+                        <li>• 恢复效果+50%</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="spiral-scout.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-eye text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋侦察机</p>
+                    <p class="text-sm text-gray-400">侦察单位</p>
+                </a>
+                <a href="vortex-assault.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-wind text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">涡流突击者</p>
+                    <p class="text-sm text-gray-400">突击单位</p>
+                </a>
+                <a href="helix-destroyer.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-bolt text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋毁灭者</p>
+                    <p class="text-sm text-gray-400">重装单位</p>
+                </a>
+                <a href="cyclone-bomber.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-bomb text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">旋风轰炸机</p>
+                    <p class="text-sm text-gray-400">轰炸单位</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const harvesterModel = document.getElementById('harvester-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        harvesterModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            harvesterModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            harvesterModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            harvesterModel.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>

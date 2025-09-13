@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角建造机 - 三角议会机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes build-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes construct-pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        @keyframes beam-project {
+            0% { transform: translateY(0) scaleY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scaleY(1); opacity: 0; }
+        }
+        
+        .triangle-constructor {
+            width: 280px;
+            height: 320px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .constructor-base {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            bottom: 40px;
+            left: 40px;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.5);
+        }
+        
+        .constructor-arm {
+            position: absolute;
+            width: 120px;
+            height: 20px;
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            top: 120px;
+            left: 80px;
+            transform-origin: left center;
+            animation: build-rotate 8s linear infinite;
+        }
+        
+        .constructor-arm::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: conic-gradient(from 0deg, #fbbf24, #f59e0b, #fbbf24);
+            border-radius: 50%;
+            right: -30px;
+            top: -20px;
+            animation: construct-pulse 2s ease-in-out infinite;
+        }
+        
+        .constructor-core {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            top: 80px;
+            left: 100px;
+            z-index: 10;
+        }
+        
+        .construct-beam {
+            position: absolute;
+            width: 4px;
+            height: 100px;
+            background: linear-gradient(180deg, #fbbf24, transparent);
+            bottom: 100px;
+            left: 138px;
+            opacity: 0;
+            animation: beam-project 3s ease-in-out infinite;
+        }
+        
+        .build-particles {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .particle-1 { top: 180px; left: 120px; animation: float-particle 4s ease-in-out infinite; }
+        .particle-2 { top: 160px; left: 160px; animation: float-particle 4s ease-in-out infinite 1s; }
+        .particle-3 { top: 140px; left: 100px; animation: float-particle 4s ease-in-out infinite 2s; }
+        
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(0); opacity: 0; }
+            50% { transform: translateY(-30px); opacity: 1; }
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-red-500 hover:text-red-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">三角议会</span>
+                    <span class="text-red-500">|</span>
+                    <span class="text-gray-300">工程机械</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
+                三角建造机
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Triangle Constructor</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-red-900 px-3 py-1 rounded-full">T2 工程单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">建造专家</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">模块化建筑</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="triangle-constructor" id="constructor-model">
+                    <div class="constructor-base"></div>
+                    <div class="constructor-core"></div>
+                    <div class="constructor-arm"></div>
+                    <div class="construct-beam"></div>
+                    <div class="build-particles particle-1"></div>
+                    <div class="build-particles particle-2"></div>
+                    <div class="build-particles particle-3"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-red-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-red-400">850/850</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-red-600 h-3 rounded-full" style="width: 0%" data-width="30%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-red-400">18</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-orange-600 h-3 rounded-full" style="width: 0%" data-width="9%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">建造速度</span>
+                            <span class="text-red-400">+150%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">建造范围</span>
+                            <span class="text-red-400">120m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">携带资源</span>
+                            <span class="text-red-400">500单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="50%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-hammer text-red-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">170资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-red-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">45秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-red-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-tools text-4xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">快速建造</h3>
+                    <p class="text-gray-400 mb-4">建造速度提升150%，可同时建造3个建筑模块。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-red-400">被动</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cube text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">模块组装</h3>
+                    <p class="text-gray-400 mb-4">将预制模块快速组装成完整建筑，节省50%建造时间。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-red-400">30秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-red-400">50</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shield-alt text-4xl text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">建筑护盾</h3>
+                    <p class="text-gray-400 mb-4">为正在建造的建筑提供临时护盾，吸收1000点伤害。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-red-400">60秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-red-400">80</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-red-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-red-400">建造策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-red-500 mt-1 mr-3"></i>
+                        <span>优先建造关键防御建筑，确保基地安全</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-red-500 mt-1 mr-3"></i>
+                        <span>利用模块组装快速恢复被摧毁的建筑</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-red-500 mt-1 mr-3"></i>
+                        <span>在建筑护盾保护下进行前线建造</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-red-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-red-500 mt-1 mr-3"></i>
+                        <span>与三角侦察机配合，选择最佳建造位置</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-red-500 mt-1 mr-3"></i>
+                        <span>需要三角突击者保护前线建造作业</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-red-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-red-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 标准建造速度</li>
+                        <li>• 基础建筑模块</li>
+                        <li>• 无特殊能力</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-orange-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁模块组装</li>
+                        <li>• 建造速度+50%</li>
+                        <li>• 携带资源+200</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁建筑护盾</li>
+                        <li>• 可建造高级建筑</li>
+                        <li>• 建造范围+50m</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-red-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="triangle-assault.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-rocket text-2xl text-red-500 mb-2"></i>
+                    <p class="font-bold">三角突击者</p>
+                    <p class="text-sm text-gray-400">突击单位</p>
+                </a>
+                <a href="prism-tank.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-tank text-2xl text-red-500 mb-2"></i>
+                    <p class="font-bold">棱镜战车</p>
+                    <p class="text-sm text-gray-400">火力单位</p>
+                </a>
+                <a href="triangle-bomber.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-bomb text-2xl text-red-500 mb-2"></i>
+                    <p class="font-bold">三角轰炸机</p>
+                    <p class="text-sm text-gray-400">轰炸单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-skull text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">三角指挥官</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const constructorModel = document.getElementById('constructor-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        constructorModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            constructorModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            constructorModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            constructorModel.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>

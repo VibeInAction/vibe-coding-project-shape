@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机械设计展示 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape-circle {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid var(--primary-red);
+            top: 65%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape-square {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--primary-green);
+            top: 35%;
+            left: 80%;
+            animation-delay: 10s;
+        }
+
+        .shape-spiral {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--primary-purple);
+            border-radius: 50%;
+            border-style: dashed;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-40px) rotate(90deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg) scale(0.9);
+            }
+            75% { 
+                transform: translateY(-60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* 机械卡片样式 */
+        .mechanical-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mechanical-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .mechanical-card:hover::before {
+            opacity: 1;
+        }
+
+        .mechanical-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 种族边框 */
+        .race-border-circle {
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .race-border-triangle {
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .race-border-square {
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .race-border-spiral {
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        /* 过滤按钮 */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.05);
+        }
+
+        /* 滚动显示动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 机械类型图标 */
+        .mechanical-type-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .mechanical-type-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* 机械等级标签 */
+        .mechanical-tier {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .tier-1 {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .tier-2 {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+        }
+
+        .tier-3 {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        /* 3D机械预览 */
+        .mechanical-preview {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            perspective: 1000px;
+            cursor: grab;
+        }
+
+        .mechanical-preview:active {
+            cursor: grabbing;
+        }
+
+        .mechanical-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        /* 机械详情模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #ef4444;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #60a5fa;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 统计图表 */
+        .stat-chart {
+            width: 100%;
+            height: 200px;
+            margin-top: 20px;
+        }
+
+        /* 搜索功能 */
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #60a5fa;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        /* 机械对比功能 */
+        .compare-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 999;
+            max-width: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .compare-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .compare-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .compare-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .compare-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-spiral"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="text-3xl hover:text-purple-400 transition">◈</a>
+                    <h1 class="font-orbitron text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        机械设计展示
+                    </h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#all-mechanical" class="text-gray-300 hover:text-white transition">全部机械</a>
+                    <a href="#circle-clan" class="text-gray-300 hover:text-white transition">圆环族</a>
+                    <a href="#triangle-council" class="text-gray-300 hover:text-white transition">三角议会</a>
+                    <a href="#square-covenant" class="text-gray-300 hover:text-white transition">方碑盟约</a>
+                    <a href="#spiral-progeny" class="text-gray-300 hover:text-white transition">螺旋之子</a>
+                    <a href="statistics.html" class="text-purple-400 hover:text-purple-300 transition">
+                        <i class="fas fa-chart-bar mr-1"></i>统计分析
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- Hero Section -->
+        <section class="text-center mb-12 reveal">
+            <h2 class="font-orbitron text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                机械系统展示
+            </h2>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                探索四大几何种族的独特机械设计，每个机械单位都融合了种族的几何美学和战斗理念
+            </p>
+            
+            <!-- 搜索框 -->
+            <div class="search-box mb-6">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索机械单位..." onkeyup="searchMechanical()">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <!-- 过滤器 -->
+            <div class="flex justify-center space-x-4 flex-wrap">
+                <button onclick="filterMechanical('all')" class="filter-btn active px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
+                    全部机械
+                </button>
+                <button onclick="filterMechanical('circle')" class="filter-btn px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition">
+                    圆环族
+                </button>
+                <button onclick="filterMechanical('triangle')" class="filter-btn px-6 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition">
+                    三角议会
+                </button>
+                <button onclick="filterMechanical('square')" class="filter-btn px-6 py-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition">
+                    方�碑盟约
+                </button>
+                <button onclick="filterMechanical('spiral')" class="filter-btn px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition">
+                    螺旋之子
+                </button>
+            </div>
+        </section>
+
+        <!-- 机械统计 -->
+        <section class="mb-12 reveal">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-blue-400">6</div>
+                    <div class="text-sm text-gray-400">圆环族机械</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-red-400">6</div>
+                    <div class="text-sm text-gray-400">三角议会机械</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-green-400">6</div>
+                    <div class="text-sm text-gray-400">方碑盟约机械</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-purple-400">6</div>
+                    <div class="text-sm text-gray-400">螺旋之子机械</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 全部机械列表 -->
+        <section id="all-mechanical" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">全部机械单位</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族机械 -->
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">⚙️</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">防御型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">圆环防御者</h4>
+                    <p class="text-sm text-gray-400 mb-3">装备能量护盾的环形防御机械，可吸收并反弹攻击</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Circle Defender</span>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="quickView('circle-defender', '圆环防御者')" class="text-blue-400 hover:text-blue-300 text-sm">快速预览</button>
+                            <button onclick="addToCompare('circle-defender', '圆环防御者', 'circle')" class="text-gray-400 hover:text-white text-sm">
+                                <i class="fas fa-plus"></i> 对比
+                            </button>
+                            <a href="circle-defender.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">详情 →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-1">T1</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">🔄</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">支援型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">能量传输器</h4>
+                    <p class="text-sm text-gray-400 mb-3">为友军单位和建筑提供持续能量补充的支援机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Energy Transmitter</span>
+                        <a href="energy-transmitter.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">🛡️</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">重装型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">和谐堡垒</h4>
+                    <p class="text-sm text-gray-400 mb-3">大型移动要塞，搭载多重防御系统和治疗装置</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Harmony Fortress</span>
+                        <a href="harmony-fortress.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">🔧</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">工程型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">环形工程师</h4>
+                    <p class="text-sm text-gray-400 mb-3">能够快速建造和维修建筑的工程机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Ring Engineer</span>
+                        <a href="ring-engineer.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">🌀</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">控制型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">共振干扰器</h4>
+                    <p class="text-sm text-gray-400 mb-3">释放干扰波，降低敌方机械单位效能</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Resonance Jammer</span>
+                        <a href="resonance-jammer.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-circle mechanical-item" data-race="circle">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-blue-500/20 text-blue-400">✨</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">终极型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">圆环圣像</h4>
+                    <p class="text-sm text-gray-400 mb-3">终极防御机械，能够展开全息护盾保护整个区域</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Circle Sanctum</span>
+                        <a href="circle-sanctum.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 三角议会机械 -->
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">🔺</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">突击型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角突击者</h4>
+                    <p class="text-sm text-gray-400 mb-3">高速突击机械，配备破甲三角钻头</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Assault</span>
+                        <a href="triangle-assault.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-1">T1</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">⚡</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">火力型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">棱镜战车</h4>
+                    <p class="text-sm text-gray-400 mb-3">移动式棱镜炮台，提供强大火力支援</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Prism Tank</span>
+                        <a href="prism-tank.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">🚀</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">轰炸型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角轰炸机</h4>
+                    <p class="text-sm text-gray-400 mb-3">空中轰炸单位，可投掷三角能量炸弹</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Bomber</span>
+                        <a href="triangle-bomber.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">🛠️</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">工程型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角建造机</h4>
+                    <p class="text-sm text-gray-400 mb-3">快速建造三角结构的工程机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Constructor</span>
+                        <a href="triangle-constructor.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">🔍</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">侦察型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角侦察机</h4>
+                    <p class="text-sm text-gray-400 mb-3">高速侦察单位，可标记敌方目标</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Scout</span>
+                        <a href="triangle-scout.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-triangle mechanical-item" data-race="triangle">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-red-500/20 text-red-400">💥</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">毁灭型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角毁灭者</h4>
+                    <p class="text-sm text-gray-400 mb-3">终极攻击机械，搭载三角聚焦毁灭炮</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Destroyer</span>
+                        <a href="triangle-destroyer.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 方碑盟约机械 -->
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">⬜</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">标准型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方碑坦克</h4>
+                    <p class="text-sm text-gray-400 mb-3">标准化主战坦克，模块化武器系统</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk Tank</span>
+                        <a href="obelisk-tank.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-1">T1</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">🤖</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">工兵型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">模块工兵</h4>
+                    <p class="text-sm text-gray-400 mb-3">基础工程单位，可快速部署模块建筑</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Module Worker</span>
+                        <a href="module-worker.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">🔬</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">科技型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">量子处理器</h4>
+                    <p class="text-sm text-gray-400 mb-3">高级科技机械，提供战场分析和增强</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Quantum Processor</span>
+                        <a href="quantum-processor.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">🚁</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">运输型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">矩阵运输机</h4>
+                    <p class="text-sm text-gray-400 mb-3">空中运输单位，可运送部队和物资</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Matrix Transport</span>
+                        <a href="matrix-transport.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">🛡️</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">防御型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方碑护盾机</h4>
+                    <p class="text-sm text-gray-400 mb-3">部署能量护盾，保护友军单位</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk Shielder</span>
+                        <a href="obelisk-shielder.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-square mechanical-item" data-race="square">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-green-500/20 text-green-400">⚛️</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">旗舰型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方碑旗舰</h4>
+                    <p class="text-sm text-gray-400 mb-3">大型空中战舰，指挥中心和移动基地</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk Flagship</span>
+                        <a href="obelisk-flagship.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 螺旋之子机械 -->
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🌀</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">有机型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">螺旋收割者</h4>
+                    <p class="text-sm text-gray-400 mb-3">半机械半有机的收割单位，可吸收敌军能量</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spiral Harvester</span>
+                        <a href="spiral-harvester.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-1">T1</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🌿</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">培育型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生物培育机</h4>
+                    <p class="text-sm text-gray-400 mb-3">培育和加速生物单位生长的机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Bio Cultivator</span>
+                        <a href="bio-cultivator.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🐙</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">巨型型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">触须巨兽</h4>
+                    <p class="text-sm text-gray-400 mb-3">巨型机械生物，具有多条能量触须</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Tentacle Behemoth</span>
+                        <a href="tentacle-behemoth.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🦋</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">飞行型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">螺旋飞行器</h4>
+                    <p class="text-sm text-gray-400 mb-3">模仿蝴蝶形态的敏捷飞行机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spiral Flier</span>
+                        <a href="spiral-flier.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-2">T2</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🧪</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">变异型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">变异催化剂</h4>
+                    <p class="text-sm text-gray-400 mb-3">加速友军单位进化的特殊机械</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Mutation Catalyst</span>
+                        <a href="mutation-catalyst.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="mechanical-card rounded-lg p-6 race-border-spiral mechanical-item" data-race="spiral">
+                    <div class="mechanical-tier tier-3">T3</div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="mechanical-type-icon bg-purple-500/20 text-purple-400">🌳</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">进化型</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生命进化体</h4>
+                    <p class="text-sm text-gray-400 mb-3">可以不断进化适应的终极机械生命体</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Life Evolver</span>
+                        <a href="life-evolver.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 按种族分类 -->
+        <section id="circle-clan" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-blue-400">圆环族机械</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族机械卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="triangle-council" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-red-400">三角议会机械</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 三角议会机械卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="square-covenant" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-green-400">方碑盟约机械</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 方碑盟约机械卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="spiral-progeny" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-purple-400">螺旋之子机械</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 螺旋之子机械卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+      </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2024 几何境域：形态之战. All rights reserved.</p>
+            <p class="text-sm mt-2">机械设计展示 | 24个独特机械单位，4个几何种族</p>
+        </div>
+    </footer>
+
+    <script>
+        // 过滤机械
+        function filterMechanical(race) {
+            const mechanicals = document.querySelectorAll('.mechanical-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(getRaceName(race)) || (race === 'all' && btn.textContent.includes('全部'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 显示/隐藏机械
+            mechanicals.forEach(mechanical => {
+                if (race === 'all' || mechanical.dataset.race === race) {
+                    mechanical.style.display = 'block';
+                } else {
+                    mechanical.style.display = 'none';
+                }
+            });
+        }
+        
+        function getRaceName(race) {
+            const names = {
+                'circle': '圆环族',
+                'triangle': '三角议会',
+                'square': '方碑盟约',
+                'spiral': '螺旋之子'
+            };
+            return names[race] || '';
+        }
+        
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // 初始化
+        revealOnScroll();
+        
+        // 动态填充种族分类机械
+        function populateRaceSections() {
+            const raceSections = {
+                'circle-clan': 'circle',
+                'triangle-council': 'triangle',
+                'square-covenant': 'square',
+                'spiral-progeny': 'spiral'
+            };
+            
+            Object.entries(raceSections).forEach(([sectionId, race]) => {
+                const section = document.querySelector(`#${sectionId} .grid`);
+                if (section) {
+                    const mechanicals = document.querySelectorAll(`#all-mechanical .mechanical-item[data-race="${race}"]`);
+                    mechanicals.forEach(mechanical => {
+                        // 使用 insertAdjacentHTML 创建深拷贝
+                        section.insertAdjacentHTML('beforeend', mechanical.outerHTML);
+                    });
+                }
+            });
+        }
+        
+        populateRaceSections();
+        
+        // 搜索功能
+        function searchMechanical() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const mechanicals = document.querySelectorAll('.mechanical-item');
+            
+            mechanicals.forEach(mechanical => {
+                const text = mechanical.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    mechanical.style.display = 'block';
+                } else {
+                    mechanical.style.display = 'none';
+                }
+            });
+        }
+        
+        // 快速预览功能
+        function quickView(id, name) {
+            const modal = document.getElementById('quickViewModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTitle.textContent = name;
+            modalContent.innerHTML = '<div class="loading-spinner"></div>';
+            modal.style.display = 'block';
+            
+            // 模拟加载机械详情
+            setTimeout(() => {
+                modalContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mechanical-preview">
+                                <div class="mechanical-3d" id="preview3d">
+                                    <div style="position: absolute; width: 100px; height: 100px; background: linear-gradient(45deg, #3b82f6, #1e40af); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-4">快速统计</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span>生命值:</span>
+                                    <span class="text-blue-400">1200</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>攻击力:</span>
+                                    <span class="text-red-400">450</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>护甲:</span>
+                                    <span class="text-green-400">35</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>移动速度:</span>
+                                    <span class="text-purple-400">3.2</span>
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <h5 class="font-bold mb-2">主要能力</h5>
+                                <ul class="text-sm text-gray-400 space-y-1">
+                                    <li>• 能量护盾吸收伤害</li>
+                                    <li>• 反弹敌方攻击</li>
+                                    <li>• 区域防御屏障</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加3D旋转交互
+                add3DRotation('preview3d');
+            }, 500);
+        }
+        
+        // 3D旋转交互
+        function add3DRotation(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            let isRotating = false;
+            let startX = 0;
+            let currentX = 0;
+            let currentY = 0;
+            
+            element.addEventListener('mousedown', (e) => {
+                isRotating = true;
+                startX = e.clientX;
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isRotating) return;
+                const deltaX = e.clientX - startX;
+                currentX += deltaX * 0.5;
+                element.style.transform = `rotateY(${currentX}deg) rotateX(${currentY}deg)`;
+                startX = e.clientX;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isRotating = false;
+            });
+        }
+        
+        // 对比功能
+        let compareList = [];
+        
+        function addToCompare(id, name, race) {
+            if (compareList.length >= 3) {
+                alert('最多只能对比3个机械单位');
+                return;
+            }
+            
+            if (compareList.find(item => item.id === id)) {
+                alert('该机械已在对比列表中');
+                return;
+            }
+            
+            compareList.push({ id, name, race });
+            updateCompareUI();
+        }
+        
+        function removeFromCompare(id) {
+            compareList = compareList.filter(item => item.id !== id);
+            updateCompareUI();
+        }
+        
+        function updateCompareUI() {
+            const compareContainer = document.getElementById('compareContainer');
+            const compareBtn = document.getElementById('compareBtn');
+            const compareCount = document.getElementById('compareCount');
+            
+            compareCount.textContent = compareList.length;
+            
+            if (compareList.length > 0) {
+                compareContainer.style.display = 'block';
+                compareBtn.style.display = 'flex';
+                
+                const compareItems = compareList.map(item => `
+                    <div class="compare-item">
+                        <span>${item.name}</span>
+                        <button onclick="removeFromCompare('${item.id}')" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                compareContainer.innerHTML = `
+                    <div class="compare-header">
+                        <h4 class="font-bold">机械对比 (${compareList.length}/3)</h4>
+                        <button onclick="clearCompare()" class="text-gray-400 hover:text-white">清空</button>
+                    </div>
+                    ${compareItems}
+                    ${compareList.length > 1 ? '<button onclick="showComparison()" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition">查看对比</button>' : ''}
+                `;
+            } else {
+                compareContainer.style.display = 'none';
+                compareBtn.style.display = 'none';
+            }
+        }
+        
+        function clearCompare() {
+            compareList = [];
+            updateCompareUI();
+        }
+        
+        function showComparison() {
+            // 实现对比详情显示
+            alert('对比功能开发中...');
+        }
+    </script>
+    
+    <!-- 快速预览模态框 -->
+    <div id="quickViewModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('quickViewModal').style.display='none'">&times;</span>
+            <h3 id="modalTitle" class="font-orbitron text-2xl font-bold mb-6"></h3>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+    
+    <!-- 对比按钮 -->
+    <div id="compareBtn" class="compare-btn" style="display: none;" onclick="document.getElementById('compareContainer').style.display='block'">
+        <i class="fas fa-balance-scale text-white text-xl"></i>
+        <span id="compareCount" class="compare-count">0</span>
+    </div>
+    
+    <!-- 对比容器 -->
+    <div id="compareContainer" class="compare-container"></div>
+    
+    <!-- 移动端统计按钮 -->
+    <div class="md:hidden fixed bottom-24 right-6 z-40">
+        <a href="statistics.html" class="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
+            <i class="fas fa-chart-line text-white text-xl"></i>
+        </a>
+    </div>
+</body>
+</html>

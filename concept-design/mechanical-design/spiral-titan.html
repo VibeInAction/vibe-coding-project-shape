@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螺旋泰坦 - 螺旋之子机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes titan-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes energy-core {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @keyframes spiral-pulse {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes vortex-flow {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 0; }
+        }
+        
+        .spiral-titan {
+            width: 340px;
+            height: 380px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .titan-core {
+            position: absolute;
+            width: 240px;
+            height: 280px;
+            background: conic-gradient(from 0deg, #7c3aed, #a855f7, #c084fc, #e9d5ff, #c084fc, #a855f7, #7c3aed);
+            border-radius: 50% 50% 40% 40%;
+            top: 50px;
+            left: 50px;
+            box-shadow: 0 25px 60px rgba(124, 58, 237, 0.7);
+            animation: titan-rotate 30s linear infinite;
+        }
+        
+        .titan-armor {
+            position: absolute;
+            width: 200px;
+            height: 240px;
+            background: conic-gradient(from 180deg, #6d28d9, #7c3aed, #8b5cf6, #a78bfa, #8b5cf6, #7c3aed, #6d28d9);
+            border-radius: 50% 50% 40% 40%;
+            top: 70px;
+            left: 70px;
+            animation: spiral-pulse 4s ease-in-out infinite;
+        }
+        
+        .titan-face {
+            position: absolute;
+            width: 120px;
+            height: 150px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 30px;
+            top: 110px;
+            left: 110px;
+            z-index: 10;
+        }
+        
+        .titan-eye {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #e9d5ff, #a855f7);
+            border-radius: 50%;
+            top: 140px;
+            animation: energy-core 2s ease-in-out infinite;
+        }
+        
+        .titan-eye.left {
+            left: 90px;
+        }
+        
+        .titan-eye.right {
+            right: 90px;
+        }
+        
+        .titan-weapon {
+            position: absolute;
+            width: 100px;
+            height: 160px;
+            background: linear-gradient(180deg, #374151, #6b7280);
+            border-radius: 20px;
+            top: 100px;
+        }
+        
+        .titan-weapon.left {
+            left: 10px;
+            transform: rotate(-20deg);
+        }
+        
+        .titan-weapon.right {
+            right: 10px;
+            transform: rotate(20deg);
+        }
+        
+        .titan-weapon::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #e9d5ff, #7c3aed);
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+            animation: energy-core 1.5s ease-in-out infinite;
+        }
+        
+        .spiral-field {
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            border: 3px solid rgba(168, 85, 247, 0.4);
+            border-radius: 50%;
+            top: 10px;
+            left: -10px;
+            animation: titan-rotate 20s linear infinite reverse;
+        }
+        
+        .spiral-field::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 50%;
+            top: -20px;
+            left: -20px;
+        }
+        
+        .titan-base {
+            position: absolute;
+            width: 300px;
+            height: 60px;
+            background: linear-gradient(90deg, #4c1d95, #6d28d9, #4c1d95);
+            background-size: 50px 100%;
+            animation: vortex-flow 3s linear infinite;
+            bottom: 20px;
+            left: 20px;
+            border-radius: 30px;
+        }
+        
+        .energy-spiral {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid transparent;
+            border-top-color: rgba(168, 85, 247, 0.6);
+            border-radius: 50%;
+            top: 90px;
+            left: 70px;
+            animation: titan-rotate 10s linear infinite;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #7c3aed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-purple-500 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">螺旋之子</span>
+                    <span class="text-purple-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+                螺旋泰坦
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Spiral Titan</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-purple-900 px-3 py-1 rounded-full">T3 旗舰单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">终极战士</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">维度掌控</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="spiral-titan" id="titan-model">
+                    <div class="spiral-field"></div>
+                    <div class="titan-core"></div>
+                    <div class="titan-armor"></div>
+                    <div class="titan-face"></div>
+                    <div class="titan-eye left"></div>
+                    <div class="titan-eye right"></div>
+                    <div class="titan-weapon left"></div>
+                    <div class="titan-weapon right"></div>
+                    <div class="energy-spiral"></div>
+                    <div class="titan-base"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-purple-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-purple-400">5000/5000</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-purple-400">250</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-indigo-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">攻击力</span>
+                            <span class="text-purple-400">800</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="95%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">维度能量</span>
+                            <span class="text-purple-400">无限</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-pink-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">控制范围</span>
+                            <span class="text-purple-400">1000m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="95%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">800资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">200秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-infinity text-4xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">维度撕裂</h3>
+                    <p class="text-gray-400 mb-4">撕裂空间维度，在目标区域创造持续8秒的次元裂缝，每秒造成400点伤害并降低敌人30%属性。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">30秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">250</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-dharmachakra text-4xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">时空冻结</h3>
+                    <p class="text-gray-400 mb-4">冻结大范围时空，使所有敌人停滞5秒。冻结期间敌人无法行动且受到伤害增加100%。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">60秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">400</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-star text-4xl text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">螺旋升格</h3>
+                    <p class="text-gray-400 mb-4">进入超维形态15秒，自身所有属性提升100%，并使周围友军单位获得50%属性加成。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">90秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">500</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>作为终极单位，在决战时投入战场</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>维度撕裂用于控制战场和削弱敌人</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>时空冻结在危急时刻使用，逆转战局</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>螺旋升格在总攻时开启，摧毁敌方防线</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-purple-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>与所有螺旋之子单位完美配合</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>螺旋升格大幅提升整个军队的战斗力</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础维度能力</li>
+                        <li>• 标准护甲</li>
+                        <li>• 常规武器</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁维度撕裂</li>
+                        <li>• 生命值+1000</li>
+                        <li>• 护甲+50</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-pink-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁螺旋升格</li>
+                        <li>• 所有属性+30%</li>
+                        <li>• 获得时空冻结</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="tornado-sniper.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-crosshairs text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">龙卷风狙击手</p>
+                    <p class="text-sm text-gray-400">远程单位</p>
+                </a>
+                <a href="helix-destroyer.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-dna text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋毁灭者</p>
+                    <p class="text-sm text-gray-400">重型单位</p>
+                </a>
+                <a href="vortex-assault.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-wind text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">涡流突击者</p>
+                    <p class="text-sm text-gray-400">突击单位</p>
+                </a>
+                <a href="spiral-scout.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-user-ninja text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋斥候</p>
+                    <p class="text-sm text-gray-400">侦察单位</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const titanModel = document.getElementById('titan-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotationX = 0;
+        let currentRotationY = 0;
+
+        titanModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            titanModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotationY += deltaX * 0.5;
+            const core = titanModel.querySelector('.titan-core');
+            if (core) {
+                core.style.transform = `rotateY(${currentRotationY}deg) rotateX(${currentRotationX}deg)`;
+            }
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            titanModel.style.cursor = 'grab';
+        });
+
+        // Eye pulsing effect
+        const eyes = document.querySelectorAll('.titan-eye');
+        setInterval(() => {
+            eyes.forEach(eye => {
+                const scale = Math.random() * 0.3 + 0.9;
+                eye.style.transform = `scale(${scale})`;
+            });
+        }, 300);
+
+        // Weapon glow effect
+        const weapons = document.querySelectorAll('.titan-weapon::before');
+        setInterval(() => {
+            const weaponElements = document.querySelectorAll('.titan-weapon');
+            weaponElements.forEach(weapon => {
+                const brightness = Math.random() * 0.5 + 0.8;
+                weapon.style.filter = `brightness(${brightness})`;
+            });
+        }, 200);
+    </script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块工兵 - 方碑盟约机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes worker-walk {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes build-construct {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        @keyframes resource-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .module-worker {
+            width: 240px;
+            height: 320px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .worker-body {
+            position: absolute;
+            width: 100px;
+            height: 140px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            bottom: 80px;
+            left: 70px;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            animation: worker-walk 2s ease-in-out infinite;
+        }
+        
+        .worker-head {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #059669, #047857);
+            border-radius: 10px;
+            top: 100px;
+            left: 90px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .worker-head::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: rgba(34, 197, 94, 0.3);
+            border-radius: 50%;
+            top: 10px;
+            left: 10px;
+        }
+        
+        .worker-arm-left {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background: linear-gradient(180deg, #059669, #047857);
+            top: 120px;
+            left: 60px;
+            transform-origin: top center;
+            animation: build-construct 3s ease-in-out infinite;
+        }
+        
+        .worker-arm-right {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background: linear-gradient(180deg, #059669, #047857);
+            top: 120px;
+            right: 60px;
+            transform-origin: top center;
+            animation: build-construct 3s ease-in-out infinite 1.5s;
+        }
+        
+        .worker-tool {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            bottom: -15px;
+            left: -5px;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        }
+        
+        .worker-leg-left {
+            position: absolute;
+            width: 25px;
+            height: 60px;
+            background: linear-gradient(180deg, #059669, #047857);
+            bottom: 20px;
+            left: 85px;
+        }
+        
+        .worker-leg-right {
+            position: absolute;
+            width: 25px;
+            height: 60px;
+            background: linear-gradient(180deg, #059669, #047857);
+            bottom: 20px;
+            right: 85px;
+        }
+        
+        .resource-pack {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 8px;
+            top: 80px;
+            right: 50px;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .resource-pack::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #60a5fa, #3b82f6);
+            border-radius: 50%;
+            top: 15px;
+            left: 10px;
+            animation: resource-glow 2s ease-in-out infinite;
+        }
+        
+        .build-projector {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: 50%;
+            bottom: 40px;
+            left: 80px;
+            opacity: 0.6;
+        }
+        
+        .build-beam {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(180deg, #10b981, transparent);
+            bottom: 120px;
+            left: 119px;
+            opacity: 0.5;
+            animation: build-construct 2s ease-in-out infinite;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-green-500 hover:text-green-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">方碑盟约</span>
+                    <span class="text-green-500">|</span>
+                    <span class="text-gray-300">工兵机械</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                模块工兵
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Module Worker</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-green-900 px-3 py-1 rounded-full">T1 工兵单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">建筑专家</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">资源收集</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="module-worker" id="worker-model">
+                    <div class="worker-body"></div>
+                    <div class="worker-head"></div>
+                    <div class="worker-arm-left">
+                        <div class="worker-tool"></div>
+                    </div>
+                    <div class="worker-arm-right">
+                        <div class="worker-tool"></div>
+                    </div>
+                    <div class="worker-leg-left"></div>
+                    <div class="worker-leg-right"></div>
+                    <div class="resource-pack"></div>
+                    <div class="build-projector"></div>
+                    <div class="build-beam"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-green-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-green-400">500/500</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="20%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-green-400">10</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="10%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">建造速度</span>
+                            <span class="text-green-400">+100%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">资源携带</span>
+                            <span class="text-green-400">300单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="30%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">维修速度</span>
+                            <span class="text-green-400">50/秒</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-red-600 h-3 rounded-full" style="width: 0%" data-width="70%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-hammer text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">80资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">25秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cubes text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">快速部署</h3>
+                    <p class="text-gray-400 mb-4">部署预制模块建筑，建造时间减少50%，可同时建造2个建筑。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">被动</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-tools text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">紧急维修</h3>
+                    <p class="text-gray-400 mb-4">快速修复友军机械或建筑，5秒内恢复500点生命值。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">30秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">40</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-truck text-4xl text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">资源优化</h3>
+                    <p class="text-gray-400 mb-4">资源收集效率提升100%，移动速度提升50%，持续20秒。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">45秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">建造策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>游戏前期快速建造资源采集设施</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>在战斗间隙快速修复受损建筑</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>利用资源优化加速基地发展</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-green-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>为方碑守卫提供前线维修支援</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>需要几何哨兵提供安全侦察</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础建造能力</li>
+                        <li>• 标准资源收集</li>
+                        <li>• 基础维修技能</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁快速部署</li>
+                        <li>• 建造速度+50%</li>
+                        <li>• 资源携带+100</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁资源优化</li>
+                        <li>• 可建造高级建筑</li>
+                        <li>• 维修速度+30</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-green-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="square-guardian.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shield-alt text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">方碑守卫</p>
+                    <p class="text-sm text-gray-400">防御单位</p>
+                </a>
+                <a href="cube-artisan.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-hammer text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">立方工匠</p>
+                    <p class="text-sm text-gray-400">工程单位</p>
+                </a>
+                <a href="matrix-fortress.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-fortress text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">矩阵堡垒</p>
+                    <p class="text-sm text-gray-400">重装单位</p>
+                </a>
+                <a href="geometric-sentry.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-eye text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">几何哨兵</p>
+                    <p class="text-sm text-gray-400">侦察单位</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const workerModel = document.getElementById('worker-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        workerModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            workerModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            workerModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            workerModel.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>

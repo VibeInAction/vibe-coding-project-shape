@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立方工匠 - 方碑盟约机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes artisan-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        @keyframes tool-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes build-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .cube-artisan {
+            width: 280px;
+            height: 300px;
+            position: relative;
+            margin: 0 auto;
+            animation: artisan-float 4s ease-in-out infinite;
+        }
+        
+        .artisan-body {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #059669, #10b981, #34d399);
+            top: 60px;
+            left: 50px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+        
+        .artisan-body::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #047857, #059669);
+            top: 20px;
+            left: 20px;
+        }
+        
+        .artisan-body::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #6ee7b7, #34d399);
+            top: 40px;
+            left: 40px;
+            border-radius: 20px;
+            animation: build-glow 2s ease-in-out infinite;
+        }
+        
+        .artisan-arm {
+            position: absolute;
+            width: 80px;
+            height: 30px;
+            background: linear-gradient(90deg, #374151, #6b7280);
+            top: 120px;
+            border-radius: 15px;
+        }
+        
+        .artisan-arm.left {
+            left: 20px;
+            transform: rotate(-20deg);
+            transform-origin: right center;
+        }
+        
+        .artisan-arm.right {
+            right: 20px;
+            transform: rotate(20deg);
+            transform-origin: left center;
+        }
+        
+        .artisan-tool {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            animation: tool-rotate 3s linear infinite;
+        }
+        
+        .artisan-tool.left {
+            left: 10px;
+            top: 110px;
+        }
+        
+        .artisan-tool.right {
+            right: 10px;
+            top: 110px;
+        }
+        
+        .artisan-base {
+            position: absolute;
+            width: 200px;
+            height: 60px;
+            background: linear-gradient(180deg, #064e3b, #047857);
+            bottom: 20px;
+            left: 40px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+        
+        .build-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #6ee7b7;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-green-500 hover:text-green-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">方碑盟约</span>
+                    <span class="text-green-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                立方工匠
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Cube Artisan</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-green-900 px-3 py-1 rounded-full">T2 工程单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">建造维修</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">资源采集</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="cube-artisan" id="artisan-model">
+                    <div class="artisan-body"></div>
+                    <div class="artisan-arm left"></div>
+                    <div class="artisan-arm right"></div>
+                    <div class="artisan-tool left"></div>
+                    <div class="artisan-tool right"></div>
+                    <div class="artisan-base"></div>
+                    <div class="build-particle" style="top: 100px; left: 150px;"></div>
+                    <div class="build-particle" style="top: 120px; left: 130px;"></div>
+                    <div class="build-particle" style="top: 140px; left: 170px;"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-green-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-green-400">800/800</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-green-400">50</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-teal-600 h-3 rounded-full" style="width: 0%" data-width="25%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">建造速度</span>
+                            <span class="text-green-400">+50%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="75%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">维修效率</span>
+                            <span class="text-green-400">80/秒</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="80%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">采集速度</span>
+                            <span class="text-green-400">30/秒</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">150资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">45秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-hammer text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">快速建造</h3>
+                    <p class="text-gray-400 mb-4">激活后30秒内，周围所有建筑建造速度提升100%，并且消耗资源减少25%。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">45秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">80</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-wrench text-4xl text-teal-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">紧急维修</h3>
+                    <p class="text-gray-400 mb-4">立即恢复目标建筑或机械单位500点生命值，并为其提供持续10秒的每秒50点生命恢复。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">20秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">60</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-industry text-4xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">资源转化</h3>
+                    <p class="text-gray-400 mb-4">将战场上的残骸转化为可用资源，每秒获得20点资源，持续20秒。最多可转化1000点资源。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">60秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>在安全区域建造防御工事，快速建造能力大幅提升效率</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>紧跟进攻部队，及时维修受损单位维持战线</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>在战后清理战场，利用资源转化能力获得额外收益</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>避免单独行动，需要战斗单位保护</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-green-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>与方碑守护者配合，建立坚固的防线</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>支援进攻部队，维持前线单位的作战能力</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础建造能力</li>
+                        <li>• 标准维修</li>
+                        <li>• 基础工具</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-teal-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁快速建造</li>
+                        <li>• 建造速度+25%</li>
+                        <li>• 维修效率+20/秒</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-emerald-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁资源转化</li>
+                        <li>• 移动速度+0.5</li>
+                        <li>• 生命值+200</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-green-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="square-guardian.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shield-alt text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">方碑守护者</p>
+                    <p class="text-sm text-gray-400">防御单位</p>
+                </a>
+                <a href="matrix-fortress.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-cube text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">矩阵要塞</p>
+                    <p class="text-sm text-gray-400">重型单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-eye text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">几何哨兵</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-shield-virus text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">方碑卫士</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const artisanModel = document.getElementById('artisan-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        artisanModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            artisanModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            artisanModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            artisanModel.style.cursor = 'grab';
+        });
+
+        // Build particle animation
+        const particles = document.querySelectorAll('.build-particle');
+        particles.forEach((particle, index) => {
+            setInterval(() => {
+                particle.style.opacity = '1';
+                particle.style.transform = `translateY(${-Math.random() * 30 - 10}px)`;
+                setTimeout(() => {
+                    particle.style.opacity = '0';
+                    particle.style.transform = 'translateY(0)';
+                }, 1000);
+            }, 2000 + index * 500);
+        });
+
+        // Tool glow effect
+        const tools = document.querySelectorAll('.artisan-tool');
+        setInterval(() => {
+            tools.forEach(tool => {
+                const brightness = Math.random() * 0.5 + 0.8;
+                tool.style.filter = `brightness(${brightness})`;
+            });
+        }, 200);
+    </script>
+</body>
+</html>

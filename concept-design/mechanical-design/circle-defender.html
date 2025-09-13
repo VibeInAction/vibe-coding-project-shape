@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圆环防御者 - 圆环族机械设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --secondary-blue: #2563eb;
+            --accent-blue: #60a5fa;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .circle-particle {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            animation: float-circle 20s infinite linear;
+        }
+
+        @keyframes float-circle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 3D模型容器 */
+        .model-container {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .defender-model {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate-defender 15s infinite linear;
+        }
+
+        @keyframes rotate-defender {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        /* 防御者结构 */
+        .defender-core {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.6));
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .defender-ring {
+            position: absolute;
+            border: 4px solid rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .defender-ring:nth-child(2) {
+            width: 180px;
+            height: 180px;
+            animation: ring-rotate 3s infinite linear;
+        }
+
+        .defender-ring:nth-child(3) {
+            width: 240px;
+            height: 240px;
+            animation: ring-rotate 4s infinite linear reverse;
+        }
+
+        @keyframes ring-rotate {
+            0% { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(0deg); }
+            100% { transform: translate(-50%, -50%) rotateX(60deg) rotateZ(360deg); }
+        }
+
+        /* 护盾效果 */
+        .shield-effect {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.3), transparent 70%);
+            animation: shield-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes shield-pulse {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* 统计条 */
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            transition: width 1s ease-out;
+        }
+
+        .stat-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 能力卡片 */
+        .ability-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ability-card:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 升级路径 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .upgrade-line {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
+            z-index: 1;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(59, 130, 246, 0.4);
+            transform: translateX(-5px);
+        }
+
+        /* 相关机械 */
+        .related-mechanical {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .related-mechanical:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation">
+        <div class="circle-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="circle-particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="circle-particle" style="left: 50%; animation-delay: 8s;"></div>
+        <div class="circle-particle" style="left: 70%; animation-delay: 12s;"></div>
+        <div class="circle-particle" style="left: 90%; animation-delay: 16s;"></div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>返回机械列表
+    </a>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="font-orbitron text-5xl font-bold mb-4 text-blue-400">圆环防御者</h1>
+            <p class="text-xl text-gray-400">圆环族的防御型机械单位</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">T2单位</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">防御专精</span>
+                <span class="px-3 py-1 bg-blue-500/20 rounded-full text-sm">能量护盾</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D模型展示 -->
+            <div>
+                <div class="bg-gray-800/50 rounded-2xl p-8">
+                    <h2 class="font-orbitron text-2xl font-bold mb-6 text-center">机械模型</h2>
+                    <div class="model-container">
+                        <div class="defender-model">
+                            <div class="shield-effect"></div>
+                            <div class="defender-ring"></div>
+                            <div class="defender-ring"></div>
+                            <div class="defender-core"></div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 text-gray-400">
+                        圆环防御者采用多层环形护盾技术，能够吸收并反弹敌方的能量攻击。
+                        其核心由高密度形素构成，周围环绕着旋转的能量环，形成强大的防御屏障。
+                    </p>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mt-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础属性</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span>800/800</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span>500/500</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-cyan-500" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>防御力</span>
+                                <span>15（反弹30%）</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-indigo-500" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>移动速度</span>
+                                <span>1.8</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-blue-500" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾恢复</span>
+                                <span>10/秒</span>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-fill bg-teal-500" style="width: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详细信息 -->
+            <div>
+                <!-- 单位介绍 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">机械介绍</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        圆环防御者是圆环族最可靠的防御机械单位。它独特的环形结构能够形成多重能量护盾，
+                        不仅能吸收伤害，还能将部分能量反弹给攻击者。这种设计理念体现了圆环族"和谐防御"的哲学，
+                        通过优雅的几何形态实现最有效的防护。
+                    </p>
+                </div>
+
+                <!-- 核心能力 -->
+                <div class="space-y-4 mb-6">
+                    <h3 class="font-orbitron text-xl font-bold">核心能力</h3>
+                    
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-shield-alt text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">环形护盾</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    生成三层环形能量护盾，每层可吸收200点伤害。
+                                    护盾被击破后会每秒恢复10点，完全恢复需要20秒。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    对能量攻击有额外50%吸收效果
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-sync-alt text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">能量反弹</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    将吸收的30%伤害以能量波形式反弹给攻击者，
+                                    反弹伤害为真实伤害，无视护甲。反弹范围5格。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    对建筑反弹效果减半
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ability-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-users text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg mb-1">守护光环</h4>
+                                <p class="text-sm text-gray-400 mb-2">
+                                    为周围3格内的友军单位提供+5护甲和每秒5点生命恢复。
+                                    光环效果可叠加，最多叠加3次。
+                                </p>
+                                <div class="text-xs text-blue-400">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    对机械单位效果翻倍
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战术指南 -->
+                <div class="bg-gray-800/50 rounded-2xl p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战术指南</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">部署在前线，保护后方脆弱单位</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">集中部署形成防御墙，最大化反弹效果</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-400 mr-2">✓</span>
+                            <p class="text-sm text-gray-300">配合治疗单位，维持护盾持续作战</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">避免单独面对高爆发输出单位</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-400 mr-2">✗</span>
+                            <p class="text-sm text-gray-300">不要在护盾恢复时强行进攻</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级路径 -->
+        <div class="mt-12 bg-gray-800/50 rounded-2xl p-8">
+            <h3 class="font-orbitron text-2xl font-bold mb-6 text-center">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node">
+                    <span class="text-sm">基础型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">进阶型</span>
+                </div>
+                <div class="upgrade-node">
+                    <span class="text-sm">精英型</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 mt-4">
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">圆环防御者</h4>
+                    <p class="text-xs text-gray-400">基础防御机械</p>
+                    <p class="text-xs text-blue-400 mt-1">资源：180形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">强化防御者</h4>
+                    <p class="text-xs text-gray-400">护盾+200，反弹+10%</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：120形素</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="font-bold mb-2">圣殿守护者</h4>
+                    <p class="text-xs text-gray-400">获得群体护盾，反弹+20%</p>
+                    <p class="text-xs text-blue-400 mt-1">升级：200形素</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相关机械 -->
+        <div class="mt-8">
+            <h3 class="font-orbitron text-xl font-bold mb-4">相关机械</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="energy-transmitter.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <p class="text-sm font-bold">能量传输器</p>
+                    <p class="text-xs text-gray-400">支援型</p>
+                </a>
+                <a href="harmony-fortress.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🛡️</div>
+                    <p class="text-sm font-bold">和谐堡垒</p>
+                    <p class="text-xs text-gray-400">重装型</p>
+                </a>
+                <a href="ring-engineer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🔧</div>
+                    <p class="text-sm font-bold">环形工程师</p>
+                    <p class="text-xs text-gray-400">工程型</p>
+                </a>
+                <a href="resonance-jammer.html" class="related-mechanical text-center">
+                    <div class="text-3xl mb-2">🌀</div>
+                    <p class="text-sm font-bold">共振干扰器</p>
+                    <p class="text-xs text-gray-400">控制型</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-fill');
+            statBars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100 * index);
+            });
+        });
+
+        // 3D模型交互
+        const defenderModel = document.querySelector('.defender-model');
+        let isMouseDown = false;
+        let mouseX = 0;
+        let rotationX = 0;
+        let rotationY = 0;
+
+        defenderModel.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            mouseX = e.clientX;
+            defenderModel.style.animationPlayState = 'paused';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            
+            const deltaX = e.clientX - mouseX;
+            rotationY += deltaX * 0.5;
+            
+            defenderModel.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            mouseX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            defenderModel.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

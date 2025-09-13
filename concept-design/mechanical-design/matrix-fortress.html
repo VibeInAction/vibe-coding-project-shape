@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>矩阵要塞 - 方碑盟约机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes fortress-rotate {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        
+        @keyframes matrix-pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes defense-grid {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .matrix-fortress {
+            width: 320px;
+            height: 300px;
+            position: relative;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+        
+        .fortress-base {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #059669, #10b981, #34d399);
+            transform-style: preserve-3d;
+            animation: fortress-rotate 20s linear infinite;
+            top: 10px;
+            left: 20px;
+        }
+        
+        .fortress-face {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #047857, #059669);
+            border: 2px solid #10b981;
+            opacity: 0.8;
+        }
+        
+        .fortress-face.front { transform: translateZ(140px); }
+        .fortress-face.back { transform: translateZ(-140px) rotateY(180deg); }
+        .fortress-face.left { transform: rotateY(-90deg) translateZ(140px); }
+        .fortress-face.right { transform: rotateY(90deg) translateZ(140px); }
+        .fortress-face.top { transform: rotateX(90deg) translateZ(140px); }
+        .fortress-face.bottom { transform: rotateX(-90deg) translateZ(140px); }
+        
+        .fortress-core {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #6ee7b7, #10b981);
+            border-radius: 50%;
+            top: 90px;
+            left: 100px;
+            z-index: 10;
+            animation: matrix-pulse 2s ease-in-out infinite;
+        }
+        
+        .fortress-turret {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(180deg, #064e3b, #047857);
+            border-radius: 30px;
+        }
+        
+        .fortress-turret.t1 { top: 40px; left: 40px; }
+        .fortress-turret.t2 { top: 40px; right: 40px; }
+        .fortress-turret.t3 { bottom: 40px; left: 40px; }
+        .fortress-turret.t4 { bottom: 40px; right: 40px; }
+        
+        .defense-field {
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            border: 3px solid rgba(16, 185, 129, 0.5);
+            border-radius: 20px;
+            top: -20px;
+            left: -10px;
+            animation: defense-grid 3s ease-in-out infinite;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        
+        .upgrade-stage {
+            transition: all 0.3s ease;
+        }
+        
+        .upgrade-stage:hover {
+            transform: scale(1.05);
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-green-500 hover:text-green-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">方碑盟约</span>
+                    <span class="text-green-500">|</span>
+                    <span class="text-gray-300">机械单位</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                矩阵要塞
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Matrix Fortress</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-green-900 px-3 py-1 rounded-full">T3 重型单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">固定防御</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">区域控制</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="matrix-fortress" id="fortress-model">
+                    <div class="defense-field"></div>
+                    <div class="fortress-base">
+                        <div class="fortress-face front"></div>
+                        <div class="fortress-face back"></div>
+                        <div class="fortress-face left"></div>
+                        <div class="fortress-face right"></div>
+                        <div class="fortress-face top"></div>
+                        <div class="fortress-face bottom"></div>
+                    </div>
+                    <div class="fortress-core"></div>
+                    <div class="fortress-turret t1"></div>
+                    <div class="fortress-turret t2"></div>
+                    <div class="fortress-turret t3"></div>
+                    <div class="fortress-turret t4"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-green-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-green-400">5000/5000</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-green-400">300</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-teal-600 h-3 rounded-full" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">防御力场</span>
+                            <span class="text-green-400">2000</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">攻击力</span>
+                            <span class="text-green-400">400×4</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-yellow-600 h-3 rounded-full" style="width: 0%" data-width="80%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">控制范围</span>
+                            <span class="text-green-400">600m</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="85%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-gem text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">600资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-green-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">180秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bolt text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">矩阵护盾</h3>
+                    <p class="text-gray-400 mb-4">激活全向防御矩阵，15秒内免疫所有远程攻击，并反射50%的魔法伤害回施法者。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">45秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">200</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-satellite text-4xl text-teal-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">轨道支援</h3>
+                    <p class="text-gray-400 mb-4">呼叫轨道防御平台，对指定区域持续10秒的能量轰炸，每秒造成800点伤害。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">60秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">250</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-network-wired text-4xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">防御矩阵</h3>
+                    <p class="text-gray-400 mb-4">在大范围内部署防御网格，20秒内所有友军单位获得50%伤害减免，并且每秒恢复50点生命值。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-green-400">90秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-green-400">300</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">作战策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>作为终极防御单位，部署在关键战略位置</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>矩阵护盾对抗敌方远程火力，保护己方单位</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>轨道支援用于清除大批敌军或突破敌方防线</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>防御矩阵在防守战或关键战役中开启，扭转战局</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-green-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>需要维修单位支持，维持要塞运转</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-green-500 mt-1 mr-3"></i>
+                        <span>与机动单位配合，形成动静结合的防御体系</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-green-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础防御能力</li>
+                        <li>• 标准护甲</li>
+                        <li>• 4个基础炮塔</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-teal-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁矩阵护盾</li>
+                        <li>• 护甲+100</li>
+                        <li>• 炮塔伤害+25%</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="upgrade-stage bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-emerald-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁轨道支援</li>
+                        <li>• 防御力场+1000</li>
+                        <li>• 控制范围+200m</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-green-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="square-guardian.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shield-alt text-2xl text-green-500 mb-2"></i>
+                    <p class="font-bold">方碑守护者</p>
+                    <p class="text-sm text-gray-400">防御单位</p>
+                </a>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-tools text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">立方工匠</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-eye text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">几何哨兵</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg opacity-50">
+                    <i class="fas fa-shield-virus text-2xl text-gray-600 mb-2"></i>
+                    <p class="font-bold">方碑卫士</p>
+                    <p class="text-sm text-gray-500">未解锁</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const fortressModel = document.getElementById('fortress-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotationX = 0;
+        let currentRotationY = 0;
+
+        fortressModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            fortressModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotationY += deltaX * 0.5;
+            const fortressBase = fortressModel.querySelector('.fortress-base');
+            fortressBase.style.transform = `rotateY(${currentRotationY}deg) rotateX(${currentRotationX}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            fortressModel.style.cursor = 'grab';
+        });
+
+        // Core pulsing effect
+        const core = document.querySelector('.fortress-core');
+        setInterval(() => {
+            const scale = Math.random() * 0.2 + 0.9;
+            core.style.transform = `scale(${scale})`;
+        }, 300);
+    </script>
+</body>
+</html>

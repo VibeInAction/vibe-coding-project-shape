@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>螺旋飞行器 - 螺族后裔机械单位 | 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes flier-hover {
+            0%, 100% { transform: translateY(0) rotateZ(0deg); }
+            25% { transform: translateY(-15px) rotateZ(-5deg); }
+            50% { transform: translateY(0) rotateZ(0deg); }
+            75% { transform: translateY(-10px) rotateZ(5deg); }
+        }
+        
+        @keyframes wing-flap {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(30deg); }
+        }
+        
+        @keyframes energy-trail {
+            0% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(30px); }
+        }
+        
+        .spiral-flier {
+            width: 320px;
+            height: 340px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .flier-body {
+            position: absolute;
+            width: 120px;
+            height: 140px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            top: 100px;
+            left: 100px;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.5);
+            animation: flier-hover 4s ease-in-out infinite;
+        }
+        
+        .flier-wing-left {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background: linear-gradient(90deg, #7c3aed, #6d28d9);
+            clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+            top: 130px;
+            left: 40px;
+            transform-origin: right center;
+            animation: wing-flap 2s ease-in-out infinite;
+        }
+        
+        .flier-wing-right {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background: linear-gradient(90deg, #6d28d9, #7c3aed);
+            clip-path: polygon(100% 50%, 0% 0%, 0% 100%);
+            top: 130px;
+            right: 40px;
+            transform-origin: left center;
+            animation: wing-flap 2s ease-in-out infinite reverse;
+        }
+        
+        .flier-engine-left {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #a78bfa, #8b5cf6);
+            border-radius: 50%;
+            bottom: 80px;
+            left: 80px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+        
+        .flier-engine-right {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #a78bfa, #8b5cf6);
+            border-radius: 50%;
+            bottom: 80px;
+            right: 80px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+        
+        .cockpit {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #60a5fa, #3b82f6);
+            border-radius: 50%;
+            top: 130px;
+            left: 140px;
+            z-index: 10;
+        }
+        
+        .energy-trail {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #a78bfa, transparent);
+            opacity: 0;
+        }
+        
+        .trail-1 { bottom: 50px; left: 90px; animation: energy-trail 1s ease-out infinite; }
+        .trail-2 { bottom: 50px; right: 90px; animation: energy-trail 1s ease-out infinite 0.3s; }
+        .trail-3 { bottom: 40px; left: 110px; animation: energy-trail 1s ease-out infinite 0.6s; }
+        .trail-4 { bottom: 40px; right: 110px; animation: energy-trail 1s ease-out infinite 0.9s; }
+        
+        .stealth-field {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border: 1px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 50%;
+            top: 80px;
+            left: 70px;
+            animation: flier-hover 6s ease-in-out infinite reverse;
+        }
+        
+        .stat-bar {
+            transition: width 1.5s ease-out;
+        }
+        
+        .ability-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-purple-500 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-arrow-left mr-3"></i>返回机械设计
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300">螺族后裔</span>
+                    <span class="text-purple-500">|</span>
+                    <span class="text-gray-300">飞行机械</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+                螺旋飞行器
+            </h1>
+            <p class="text-xl text-gray-400 mb-2">Spiral Flier</p>
+            <div class="flex justify-center items-center space-x-6 text-sm">
+                <span class="bg-purple-900 px-3 py-1 rounded-full">T2 飞行单位</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">快速机动</span>
+                <span class="bg-gray-700 px-3 py-1 rounded-full">突袭作战</span>
+            </div>
+        </div>
+
+        <!-- 3D Model and Basic Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <!-- 3D Model Display -->
+            <div class="flex justify-center items-center">
+                <div class="spiral-flier" id="flier-model">
+                    <div class="stealth-field"></div>
+                    <div class="flier-body"></div>
+                    <div class="flier-wing-left"></div>
+                    <div class="flier-wing-right"></div>
+                    <div class="cockpit"></div>
+                    <div class="flier-engine-left"></div>
+                    <div class="flier-engine-right"></div>
+                    <div class="energy-trail trail-1"></div>
+                    <div class="energy-trail trail-2"></div>
+                    <div class="energy-trail trail-3"></div>
+                    <div class="energy-trail trail-4"></div>
+                </div>
+            </div>
+
+            <!-- Basic Statistics -->
+            <div class="space-y-6">
+                <h2 class="text-3xl font-bold text-purple-500 mb-6">基础属性</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">生命值</span>
+                            <span class="text-purple-400">800/800</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-purple-600 h-3 rounded-full" style="width: 0%" data-width="32%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">护甲</span>
+                            <span class="text-purple-400">25</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-gray-600 h-3 rounded-full" style="width: 0%" data-width="25%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">攻击力</span>
+                            <span class="text-purple-400">250</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-red-600 h-3 rounded-full" style="width: 0%" data-width="30%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">移动速度</span>
+                            <span class="text-purple-400">8.0</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-green-600 h-3 rounded-full" style="width: 0%" data-width="80%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-400">隐身等级</span>
+                            <span class="text-purple-400">中级</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="stat-bar bg-blue-600 h-3 rounded-full" style="width: 0%" data-width="60%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-helicopter text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造费用</p>
+                        <p class="text-xl font-bold">160资源</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <i class="fas fa-clock text-purple-500 mb-2"></i>
+                        <p class="text-sm text-gray-400">建造时间</p>
+                        <p class="text-xl font-bold">45秒</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abilities Section -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">核心能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-ninja text-4xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">相位隐身</h3>
+                    <p class="text-gray-400 mb-4">进入隐身状态，无法被常规侦察发现，持续15秒。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">25秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">50</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bolt text-4xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">电磁干扰</h3>
+                    <p class="text-gray-400 mb-4">释放电磁脉冲，瘫痪周围150m内的敌方机械3秒。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">40秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">70</span>
+                    </div>
+                </div>
+
+                <div class="ability-card bg-gray-800 p-6 rounded-lg transition-all duration-300">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-meteor text-4xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">俯冲轰炸</h3>
+                    <p class="text-gray-400 mb-4">高速俯冲攻击，造成500点伤害并击晕目标2秒。</p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">冷却时间</span>
+                        <span class="text-purple-400">30秒</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">能量消耗</span>
+                        <span class="text-purple-400">60</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tactical Guide -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-6">战术指南</h2>
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-purple-400">突袭策略</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>利用高机动性进行快速侦察和骚扰</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>使用相位隐身渗透敌方防线</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>对关键目标使用俯冲轰炸</span>
+                    </li>
+                </ul>
+
+                <h3 class="text-xl font-bold mb-4 mt-6 text-purple-400">单位配合</h3>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>与螺旋侦察机配合进行双重侦察</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-chevron-right text-purple-500 mt-1 mr-3"></i>
+                        <span>需要涡流突击者提供地面支援</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Upgrade Path -->
+        <div class="mb-12">
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">升级路径</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">基础型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 基础飞行能力</li>
+                        <li>• 标准攻击力</li>
+                        <li>• 无特殊技能</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">进阶型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁相位隐身</li>
+                        <li>• 移动速度+1.0</li>
+                        <li>• 隐身持续时间+5秒</li>
+                        <li>• 需要T2科技建筑</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border-2 border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">精英型</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>• 解锁电磁干扰</li>
+                        <li>• 解锁俯冲轰炸</li>
+                        <li>• 攻击力+100</li>
+                        <li>• 需要T3科技建筑</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Units -->
+        <div>
+            <h2 class="text-3xl font-bold text-purple-500 mb-8">相关单位</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="spiral-scout.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-eye text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋侦察机</p>
+                    <p class="text-sm text-gray-400">侦察单位</p>
+                </a>
+                <a href="vortex-assault.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-wind text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">涡流突击者</p>
+                    <p class="text-sm text-gray-400">突击单位</p>
+                </a>
+                <a href="cyclone-bomber.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-bomb text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">旋风轰炸机</p>
+                    <p class="text-sm text-gray-400">轰炸单位</p>
+                </a>
+                <a href="helix-destroyer.html" class="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-bolt text-2xl text-purple-500 mb-2"></i>
+                    <p class="font-bold">螺旋毁灭者</p>
+                    <p class="text-sm text-gray-400">重装单位</p>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Animate stat bars on page load
+        window.addEventListener('load', () => {
+            const statBars = document.querySelectorAll('.stat-bar');
+            statBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // 3D Model interaction
+        const flierModel = document.getElementById('flier-model');
+        let isRotating = false;
+        let startX = 0;
+        let currentRotation = 0;
+
+        flierModel.addEventListener('mousedown', (e) => {
+            isRotating = true;
+            startX = e.clientX;
+            flierModel.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isRotating) return;
+            e.preventDefault();
+            const deltaX = e.clientX - startX;
+            currentRotation += deltaX * 0.5;
+            flierModel.style.transform = `rotateY(${currentRotation}deg)`;
+            startX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isRotating = false;
+            flierModel.style.cursor = 'grab';
+        });
+    </script>
+</body>
+</html>
