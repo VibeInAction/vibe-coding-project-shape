@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP周边商城 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.8); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .rotate-animation {
+            animation: rotate 20s linear infinite;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .glow-animation {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .gradient-border {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #10b981, #f59e0b);
+            background-size: 300% 300%;
+            animation: gradient-shift 5s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .category-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .category-icon:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        /* Product Image CSS Shapes */
+        .product-shape {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Circle Shape - for Collectibles */
+        .shape-circle {
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            position: relative;
+        }
+        
+        .shape-circle::before {
+            content: '';
+            position: absolute;
+            inset: 20%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Triangle Shape - for Apparel */
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 260px solid #ef4444;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .shape-triangle::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: -100px;
+            width: 0;
+            height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 180px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Square Shape - for Lifestyle */
+        .shape-square {
+            background: linear-gradient(45deg, #10b981, #06b6d4);
+            position: relative;
+            transform: rotate(45deg);
+        }
+        
+        .shape-square::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Spiral Shape - for Education */
+        .shape-spiral {
+            background: conic-gradient(from 0deg, #8b5cf6, #a78bfa, #c084fc, #8b5cf6);
+            position: relative;
+        }
+        
+        .shape-spiral::before {
+            content: '';
+            position: absolute;
+            inset: 15%;
+            background: #1f2937;
+            border-radius: 50%;
+        }
+        
+        .shape-spiral::after {
+            content: '';
+            position: absolute;
+            inset: 30%;
+            background: conic-gradient(from 180deg, #8b5cf6, #a78bfa, #c084fc, #8b5cf6);
+            border-radius: 50%;
+        }
+        
+        /* Hero Statue Shape */
+        .hero-statue {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-statue::before {
+            content: '♦';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Mechanical Unit Shape */
+        .mechanical-unit {
+            background: linear-gradient(45deg, #6b7280, #9ca3af);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            position: relative;
+        }
+        
+        .mechanical-unit::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+        }
+        
+        /* Energy Core Shape */
+        .energy-core {
+            background: radial-gradient(circle, #60a5fa, #3b82f6, #1e40af);
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .energy-core::before {
+            content: '';
+            position: absolute;
+            inset: 20%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Comic Book Shape */
+        .comic-book {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comic-book::before {
+            content: 'BOOK';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 36px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Card Deck Shape */
+        .card-deck {
+            background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+            position: relative;
+        }
+        
+        .card-deck::before,
+        .card-deck::after {
+            content: '';
+            position: absolute;
+            width: 90%;
+            height: 90%;
+            background: inherit;
+            border-radius: 10px;
+        }
+        
+        .card-deck::before {
+            top: 5%;
+            left: 5%;
+            transform: rotate(-5deg);
+            opacity: 0.7;
+        }
+        
+        .card-deck::after {
+            top: 10%;
+            left: 10%;
+            transform: rotate(-10deg);
+            opacity: 0.5;
+        }
+        
+        /* Building Blocks Shape */
+        .building-blocks {
+            background: linear-gradient(135deg, #10b981, #059669);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+            position: relative;
+        }
+        
+        .building-blocks::before {
+            content: '';
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.2);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+        }
+        
+        .building-blocks::after {
+            content: '';
+            position: absolute;
+            bottom: 25%;
+            right: 25%;
+            width: 30%;
+            height: 30%;
+            background: rgba(255, 255, 255, 0.15);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+        }
+        
+        /* Limited Edition Shape */
+        .limited-edition {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b, #fbbf24);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .limited-edition::before {
+            content: '★';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .limited-edition::after {
+            content: 'LIMITED';
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shapes text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">几何境域</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-6 ml-10">
+                        <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                            <i class="fas fa-home text-blue-400"></i>
+                            <span>首页</span>
+                        </a>
+                        <a href="../concept-design/index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                            <i class="fas fa-lightbulb text-pink-400"></i>
+                            <span>概念设计</span>
+                        </a>
+                        <a href="index.html" class="nav-item px-3 py-2 rounded-md bg-gray-700/50 transition flex items-center space-x-2">
+                            <i class="fas fa-shopping-bag text-purple-400"></i>
+                            <span>IP周边</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 rounded-md hover:bg-gray-700 transition">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="p-2 rounded-md hover:bg-gray-700 transition relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                    <button class="md:hidden p-2 rounded-md hover:bg-gray-700" id="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-purple-900/30 via-gray-900 to-gray-900"></div>
+        
+        <!-- Animated Background -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 border-4 border-blue-500/30 rounded-full rotate-animation"></div>
+            <div class="absolute top-1/2 right-1/4 w-64 h-64 border-4 border-purple-500/30 transform rotate-45 float-animation"></div>
+            <div class="absolute bottom-1/4 left-1/2 w-80 h-80 border-4 border-green-500/30 rotate-animation" style="animation-duration: 25s;"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="bg-gradient-to-r from-blue-400 via-purple-500 to-green-400 bg-clip-text text-transparent">
+                    IP周边商城
+                </span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 text-gray-300">
+                将几何世界的艺术带入现实生活
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full font-semibold hover:scale-105 transform transition duration-300 glow-animation">
+                    <i class="fas fa-shopping-bag mr-2"></i>立即购买
+                </button>
+                <a href="#products" class="px-8 py-4 border border-white/30 rounded-full font-semibold hover:bg-white/10 transition duration-300">
+                    <i class="fas fa-eye mr-2"></i>浏览产品
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">产品分类</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <a href="#collectibles" class="category-card bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition group">
+                    <div class="category-icon w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <div class="product-shape shape-circle w-full h-full flex items-center justify-center">
+                            <i class="fas fa-gem text-4xl text-white"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">收藏品系列</h3>
+                    <p class="text-gray-400 text-sm">高端雕像、模型、徽章</p>
+                </a>
+                
+                <a href="#apparel" class="category-card bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition group">
+                    <div class="category-icon w-20 h-20 mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                        <div class="product-shape shape-triangle h-full"></div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">服饰系列</h3>
+                    <p class="text-gray-400 text-sm">T恤、配饰、潮流单品</p>
+                </a>
+                
+                <a href="#lifestyle" class="category-card bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition group">
+                    <div class="category-icon w-20 h-20 mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                        <div class="product-shape shape-square w-16 h-16"></div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">生活用品</h3>
+                    <p class="text-gray-400 text-sm">文具、家居、数码产品</p>
+                </a>
+                
+                <a href="#education" class="category-card bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition group">
+                    <div class="category-icon w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <div class="product-shape shape-spiral w-full h-full flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-4xl text-white" style="z-index: 10;"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">教育产品</h3>
+                    <p class="text-gray-400 text-sm">漫画、卡片、STEAM玩具</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section id="products" class="py-16 px-4 bg-gray-800/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">精选产品</h2>
+            
+            <!-- Collectibles -->
+            <div id="collectibles" class="mb-16">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-gem mr-3 text-blue-400"></i>收藏品系列
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape hero-statue h-full flex items-center justify-center">
+                                <span class="text-6xl">👑</span>
+                            </div>
+                            <span class="absolute top-4 right-4 bg-red-500 px-3 py-1 rounded-full text-sm font-semibold">限量</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">几何大师系列雕像</h4>
+                            <p class="text-gray-400 mb-4">四大种族英雄，LED发光效果</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥699</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape mechanical-unit h-full flex items-center justify-center">
+                                <span class="text-6xl">⚙️</span>
+                            </div>
+                            <span class="absolute top-4 right-4 bg-green-500 px-3 py-1 rounded-full text-sm font-semibold">热卖</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">机械单位模型系列</h4>
+                            <p class="text-gray-400 mb-4">1/12比例，可动关节设计</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥299</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape energy-core h-full flex items-center justify-center">
+                                <span class="text-6xl">💎</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">形核能量源</h4>
+                            <p class="text-gray-400 mb-4">透明亚克力，触摸感应发光</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥399</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Education Products -->
+            <div id="education" class="mb-16">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-graduation-cap mr-3 text-purple-400"></i>教育产品系列
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape comic-book h-full flex items-center justify-center">
+                                <span class="text-6xl">📚</span>
+                            </div>
+                            <span class="absolute top-4 right-4 bg-blue-500 px-3 py-1 rounded-full text-sm font-semibold">新书</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">几何境域启蒙漫画</h4>
+                            <p class="text-gray-400 mb-4">寓教于乐，培养几何思维</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥19.9</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape card-deck h-full flex items-center justify-center">
+                                <span class="text-6xl">🎴</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">几何对战卡牌</h4>
+                            <p class="text-gray-400 mb-4">策略对战，STEAM教育</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥199</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card bg-gray-800 rounded-xl overflow-hidden">
+                        <div class="relative h-64">
+                            <div class="product-shape building-blocks h-full flex items-center justify-center">
+                                <span class="text-6xl">🧩</span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold mb-2">几何拼搭积木</h4>
+                            <p class="text-gray-400 mb-4">创意搭建，空间思维培养</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-bold text-purple-400">￥299</span>
+                                <button class="px-4 py-2 bg-purple-500 rounded-lg hover:bg-purple-600 transition">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Limited Edition -->
+    <section class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-2xl p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">周年纪念限量版</h2>
+                        <p class="text-xl text-gray-300 mb-6">金色镀层特别设计，全球限定200套</p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                                <span>收藏证书编号</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                                <span>豪华礼盒包装</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                                <span>独家数字内容</span>
+                            </li>
+                        </ul>
+                        <div class="flex items-center gap-4">
+                            <span class="text-3xl font-bold text-yellow-400">￥1999</span>
+                            <button class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-semibold hover:scale-105 transform transition">
+                                立即抢购
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="gradient-border p-1 rounded-xl inline-block">
+                            <div class="product-shape limited-edition w-96 h-96 flex items-center justify-center">
+                                <span class="text-8xl">🏆</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collaboration Section -->
+    <section class="py-16 px-4 bg-gray-800/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">品牌联名</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition">
+                    <i class="fas fa-laptop text-4xl mb-4 text-blue-400"></i>
+                    <h3 class="font-bold mb-2">科技品牌</h3>
+                    <p class="text-sm text-gray-400">机械键盘、显示器</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition">
+                    <i class="fas fa-running text-4xl mb-4 text-green-400"></i>
+                    <h3 class="font-bold mb-2">运动品牌</h3>
+                    <p class="text-sm text-gray-400">运动鞋、背包</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition">
+                    <i class="fas fa-coffee text-4xl mb-4 text-yellow-400"></i>
+                    <h3 class="font-bold mb-2">咖啡品牌</h3>
+                    <p class="text-sm text-gray-400">主题咖啡厅</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl text-center hover:bg-gray-700 transition">
+                    <i class="fas fa-paint-brush text-4xl mb-4 text-purple-400"></i>
+                    <h3 class="font-bold mb-2">艺术品牌</h3>
+                    <p class="text-sm text-gray-400">联名画作</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-12 px-4 mt-20">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">关于我们</h3>
+                    <p class="text-gray-400">几何境域：形态之战IP周边商城，为您提供最优质的游戏衍生产品。</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">客户服务</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">配送说明</a></li>
+                        <li><a href="#" class="hover:text-white transition">退换货政策</a></li>
+                        <li><a href="#" class="hover:text-white transition">常见问题</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">关注我们</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-weibo text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-weixin text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-bilibili text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">订阅资讯</h3>
+                    <p class="text-gray-400 mb-4">获取最新产品信息和优惠活动</p>
+                    <div class="flex">
+                        <input type="email" placeholder="输入邮箱" class="bg-gray-700 px-4 py-2 rounded-l-lg flex-1">
+                        <button class="bg-purple-500 px-4 py-2 rounded-r-lg hover:bg-purple-600 transition">
+                            订阅
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Cart animation
+        let cartCount = 0;
+        const cartButtons = document.querySelectorAll('.fa-cart-plus').forEach(btn => {
+            btn.parentElement.addEventListener('click', function() {
+                cartCount++;
+                document.querySelector('.fa-shopping-cart').nextElementSibling.textContent = cartCount;
+                
+                // Add animation
+                const cartIcon = document.querySelector('.fa-shopping-cart');
+                cartIcon.classList.add('animate-bounce');
+                setTimeout(() => {
+                    cartIcon.classList.remove('animate-bounce');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
