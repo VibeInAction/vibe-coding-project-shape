@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>种族战争 - 游戏模式分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes storyFlow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            10% { transform: translateX(0); opacity: 1; }
+            90% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .story-timeline {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .story-text {
+            animation: storyFlow 10s infinite;
+            white-space: nowrap;
+        }
+        
+        .race-icon {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .race-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .chapter-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .chapter-card:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .choice-branch {
+            position: relative;
+        }
+        
+        .choice-branch::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: #4b5563;
+            transform: translateX(-50%);
+        }
+        
+        .hero-portrait {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-portrait::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+        }
+        
+        .circular-progress {
+            transform: rotate(-90deg);
+        }
+        
+        .circular-progress-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="../index.html" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        几何境域
+                    </a>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="../index.html" class="hover:text-blue-400 transition">主页</a>
+                        <a href="../game-design.html" class="hover:text-blue-400 transition">游戏设计</a>
+                        <a href="../mechanical-design.html" class="hover:text-blue-400 transition">机械设计</a>
+                        <a href="#" class="text-blue-400">游戏模式</a>
+                        <a href="../ip-merchandise/index.html" class="hover:text-blue-400 transition">IP周边</a>
+                    </div>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-gray-700 px-4 py-2">
+            <a href="../index.html" class="block py-2 hover:text-blue-400">主页</a>
+            <a href="../game-design.html" class="block py-2 hover:text-blue-400">游戏设计</a>
+            <a href="../mechanical-design.html" class="block py-2 hover:text-blue-400">机械设计</a>
+            <a href="#" class="block py-2 text-blue-400">游戏模式</a>
+            <a href="../ip-merchandise/index.html" class="block py-2 hover:text-blue-400">IP周边</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-900/20 to-gray-900"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
+                    种族战争
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8">单人战役模式，体验独特故事线，深入了解游戏世界观</p>
+                <div class="flex justify-center space-x-8 mb-12">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-indigo-400">20+小时</div>
+                        <div class="text-gray-400">游戏时长</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-indigo-400">4个</div>
+                        <div class="text-gray-400">可玩种族</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-indigo-400">20章</div>
+                        <div class="text-gray-400">剧情章节</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Return Button -->
+    <div class="container mx-auto px-4 -mt-8 mb-8">
+        <div class="text-center">
+            <a href="../game-modes.html" class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-full transition transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回游戏模式
+            </a>
+        </div>
+    </div>
+
+    <!-- Race Selection Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">选择你的种族</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Circle Race -->
+                <div class="bg-gradient-to-br from-blue-900/50 to-purple-900/50 rounded-lg p-6 race-icon">
+                    <div class="text-center mb-4">
+                        <div class="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
+                            <i class="fas fa-circle text-6xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-blue-400">圆环族</h3>
+                        <p class="text-sm text-gray-400 mt-2">和谐与平衡的守护者</p>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主角</span>
+                            <span class="text-white">艾欧</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主题</span>
+                            <span class="text-white">和谐与平衡</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">难度</span>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="far fa-star text-gray-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Triangle Race -->
+                <div class="bg-gradient-to-br from-red-900/50 to-orange-900/50 rounded-lg p-6 race-icon">
+                    <div class="text-center mb-4">
+                        <div class="w-32 h-32 mx-auto mb-4" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background: linear-gradient(135deg, #ef4444, #f59e0b);"></div>
+                        <h3 class="text-xl font-bold text-red-400">三角议会</h3>
+                        <p class="text-sm text-gray-400 mt-2">力量与责任的平衡</p>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主角</span>
+                            <span class="text-white">塔里克</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主题</span>
+                            <span class="text-white">力量与责任</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">难度</span>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Square Race -->
+                <div class="bg-gradient-to-br from-cyan-900/50 to-teal-900/50 rounded-lg p-6 race-icon">
+                    <div class="text-center mb-4">
+                        <div class="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-cyan-400 to-teal-600"></div>
+                        <h3 class="text-xl font-bold text-cyan-400">方碑盟约</h3>
+                        <p class="text-sm text-gray-400 mt-2">秩序与自由的抉择</p>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主角</span>
+                            <span class="text-white">诺亚</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主题</span>
+                            <span class="text-white">秩序与自由</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">难度</span>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="far fa-star text-gray-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Spiral Race -->
+                <div class="bg-gradient-to-br from-green-900/50 to-emerald-900/50 rounded-lg p-6 race-icon">
+                    <div class="text-center mb-4">
+                        <div class="w-32 h-32 mx-auto mb-4" style="background: linear-gradient(135deg, #10b981, #059669); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);"></div>
+                        <h3 class="text-xl font-bold text-green-400">螺旋之子</h3>
+                        <p class="text-sm text-gray-400 mt-2">变化与永恒的辩证</p>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主角</span>
+                            <span class="text-white">莉拉</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">主题</span>
+                            <span class="text-white">变化与永恒</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">难度</span>
+                            <div class="flex">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="far fa-star text-gray-600"></i>
+                                <i class="far fa-star text-gray-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Overview Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">故事架构</h2>
+            
+            <div class="bg-gray-800 rounded-lg p-8">
+                <div class="story-timeline h-12 flex items-center overflow-hidden">
+                    <p class="story-text text-xl text-gray-300">
+                        发现异变 → 揭露阴谋 → 团结抵抗 → 组织力量 → 最终决战
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-purple-400">核心剧情</h3>
+                        <p class="text-gray-400 mb-4">
+                            几何境域正面临前所未有的混沌威胁。作为四大种族的一员，你将踏上一段史诗般的旅程，揭开隐藏在平静表面下的黑暗秘密。
+                        </p>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><i class="fas fa-chevron-right mr-2"></i>每个种族都有独特的故事线和结局</li>
+                            <li><i class="fas fa-chevron-right mr-2"></i>你的选择将影响整个世界</li>
+                            <li><i class="fas fa-chevron-right mr-2"></i>解锁隐藏的真相和秘密</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-cyan-400">游戏机制</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-comments text-cyan-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-bold">对话选择</h4>
+                                    <p class="text-sm text-gray-400">影响剧情走向和角色关系</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-chess text-cyan-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-bold">战术选择</h4>
+                                    <p class="text-sm text-gray-400">不同完成任务方式</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-flask text-cyan-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-bold">科技选择</h4>
+                                    <p class="text-sm text-gray-400">解锁独特科技路线</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chapter Progression Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">章节进度</h2>
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Circle Race Chapters -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-400 flex items-center">
+                        <i class="fas fa-circle mr-3"></i>圆环族剧情线
+                    </h3>
+                    <div class="grid md:grid-cols-5 gap-4">
+                        <div class="chapter-card bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-lg p-4 text-center cursor-pointer">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-xl font-bold">1</span>
+                            </div>
+                            <h4 class="font-bold mb-1">觉醒</h4>
+                            <p class="text-xs text-gray-400">发现异变，获得能力</p>
+                        </div>
+                        <div class="chapter-card bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-lg p-4 text-center cursor-pointer">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-xl font-bold">2</span>
+                            </div>
+                            <h4 class="font-bold mb-1">真相</h4>
+                            <p class="text-xs text-gray-400">揭露混沌阴谋</p>
+                        </div>
+                        <div class="chapter-card bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-lg p-4 text-center cursor-pointer">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-xl font-bold">3</span>
+                            </div>
+                            <h4 class="font-bold mb-1">团结</h4>
+                            <p class="text-xs text-gray-400">说服其他种族</p>
+                        </div>
+                        <div class="chapter-card bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-lg p-4 text-center cursor-pointer">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-xl font-bold">4</span>
+                            </div>
+                            <h4 class="font-bold mb-1">反击</h4>
+                            <p class="text-xs text-gray-400">组织抵抗力量</p>
+                        </div>
+                        <div class="chapter-card bg-gradient-to-b from-blue-900/50 to-gray-800 rounded-lg p-4 text-center cursor-pointer">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
+                                <span class="text-xl font-bold">5</span>
+                            </div>
+                            <h4 class="font-bold mb-1">净化</h4>
+                            <p class="text-xs text-gray-400">最终决战</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Difficulty Selection -->
+                <div class="bg-gray-800 rounded-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center">难度选择</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="text-center p-6 rounded-lg bg-green-900/30 hover:bg-green-900/50 transition cursor-pointer">
+                            <i class="fas fa-book text-4xl text-green-400 mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">故事难度</h4>
+                            <p class="text-gray-400 text-sm">注重剧情体验，战斗压力较小</p>
+                            <div class="mt-4 flex justify-center space-x-1">
+                                <i class="fas fa-sword text-gray-600"></i>
+                                <i class="fas fa-sword text-gray-600"></i>
+                                <i class="fas fa-sword text-gray-600"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-6 rounded-lg bg-yellow-900/30 hover:bg-yellow-900/50 transition cursor-pointer">
+                            <i class="fas fa-balance-scale text-4xl text-yellow-400 mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">普通难度</h4>
+                            <p class="text-gray-400 text-sm">平衡的挑战，适合大多数玩家</p>
+                            <div class="mt-4 flex justify-center space-x-1">
+                                <i class="fas fa-sword text-yellow-400"></i>
+                                <i class="fas fa-sword text-yellow-400"></i>
+                                <i class="fas fa-sword text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-6 rounded-lg bg-red-900/30 hover:bg-red-900/50 transition cursor-pointer">
+                            <i class="fas fa-fire text-4xl text-red-400 mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">挑战难度</h4>
+                            <p class="text-gray-400 text-sm">硬核RTS体验，需要精通策略</p>
+                            <div class="mt-4 flex justify-center space-x-1">
+                                <i class="fas fa-sword text-red-400"></i>
+                                <i class="fas fa-sword text-red-400"></i>
+                                <i class="fas fa-sword text-red-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Character Progression Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">角色成长</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Hero Level -->
+                <div class="bg-gray-800 rounded-lg p-6 text-center">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">英雄等级</h3>
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <svg class="circular-progress w-32 h-32">
+                            <circle cx="64" cy="64" r="56" stroke="#374151" stroke-width="8" fill="none"></circle>
+                            <circle cx="64" cy="64" r="56" stroke="#8b5cf6" stroke-width="8" fill="none" 
+                                    stroke-dasharray="351.86" stroke-dashoffset="87.97" class="circular-progress-circle"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div>
+                                <div class="text-3xl font-bold">15</div>
+                                <div class="text-sm text-gray-400">等级</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">通过战斗和任务获得经验值</p>
+                </div>
+                
+                <!-- Skill Tree -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 text-cyan-400">技能树</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">战斗专精</span>
+                            <div class="flex space-x-1">
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">领导能力</span>
+                            <div class="flex space-x-1">
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">种族专长</span>
+                            <div class="flex space-x-1">
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="fas fa-circle text-green-400 text-xs"></i>
+                                <i class="far fa-circle text-gray-600 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equipment -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">装备收集</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-shield-alt text-2xl text-gray-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-sword text-2xl text-blue-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-ring text-2xl text-purple-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-gem text-2xl text-green-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-crown text-2xl text-yellow-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                            <i class="fas fa-plus text-2xl text-gray-500"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-3">收集传说装备，解锁特殊能力</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Unlockables Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">解锁内容</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-palette text-3xl text-purple-400 mr-4"></i>
+                        <h3 class="text-xl font-bold">概念艺术</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">解锁精美的游戏概念艺术，深入了解世界观构建</p>
+                    <div class="text-sm text-gray-500">
+                        <p>• 角色设计图</p>
+                        <p>• 场景概念图</p>
+                        <p>• 早期草图</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-book-open text-3xl text-cyan-400 mr-4"></i>
+                        <h3 class="text-xl font-bold">背景故事</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">揭示游戏世界的历史传说和角色背景</p>
+                    <div class="text-sm text-gray-500">
+                        <p>• 种族起源</p>
+                        <p>• 重要事件</p>
+                        <p>• 角色传记</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-dragon text-3xl text-green-400 mr-4"></i>
+                        <h3 class="text-xl font-bold">特殊单位</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">解锁只能在战役模式使用的传奇单位</p>
+                    <div class="text-sm text-gray-500">
+                        <p>• 传说英雄</p>
+                        <p>• 神话单位</p>
+                        <p>• 限定建筑</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">返回主页</a>
+                    <a href="../game-modes.html" class="text-gray-400 hover:text-white transition">游戏模式</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Race selection animation
+        document.querySelectorAll('.race-icon').forEach(race => {
+            race.addEventListener('click', function() {
+                // Remove active state from all races
+                document.querySelectorAll('.race-icon').forEach(r => {
+                    r.classList.remove('ring-2', 'ring-white');
+                });
+                // Add active state to clicked race
+                this.classList.add('ring-2', 'ring-white');
+            });
+        });
+        
+        // Chapter hover effect
+        document.querySelectorAll('.chapter-card').forEach(chapter => {
+            chapter.addEventListener('mouseenter', function() {
+                this.querySelector('h4').classList.add('text-white');
+            });
+            chapter.addEventListener('mouseleave', function() {
+                this.querySelector('h4').classList.remove('text-white');
+            });
+        });
+    </script>
+</body>
+</html>

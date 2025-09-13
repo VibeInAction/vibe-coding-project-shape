@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>征服模式 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-energy {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .pulse-energy {
+            animation: pulse-energy 2s ease-in-out infinite;
+        }
+        
+        .rotate-slow {
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .map-preview {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-preview::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+        }
+        
+        .phase-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .resource-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .resource-icon:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        .victory-condition {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shapes text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">几何境域</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-6 ml-10">
+                        <a href="../index.html" class="nav-item px-3 py-2 rounded-md hover:bg-gray-700/50 transition flex items-center space-x-2">
+                            <i class="fas fa-home text-blue-400"></i>
+                            <span>首页</span>
+                        </a>
+                        <a href="index.html" class="nav-item px-3 py-2 rounded-md bg-gray-700/50 transition flex items-center space-x-2">
+                            <i class="fas fa-gamepad text-purple-400"></i>
+                            <span>游戏模式</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-gray-900 to-gray-900"></div>
+        
+        <!-- Animated Background -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 border-4 border-blue-500/30 rounded-full rotate-slow"></div>
+            <div class="absolute top-1/2 right-1/4 w-64 h-64 border-4 border-purple-500/30 transform rotate-45 float-animation"></div>
+            <div class="absolute bottom-1/4 left-1/2 w-80 h-80 border-4 border-green-500/30 rotate-slow" style="animation-duration: 25s;"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                <span class="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    征服模式
+                </span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">
+                传统的RTS体验，通过资源管理、基地建设和战术指挥来击败对手
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span class="px-4 py-2 bg-blue-500/20 rounded-full text-blue-400">
+                    <i class="fas fa-users mr-2"></i>1v1 至 4v4
+                </span>
+                <span class="px-4 py-2 bg-purple-500/20 rounded-full text-purple-400">
+                    <i class="fas fa-clock mr-2"></i>15-60分钟
+                </span>
+                <span class="px-4 py-2 bg-green-500/20 rounded-full text-green-400">
+                    <i class="fas fa-trophy mr-2"></i>经典RTS
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Return Button -->
+    <div class="container mx-auto px-4 -mt-8 mb-8">
+        <div class="text-center">
+            <a href="../game-modes.html" class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-full transition transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回游戏模式
+            </a>
+        </div>
+    </div>
+
+    <!-- Victory Conditions -->
+    <section class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">胜利条件</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="victory-condition p-6 rounded-xl">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-flag text-5xl text-red-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">主要胜利</h3>
+                    <p class="text-gray-400">摧毁所有敌方主基地</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        最直接的胜利方式，考验全面实力
+                    </div>
+                </div>
+                
+                <div class="victory-condition p-6 rounded-xl">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bolt text-5xl text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">次要胜利</h3>
+                    <p class="text-gray-400">控制源初形核超过5分钟</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        风险与机遇并存的战略选择
+                    </div>
+                </div>
+                
+                <div class="victory-condition p-6 rounded-xl">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-gem text-5xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">特殊胜利</h3>
+                    <p class="text-gray-400">收集1000点几何精华</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        需要精确的资源管理和控制
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resource System -->
+    <section class="py-16 px-4 bg-gray-800/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">资源系统</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="resource-icon w-32 h-32 mx-auto mb-6 bg-blue-500/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-battery-three-quarters text-5xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-blue-400">形魄能量</h3>
+                    <p class="text-gray-400 mb-4">基础资源</p>
+                    <ul class="text-left space-y-2 text-gray-300">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>通过几何采集器获取</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>采集速度：5点/秒</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>用于基础单位和建筑</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center">
+                    <div class="resource-icon w-32 h-32 mx-auto mb-6 bg-purple-500/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-star text-5xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-purple-400">纯净形魄</h3>
+                    <p class="text-gray-400 mb-4">高级资源</p>
+                    <ul class="text-left space-y-2 text-gray-300">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>形态能量节点获取</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>稀有度：形魄的1/3</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>用于高级单位和科技</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center">
+                    <div class="resource-icon w-32 h-32 mx-auto mb-6 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-crown text-5xl text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-yellow-400">几何精华</h3>
+                    <p class="text-gray-400 mb-4">终极资源</p>
+                    <ul class="text-left space-y-2 text-gray-300">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>击败精英单位获得</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>探索遗迹发现</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>用于英雄和特殊技能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Game Phases -->
+    <section class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">游戏阶段</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="phase-card bg-gray-800 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold">1</span>
+                        </div>
+                        <h3 class="text-xl font-bold">前期阶段</h3>
+                    </div>
+                    <p class="text-gray-400 mb-2">0-10分钟</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>建立基地</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>收集初始资源</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>快速扩张</li>
+                        <li><i class="fas fa-angle-right text-red-400 mr-2"></i>谨防早期突袭</li>
+                    </ul>
+                </div>
+                
+                <div class="phase-card bg-gray-800 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold">2</span>
+                        </div>
+                        <h3 class="text-xl font-bold">中期阶段</h3>
+                    </div>
+                    <p class="text-gray-400 mb-2">10-25分钟</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>科技升级</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>组建军队</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>地图控制</li>
+                        <li><i class="fas fa-angle-right text-yellow-400 mr-2"></i>首次大型冲突</li>
+                    </ul>
+                </div>
+                
+                <div class="phase-card bg-gray-800 p-6 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl font-bold">3</span>
+                        </div>
+                        <h3 class="text-xl font-bold">后期阶段</h3>
+                    </div>
+                    <p class="text-gray-400 mb-2">25分钟以后</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>最终决战</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>终极单位</li>
+                        <li><i class="fas fa-angle-right text-green-400 mr-2"></i>英雄技能</li>
+                        <li><i class="fas fa-angle-right text-purple-400 mr-2"></i>经济优势决定胜负</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Sizes -->
+    <section class="py-16 px-4 bg-gray-800/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">地图规格</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">小型地图</h3>
+                    <div class="map-preview h-32 rounded-lg mb-4"></div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>尺寸：512×512</li>
+                        <li>玩家：1v1, 2v2</li>
+                        <li>时长：15-30分钟</li>
+                        <li>特点：快节奏战斗</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">中型地图</h3>
+                    <div class="map-preview h-32 rounded-lg mb-4"></div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>尺寸：1024×1024</li>
+                        <li>玩家：2v2, 3v3</li>
+                        <li>时长：30-45分钟</li>
+                        <li>特点：平衡发展</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">大型地图</h3>
+                    <div class="map-preview h-32 rounded-lg mb-4"></div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>尺寸：2048×2048</li>
+                        <li>玩家：3v3, 4v4</li>
+                        <li>时长：45-60分钟</li>
+                        <li>特点：战略深度</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">巨型地图</h3>
+                    <div class="map-preview h-32 rounded-lg mb-4"></div>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li>尺寸：4096×4096</li>
+                        <li>玩家：4v4, FFA</li>
+                        <li>时长：60+分钟</li>
+                        <li>特点：史诗战役</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Features -->
+    <section class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">特色系统</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-atom mr-3 text-purple-400"></i>
+                        源初形核争夺
+                    </h3>
+                    <p class="text-gray-300 mb-4">地图中心的强力能量源，控制后获得全局加成</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-bolt text-yellow-400 mr-2"></i>每30秒能量波动</li>
+                        <li><i class="fas fa-shield-alt text-blue-400 mr-2"></i>护盾恢复效果</li>
+                        <li><i class="fas fa-fire text-red-400 mr-2"></i>攻击力提升</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-900/50 to-cyan-900/50 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-cloud-rain mr-3 text-green-400"></i>
+                        动态事件
+                    </h3>
+                    <p class="text-gray-300 mb-4">随机事件改变战场局势，增加游戏变数</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-wind text-cyan-400 mr-2"></i>几何风暴</li>
+                        <li><i class="fas fa-moon text-purple-400 mr-2"></i>形态日蚀</li>
+                        <li><i class="fas fa-sync text-green-400 mr-2"></i>共鸣爆发</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategy Tips -->
+    <section class="py-16 px-4 bg-gray-800/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12">战略要点</h2>
+            <div class="bg-gray-800 rounded-xl p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-green-400">
+                            <i class="fas fa-lightbulb mr-2"></i>经济发展
+                        </h3>
+                        <ul class="space-y-3 text-gray-300">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                <span>早期扩张资源点，建立经济优势</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                <span>平衡采集和军事投入</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mt-1 mr-3"></i>
+                                <span>保护资源线，切断敌方经济</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-blue-400">
+                            <i class="fas fa-chess mr-2"></i>战术运用
+                        </h3>
+                        <ul class="space-y-3 text-gray-300">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                <span>利用地形优势，控制关键位置</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                <span>侦察敌方动向，及时调整策略</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
+                                <span>把握时机，发动决定性攻击</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Back to Game Modes -->
+    <section class="py-16 px-4">
+        <div class="text-center">
+            <a href="index.html" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full font-semibold hover:scale-105 transform transition duration-300">
+                <i class="fas fa-arrow-left mr-3"></i>
+                返回游戏模式
+            </a>
+        </div>
+    </section>
+
+    <script>
+        // Add interactive animations
+        document.querySelectorAll('.phase-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

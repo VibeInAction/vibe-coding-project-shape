@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生存挑战 - 游戏模式分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes wave {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+        
+        .enemy-wave {
+            animation: wave 3s linear infinite;
+        }
+        
+        .tower-defense {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .tower-defense:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .boss-warning {
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .resource-counter {
+            transition: all 0.5s ease;
+        }
+        
+        .hero-ability {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .hero-ability:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .hero-ability.cooldown {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .achievement-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .achievement-badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            transform: rotate(45deg);
+            transition: transform 0.6s;
+        }
+        
+        .achievement-badge:hover::before {
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+        
+        .wave-progress {
+            transition: width 1s ease;
+        }
+        
+        .defense-tower {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .defense-tower:nth-child(2n) {
+            animation-delay: 0.5s;
+        }
+        
+        .defense-tower:nth-child(3n) {
+            animation-delay: 1s;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <a href="../index.html" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        几何境域
+                    </a>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="../index.html" class="hover:text-blue-400 transition">主页</a>
+                        <a href="../game-design.html" class="hover:text-blue-400 transition">游戏设计</a>
+                        <a href="../mechanical-design.html" class="hover:text-blue-400 transition">机械设计</a>
+                        <a href="#" class="text-blue-400">游戏模式</a>
+                        <a href="../ip-merchandise/index.html" class="hover:text-blue-400 transition">IP周边</a>
+                    </div>
+                </div>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-gray-700 px-4 py-2">
+            <a href="../index.html" class="block py-2 hover:text-blue-400">主页</a>
+            <a href="../game-design.html" class="block py-2 hover:text-blue-400">游戏设计</a>
+            <a href="../mechanical-design.html" class="block py-2 hover:text-blue-400">机械设计</a>
+            <a href="#" class="block py-2 text-blue-400">游戏模式</a>
+            <a href="../ip-merchandise/index.html" class="block py-2 hover:text-blue-400">IP周边</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-red-900/20 to-gray-900"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-red-400 to-orange-600 bg-clip-text text-transparent">
+                    生存挑战
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8">塔防生存模式，抵御混沌入侵，挑战极限</p>
+                <div class="flex justify-center space-x-8 mb-12">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-red-400">30秒</div>
+                        <div class="text-gray-400">Wave间隔</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-red-400">∞</div>
+                        <div class="text-gray-400">无Wave限制</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-red-400">单人</div>
+                        <div class="text-gray-400">游戏模式</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Return Button -->
+    <div class="container mx-auto px-4 -mt-8 mb-8">
+        <div class="text-center">
+            <a href="../game-modes.html" class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-full transition transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>
+                返回游戏模式
+            </a>
+        </div>
+    </div>
+
+    <!-- Wave System Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Wave系统</h2>
+            
+            <!-- Wave Progress Bar -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">当前Wave</h3>
+                    <div class="text-2xl font-bold text-red-400">Wave <span id="currentWave">15</span></div>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                    <div class="wave-progress bg-gradient-to-r from-red-500 to-orange-500 h-4 rounded-full" style="width: 65%"></div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-400">
+                    <span>下一Wave: 25秒</span>
+                    <span>难度系数: 2.5x</span>
+                </div>
+            </div>
+            
+            <!-- Wave Types -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">常规波</h3>
+                            <p class="text-sm text-gray-400">标准混合单位</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 地面单位：60%</p>
+                        <p>• 空中单位：30%</p>
+                        <p>• 精英单位：10%</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-bolt text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">快速波</h3>
+                            <p class="text-sm text-gray-400">高速单位群</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 移动速度+100%</p>
+                        <p>• 生命值-50%</p>
+                        <p>• 数量+200%</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-yellow-600 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-shield-alt text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">重装甲波</h3>
+                            <p class="text-sm text-gray-400">高生命值单位</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 生命值+300%</p>
+                        <p>• 移动速度-50%</p>
+                        <p>• 护盾+2层</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-plane text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">飞行波</h3>
+                            <p class="text-sm text-gray-400">空中单位为主</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 全部飞行单位</p>
+                        <p>• 免疫地面塔攻击</p>
+                        <p>• 需要防空塔</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-random text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">混合波</h3>
+                            <p class="text-sm text-gray-400">多种类型组合</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 包含所有类型</p>
+                        <p>• 随机组合出现</p>
+                        <p>• 最难应对</p>
+                    </div>
+                </div>
+                
+                <!-- Boss Wave -->
+                <div class="bg-gray-800 rounded-lg p-6 border-2 border-red-500 boss-warning">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4 animate-pulse">
+                            <i class="fas fa-skull text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-red-400">Boss波</h3>
+                            <p class="text-sm text-gray-400">每10波出现</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <p>• 巨大生命值</p>
+                        <p>• 特殊技能</p>
+                        <p>• 阶段转换</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Defense System Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">防御系统</h2>
+            
+            <!-- Tower Types -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Basic Tower -->
+                <div class="text-center">
+                    <div class="defense-tower w-32 h-32 mx-auto mb-4 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition cursor-pointer">
+                        <i class="fas fa-crosshairs text-4xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">基础塔</h3>
+                    <p class="text-gray-400 mb-2">通用防御</p>
+                    <div class="text-sm space-y-1">
+                        <p class="text-green-400">成本：100形魄</p>
+                        <p class="text-gray-500">攻击：中等</p>
+                        <p class="text-gray-500">射程：标准</p>
+                    </div>
+                </div>
+                
+                <!-- Circle Race Tower -->
+                <div class="text-center">
+                    <div class="defense-tower w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center hover:scale-110 transition cursor-pointer">
+                        <i class="fas fa-wave-square text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-blue-400">共鸣塔</h3>
+                    <p class="text-gray-400 mb-2">圆环族特色</p>
+                    <div class="text-sm space-y-1">
+                        <p class="text-green-400">范围效果</p>
+                        <p class="text-gray-500">减速敌人</p>
+                        <p class="text-gray-500">连锁攻击</p>
+                    </div>
+                </div>
+                
+                <!-- Triangle Race Tower -->
+                <div class="text-center">
+                    <div class="defense-tower w-32 h-32 mx-auto mb-4" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background: linear-gradient(135deg, #ef4444, #f59e0b); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;">
+                        <i class="fas fa-meteor text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-red-400">棱镜塔</h3>
+                    <p class="text-gray-400 mb-2">三角议会</p>
+                    <div class="text-sm space-y-1">
+                        <p class="text-green-400">穿透攻击</p>
+                        <p class="text-gray-500">高伤害</p>
+                        <p class="text-gray-500">直线射击</p>
+                    </div>
+                </div>
+                
+                <!-- Square Race Tower -->
+                <div class="text-center">
+                    <div class="defense-tower w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-cyan-400 to-teal-600 hover:scale-110 transition cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-th text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-cyan-400">矩阵塔</h3>
+                    <p class="text-gray-400 mb-2">方碑盟约</p>
+                    <div class="text-sm space-y-1">
+                        <p class="text-green-400">多重目标</p>
+                        <p class="text-gray-500">智能索敌</p>
+                        <p class="text-gray-500">自动升级</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tower Upgrade System -->
+            <div class="bg-gray-800 rounded-lg p-8">
+                <h3 class="text-2xl font-bold mb-6">塔升级系统</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-5xl font-bold text-yellow-400 mb-2">3</div>
+                        <p class="text-gray-400">升级等级</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl font-bold text-purple-400 mb-2">3</div>
+                        <p class="text-gray-400">分支选择</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl font-bold text-green-400 mb-2">∞</div>
+                        <p class="text-gray-400">特殊效果</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 grid md:grid-cols-3 gap-6">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-bold mb-2 text-red-400">攻击路线</h4>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• 伤害+50%/级</li>
+                            <li>• 攻速+20%/级</li>
+                            <li>• 终极：暴击效果</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-bold mb-2 text-blue-400">控制路线</h4>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• 减速+10%/级</li>
+                            <li>• 范围+15%/级</li>
+                            <li>• 终极：冰冻效果</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-bold mb-2 text-green-400">辅助路线</h4>
+                        <ul class="text-sm text-gray-400 space-y-1">
+                            <li>• 资源+10%/级</li>
+                            <li>• 经验+20%/级</li>
+                            <li>• 终极：范围buff</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Boss System Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Boss系统</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-600 flex items-center justify-center">
+                            <i class="fas fa-venus text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-purple-400">混沌吞噬者</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><i class="fas fa-plus-circle mr-2"></i>吞噬友军单位</li>
+                        <li><i class="fas fa-heart mr-2"></i>吞噬后恢复生命</li>
+                        <li><i class="fas fa-expand-arrows-alt mr-2"></i>体型逐渐增大</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-900/50 to-teal-900/50 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-600 flex items-center justify-center">
+                            <i class="fas fa-mountain text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-green-400">形态扭曲者</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><i class="fas fa-map mr-2"></i>改变地形</li>
+                        <li><i class="fas fa-route mr-2"></i>创造新路径</li>
+                        <li><i class="fas fa-magic mr-2"></i>禁用防御塔</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-blue-600 flex items-center justify-center">
+                            <i class="fas fa-bolt text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-blue-400">能量吸血鬼</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><i class="fas fa-battery-empty mr-2"></i>吸收塔能量</li>
+                        <li><i class="fas fa-times-circle mr-2"></i>暂时禁用塔</li>
+                        <li><i class="fas fa-shield-alt mr-2"></i>获得护盾</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-yellow-600 flex items-center justify-center">
+                            <i class="fas fa-clone text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-yellow-400">分形领主</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><i class="fas fa-copy mr-2"></i>分裂复制</li>
+                        <li><i class="fas fa-percentage mr-2"></i>复制体50%生命</li>
+                        <li><i class="fas fa-infinity mr-2"></i>无限分裂</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero System Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">英雄系统</h2>
+            
+            <div class="bg-gray-800 rounded-lg p-8 mb-8">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Hero Abilities -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-purple-400">英雄技能</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="hero-ability bg-gray-700 rounded-lg p-4 text-center">
+                                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-blue-600 flex items-center justify-center">
+                                    <i class="fas fa-fire text-2xl"></i>
+                                </div>
+                                <h4 class="text-sm font-bold mb-1">烈焰风暴</h4>
+                                <p class="text-xs text-gray-400">范围伤害</p>
+                                <p class="text-xs text-yellow-400 mt-1">CD: 30s</p>
+                            </div>
+                            
+                            <div class="hero-ability bg-gray-700 rounded-lg p-4 text-center">
+                                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-green-600 flex items-center justify-center">
+                                    <i class="fas fa-shield-alt text-2xl"></i>
+                                </div>
+                                <h4 class="text-sm font-bold mb-1">神圣护盾</h4>
+                                <p class="text-xs text-gray-400">保护塔</p>
+                                <p class="text-xs text-yellow-400 mt-1">CD: 45s</p>
+                            </div>
+                            
+                            <div class="hero-ability bg-gray-700 rounded-lg p-4 text-center">
+                                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-red-600 flex items-center justify-center">
+                                    <i class="fas fa-meteor text-2xl"></i>
+                                </div>
+                                <h4 class="text-sm font-bold mb-1">终极审判</h4>
+                                <p class="text-xs text-gray-400">全屏秒杀</p>
+                                <p class="text-xs text-yellow-400 mt-1">CD: 180s</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Stats -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-cyan-400">英雄属性</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-400">等级</span>
+                                    <span class="text-sm font-bold">25</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-400">经验值</span>
+                                    <span class="text-sm font-bold">125,000 / 150,000</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: 83%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-400">+250%</div>
+                                    <div class="text-xs text-gray-400">技能伤害</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-400">-40%</div>
+                                    <div class="text-xs text-gray-400">冷却时间</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievement System Section -->
+    <section class="py-16 bg-gray-800/50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">成就系统</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="achievement-badge bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-yellow-600 flex items-center justify-center">
+                        <i class="fas fa-trophy text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">生存大师</h3>
+                    <p class="text-sm text-gray-400 mb-2">达到Wave 100</p>
+                    <div class="text-xs text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                        <i class="far fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="achievement-badge bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-600 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">完美防御</h3>
+                    <p class="text-sm text-gray-400 mb-2">无损伤通过Wave 50</p>
+                    <div class="text-xs text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="achievement-badge bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-600 flex items-center justify-center">
+                        <i class="fas fa-bolt text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">速度之王</h3>
+                    <p class="text-sm text-gray-400 mb-2">30秒内清除Wave</p>
+                    <div class="text-xs text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                        <i class="far fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="achievement-badge bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition cursor-pointer">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-blue-600 flex items-center justify-center">
+                        <i class="fas fa-coins text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">经济大师</h3>
+                    <p class="text-sm text-gray-400 mb-2">积累10万资源</p>
+                    <div class="text-xs text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Challenge Modes -->
+            <div class="mt-12 bg-gray-800 rounded-lg p-8">
+                <h3 class="text-2xl font-bold mb-6 text-center">挑战模式</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center p-6 rounded-lg bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 transition cursor-pointer">
+                        <i class="fas fa-infinity text-5xl text-purple-400 mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">无限模式</h4>
+                        <p class="text-gray-400 text-sm">无Wave限制，挑战极限</p>
+                        <div class="mt-4 text-2xl font-bold text-red-400">难度：★★★★★</div>
+                    </div>
+                    
+                    <div class="text-center p-6 rounded-lg bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 transition cursor-pointer">
+                        <i class="fas fa-skull text-5xl text-red-400 mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">极限模式</h4>
+                        <p class="text-gray-400 text-sm">资源极少，依靠策略</p>
+                        <div class="mt-4 text-2xl font-bold text-red-400">难度：★★★★☆</div>
+                    </div>
+                    
+                    <div class="text-center p-6 rounded-lg bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 transition cursor-pointer">
+                        <i class="fas fa-ghost text-5xl text-gray-400 mb-4"></i>
+                        <h4 class="text-xl font-bold mb-2">噩梦模式</h4>
+                        <p class="text-gray-400 text-sm">所有敌人+100%强度</p>
+                        <div class="mt-4 text-2xl font-bold text-red-400">难度：★★★★★</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">排行榜</h2>
+            
+            <div class="bg-gray-800 rounded-lg p-8">
+                <div class="grid md:grid-cols-3 gap-8 mb-8">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4 text-yellow-400">全球排名</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-3">🥇</span>
+                                    <span>ProGamer123</span>
+                                </div>
+                                <span class="font-bold text-yellow-400">Wave 999</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-3">🥈</span>
+                                    <span>TowerMaster</span>
+                                </div>
+                                <span class="font-bold text-gray-300">Wave 888</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-2xl mr-3">🥉</span>
+                                    <span>DefenseKing</span>
+                                </div>
+                                <span class="font-bold text-orange-400">Wave 777</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4 text-green-400">好友排行</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span>你</span>
+                                <span class="font-bold text-green-400">Wave 150</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Alice</span>
+                                <span class="font-bold">Wave 200</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Bob</span>
+                                <span class="font-bold">Wave 120</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4 text-blue-400">个人记录</h3>
+                        <div class="space-y-3">
+                            <div class="text-3xl font-bold text-blue-400">150</div>
+                            <div class="text-gray-400">最高Wave</div>
+                            <div class="text-sm text-gray-500">
+                                <p>最佳时间：2小时35分</p>
+                                <p>使用种族：圆环族</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">&copy; 2024 几何境域：形态之战. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">返回主页</a>
+                    <a href="../game-modes.html" class="text-gray-400 hover:text-white transition">游戏模式</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Tower click animation
+        document.querySelectorAll('.defense-tower').forEach(tower => {
+            tower.addEventListener('click', function() {
+                this.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 300);
+            });
+        });
+        
+        // Hero ability click
+        document.querySelectorAll('.hero-ability').forEach(ability => {
+            ability.addEventListener('click', function() {
+                if (!this.classList.contains('cooldown')) {
+                    this.classList.add('cooldown');
+                    // Simulate cooldown
+                    const cdTime = parseInt(this.querySelector('.text-yellow-400').textContent.match(/\d+/)[0]);
+                    setTimeout(() => {
+                        this.classList.remove('cooldown');
+                    }, cdTime * 100);
+                }
+            });
+        });
+        
+        // Wave progress animation
+        let currentWave = 15;
+        setInterval(() => {
+            currentWave++;
+            document.getElementById('currentWave').textContent = currentWave;
+        }, 30000);
+    </script>
+</body>
+</html>
