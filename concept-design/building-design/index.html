@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑设计展示 - 几何境域：形态之战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-red: #ef4444;
+            --primary-green: #10b981;
+            --primary-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 几何背景动画 */
+        .geometric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .shape-circle {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape-triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid var(--primary-red);
+            top: 65%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape-square {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--primary-green);
+            top: 35%;
+            left: 80%;
+            animation-delay: 10s;
+        }
+
+        .shape-spiral {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--primary-purple);
+            border-radius: 50%;
+            border-style: dashed;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% { 
+                transform: translateY(-40px) rotate(90deg) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg) scale(0.9);
+            }
+            75% { 
+                transform: translateY(-60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .building-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .building-card:hover::before {
+            opacity: 1;
+        }
+
+        .building-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 种族边框 */
+        .race-border-circle {
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .race-border-triangle {
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .race-border-square {
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .race-border-spiral {
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        /* 过滤按钮 */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.05);
+        }
+
+        /* 滚动显示动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 建筑类型图标 */
+        .building-type-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .building-type-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- 几何背景 -->
+    <div class="geometric-bg">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-spiral"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-black/60 backdrop-blur-lg z-50 border-b border-white/10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="../index.html" class="text-3xl hover:text-purple-400 transition">◈</a>
+                    <h1 class="font-orbitron text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        建筑设计展示
+                    </h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#all-buildings" class="text-gray-300 hover:text-white transition">全部建筑</a>
+                    <a href="#circle-clan" class="text-gray-300 hover:text-white transition">圆环族</a>
+                    <a href="#triangle-council" class="text-gray-300 hover:text-white transition">三角议会</a>
+                    <a href="#square-covenant" class="text-gray-300 hover:text-white transition">方碑盟约</a>
+                    <a href="#spiral-progeny" class="text-gray-300 hover:text-white transition">螺旋之子</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- Hero Section -->
+        <section class="text-center mb-12 reveal">
+            <h2 class="font-orbitron text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                建筑系统展示
+            </h2>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                探索四大几何种族的独特建筑设计，每个建筑都体现了种族的核心理念和战斗风格
+            </p>
+            
+            <!-- 过滤器 -->
+            <div class="flex justify-center space-x-4 flex-wrap">
+                <button onclick="filterBuildings('all')" class="filter-btn active px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition">
+                    全部建筑
+                </button>
+                <button onclick="filterBuildings('circle')" class="filter-btn px-6 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition">
+                    圆环族
+                </button>
+                <button onclick="filterBuildings('triangle')" class="filter-btn px-6 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition">
+                    三角议会
+                </button>
+                <button onclick="filterBuildings('square')" class="filter-btn px-6 py-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition">
+                    方碑盟约
+                </button>
+                <button onclick="filterBuildings('spiral')" class="filter-btn px-6 py-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition">
+                    螺旋之子
+                </button>
+            </div>
+        </section>
+
+        <!-- 建筑统计 -->
+        <section class="mb-12 reveal">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-blue-400">5</div>
+                    <div class="text-sm text-gray-400">圆环族建筑</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-red-400">5</div>
+                    <div class="text-sm text-gray-400">三角议会建筑</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-green-400">5</div>
+                    <div class="text-sm text-gray-400">方碑盟约建筑</div>
+                </div>
+                <div class="text-center p-4 bg-white/5 rounded-lg">
+                    <div class="text-3xl font-bold text-purple-400">5</div>
+                    <div class="text-sm text-gray-400">螺旋之子建筑</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 全部建筑列表 -->
+        <section id="all-buildings" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center">全部建筑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族建筑 -->
+                <div class="building-card rounded-lg p-6 race-border-circle building-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-blue-500/20 text-blue-400">○</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">主基地</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">中央圆环</h4>
+                    <p class="text-sm text-gray-400 mb-3">圆环族的主基地建筑，可旋转优化能量流动</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Central Ring</span>
+                        <a href="central-ring.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-circle building-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-blue-500/20 text-blue-400">◯</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">防御</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">共鸣塔</h4>
+                    <p class="text-sm text-gray-400 mb-3">增强周围建筑的能量共鸣效果</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Resonance Tower</span>
+                        <a href="resonance-tower.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-circle building-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-blue-500/20 text-blue-400">◎</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">防御</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">能量护盾塔</h4>
+                    <p class="text-sm text-gray-400 mb-3">生成能量护盾保护友军单位</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Energy Shield Tower</span>
+                        <a href="energy-shield-tower.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-circle building-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-blue-500/20 text-blue-400">⭕</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">资源</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">形能收集器</h4>
+                    <p class="text-sm text-gray-400 mb-3">收集和转化形魄能量的核心设施</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Morph Collector</span>
+                        <a href="morph-collector.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-circle building-item" data-race="circle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-blue-500/20 text-blue-400">◌</div>
+                        <span class="text-sm text-blue-400 bg-blue-500/20 px-2 py-1 rounded">战略</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">和谐圣殿</h4>
+                    <p class="text-sm text-gray-400 mb-3">提供单位强化和治疗的高级建筑</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Harmony Sanctuary</span>
+                        <a href="harmony-sanctuary.html" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 三角议会建筑 -->
+                <div class="building-card rounded-lg p-6 race-border-triangle building-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-red-500/20 text-red-400">△</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">主基地</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">三角堡垒</h4>
+                    <p class="text-sm text-gray-400 mb-3">三角议会的主基地，可快速建造防御工事</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Triangle Fortress</span>
+                        <a href="triangle-fortress.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-triangle building-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-red-500/20 text-red-400">▲</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">攻击</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">棱镜炮台</h4>
+                    <p class="text-sm text-gray-400 mb-3">强大的三角结构攻击建筑</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Prism Cannon</span>
+                        <a href="prism-cannon.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-triangle building-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-red-500/20 text-red-400">△̅</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">防御</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">能量聚焦塔</h4>
+                    <p class="text-sm text-gray-400 mb-3">聚焦能量形成强力光束</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Energy Focus Tower</span>
+                        <a href="energy-focus-tower.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-triangle building-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-red-500/20 text-red-400">▽</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">资源</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">形能精炼厂</h4>
+                    <p class="text-sm text-gray-400 mb-3">高效精炼形魄资源的设施</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Morph Refinery</span>
+                        <a href="morph-refinery.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-triangle building-item" data-race="triangle">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-red-500/20 text-red-400">△△</div>
+                        <span class="text-sm text-red-400 bg-red-500/20 px-2 py-1 rounded">战略</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">力量祭坛</h4>
+                    <p class="text-sm text-gray-400 mb-3">提供牺牲强化和能量增幅</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Power Altar</span>
+                        <a href="power-altar.html" target="_blank" class="text-red-400 hover:text-red-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 方碑盟约建筑 -->
+                <div class="building-card rounded-lg p-6 race-border-square building-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-green-500/20 text-green-400">□</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">主基地</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">方尖碑</h4>
+                    <p class="text-sm text-gray-400 mb-3">方碑盟约的主基地，模块化设计</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Obelisk</span>
+                        <a href="obelisk.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-square building-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-green-500/20 text-green-400">■</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">防御</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">矩阵阵列</h4>
+                    <p class="text-sm text-gray-400 mb-3">模块化防御阵列系统</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Matrix Array</span>
+                        <a href="matrix-array.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-square building-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-green-500/20 text-green-400">▢</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">科技</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">量子计算中心</h4>
+                    <p class="text-sm text-gray-400 mb-3">提供高级科技研发能力</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Quantum Computing Center</span>
+                        <a href="quantum-computing-center.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-square building-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-green-500/20 text-green-400">▣</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">生产</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">模块工厂</h4>
+                    <p class="text-sm text-gray-400 mb-3">标准化模块生产设施</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Module Factory</span>
+                        <a href="module-factory.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-square building-item" data-race="square">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-green-500/20 text-green-400">▥</div>
+                        <span class="text-sm text-green-400 bg-green-500/20 px-2 py-1 rounded">战略</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">空间折叠器</h4>
+                    <p class="text-sm text-gray-400 mb-3">操控空间进行单位传送</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Space Folder</span>
+                        <a href="space-folder.html" target="_blank" class="text-green-400 hover:text-green-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <!-- 螺旋之子建筑 -->
+                <div class="building-card rounded-lg p-6 race-border-spiral building-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-purple-500/20 text-purple-400">◎</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">主基地</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生命核心</h4>
+                    <p class="text-sm text-gray-400 mb-3">螺旋之子的有机生命核心，可生长进化</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Life Core</span>
+                        <a href="life-core.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-spiral building-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-purple-500/20 text-purple-400">◯</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">生产</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">螺旋花园</h4>
+                    <p class="text-sm text-gray-400 mb-3">培育和孵化生物单位</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spiral Garden</span>
+                        <a href="spiral-garden.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-spiral building-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-purple-500/20 text-purple-400">◉</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">进化</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">进化腔室</h4>
+                    <p class="text-sm text-gray-400 mb-3">单位进化和改造设施</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Evolution Chamber</span>
+                        <a href="evolution-chamber.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-spiral building-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-purple-500/20 text-purple-400">⚗</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">攻击</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">孢子炮台</h4>
+                    <p class="text-sm text-gray-400 mb-3">发射生物孢子的防御武器</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Spore Cannon</span>
+                        <a href="spore-cannon.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+
+                <div class="building-card rounded-lg p-6 race-border-spiral building-item" data-race="spiral">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="building-type-icon bg-purple-500/20 text-purple-400">🌳</div>
+                        <span class="text-sm text-purple-400 bg-purple-500/20 px-2 py-1 rounded">战略</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">生命之树</h4>
+                    <p class="text-sm text-gray-400 mb-3">终极战略建筑，控制生命和进化</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Tree of Life</span>
+                        <a href="tree-of-life.html" target="_blank" class="text-purple-400 hover:text-purple-300 text-sm">查看详情 →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 按种族分类 -->
+        <section id="circle-clan" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-blue-400">圆环族建筑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 圆环族建筑卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="triangle-council" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-red-400">三角议会建筑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 三角议会建筑卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="square-covenant" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-green-400">方碑盟约建筑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 方碑盟约建筑卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+        <section id="spiral-progeny" class="mb-16 reveal">
+            <h3 class="font-orbitron text-3xl font-bold mb-8 text-center text-purple-400">螺旋之子建筑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 螺旋之子建筑卡片将在这里动态生成 -->
+            </div>
+        </section>
+
+      </main>
+
+    <!-- 页脚 -->
+    <footer class="border-t border-white/10 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>© 2024 几何境域：形态之战. All rights reserved.</p>
+            <p class="text-sm mt-2">建筑设计展示 | 20个独特建筑，4个几何种族</p>
+        </div>
+    </footer>
+
+    <script>
+        // 过滤建筑
+        function filterBuildings(race) {
+            const buildings = document.querySelectorAll('.building-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // 更新按钮状态
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(getRaceName(race)) || (race === 'all' && btn.textContent.includes('全部'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 显示/隐藏建筑
+            buildings.forEach(building => {
+                if (race === 'all' || building.dataset.race === race) {
+                    building.style.display = 'block';
+                } else {
+                    building.style.display = 'none';
+                }
+            });
+        }
+        
+        function getRaceName(race) {
+            const names = {
+                'circle': '圆环族',
+                'triangle': '三角议会',
+                'square': '方碑盟约',
+                'spiral': '螺旋之子'
+            };
+            return names[race] || '';
+        }
+        
+        // 滚动显示动画
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', revealOnScroll);
+        
+        // 初始化
+        revealOnScroll();
+        
+        // 动态填充种族分类建筑
+        function populateRaceSections() {
+            const raceSections = {
+                'circle-clan': 'circle',
+                'triangle-council': 'triangle',
+                'square-covenant': 'square',
+                'spiral-progeny': 'spiral'
+            };
+            
+            Object.entries(raceSections).forEach(([sectionId, race]) => {
+                const section = document.querySelector(`#${sectionId} .grid`);
+                if (section) {
+                    const buildings = document.querySelectorAll(`#all-buildings .building-item[data-race="${race}"]`);
+                    buildings.forEach(building => {
+                        // 使用 insertAdjacentHTML 创建深拷贝
+                        section.insertAdjacentHTML('beforeend', building.outerHTML);
+                    });
+                }
+            });
+        }
+        
+        populateRaceSections();
+    </script>
+</body>
+</html>

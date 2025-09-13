@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiral Garden - 螺旋花园 | Spiral Progeny</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --spiral-color: #8b5cf6;
+            --spiral-dark: #6d28d9;
+            --spiral-light: #a78bfa;
+            --spiral-glow: rgba(139, 92, 246, 0.3);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0a1e 0%, #1a0f2e 100%);
+            min-height: 100vh;
+        }
+        
+        .spiral-glow {
+            box-shadow: 0 0 20px var(--spiral-glow), 
+                        0 0 40px var(--spiral-glow),
+                        inset 0 0 20px var(--spiral-glow);
+        }
+        
+        .spiral-rotate {
+            animation: spiralRotate 20s linear infinite;
+        }
+        
+        @keyframes spiralRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .plant-grow {
+            animation: plantGrow 4s ease-in-out infinite;
+        }
+        
+        @keyframes plantGrow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .bio-luminescence {
+            animation: bioLuminescence 3s ease-in-out infinite;
+        }
+        
+        @keyframes bioLuminescence {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .pollen-flow {
+            animation: pollenFlow 8s linear infinite;
+        }
+        
+        @keyframes pollenFlow {
+            0% { transform: translateY(100%) translateX(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100%) translateX(20px); opacity: 0; }
+        }
+        
+        .garden-sector {
+            background: rgba(139, 92, 246, 0.1);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .garden-sector:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--spiral-light);
+            transform: translateY(-2px);
+        }
+        
+        .growth-indicator {
+            background: linear-gradient(90deg, var(--spiral-dark) 0%, var(--spiral-light) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .growth-indicator::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        #canvas-container {
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold">Spiral Garden</h1>
+                    <span class="px-3 py-1 bg-purple-900/50 text-purple-400 rounded-full text-sm">Spiral Progeny</span>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="#overview" class="hover:text-purple-400 transition">概览</a>
+                    <a href="#sectors" class="hover:text-purple-400 transition">园区分区</a>
+                    <a href="#flora" class="hover:text-purple-400 transition">植物群落</a>
+                    <a href="#cultivation" class="hover:text-purple-400 transition">培育系统</a>
+                    <a href="#upgrades" class="hover:text-purple-400 transition">升级路径</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-12">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 3D Visualization -->
+                <div class="bg-gray-800/30 rounded-lg p-6 spiral-glow">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                        螺旋花园 3D 展示
+                    </h2>
+                    <div id="canvas-container" class="relative h-96 rounded-lg overflow-hidden">
+                        <canvas id="garden-canvas"></canvas>
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <button onclick="toggleRotation()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                            <button onclick="resetView()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Garden Info -->
+                <div class="space-y-6">
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">花园信息</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">等级</span>
+                                <span class="text-purple-400 font-bold">Level 4</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">植物种类</span>
+                                <span class="font-bold">342 种</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">覆盖面积</span>
+                                <span class="font-bold">5.2 km²</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">生物多样性</span>
+                                <span class="font-bold text-purple-400">98.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Status -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">生态状态</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">生长活力</span>
+                                    <span class="text-sm text-purple-400">92%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-full growth-indicator" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">养分循环</span>
+                                    <span class="text-sm text-green-400">88%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 88%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">共生网络</span>
+                                    <span class="text-sm text-purple-400">95%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-full transition-all duration-300" style="width: 95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Systems -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">活跃系统</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                光合作用
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                生物发光
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                共生关系
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                适应性进化
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sectors Section -->
+        <section id="sectors" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">园区分区</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Sector Cards -->
+                <div class="garden-sector rounded-lg p-4 cursor-pointer" onclick="selectSector('central')">
+                    <div class="text-center mb-3">
+                        <div class="w-16 h-16 mx-auto bg-purple-900/30 rounded-full flex items-center justify-center mb-2 spiral-rotate">
+                            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold">中央核心区</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">螺旋基因植物群</p>
+                    <div class="mt-3 text-xs">
+                        <span class="text-purple-400">物种: 86</span> · 
+                        <span class="text-green-400">健康度: 优</span>
+                    </div>
+                </div>
+
+                <div class="garden-sector rounded-lg p-4 cursor-pointer" onclick="selectSector('bio')">
+                    <div class="text-center mb-3">
+                        <div class="w-16 h-16 mx-auto bg-purple-900/30 rounded-full flex items-center justify-center mb-2">
+                            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold">生物发光区</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">自发光植物群落</p>
+                    <div class="mt-3 text-xs">
+                        <span class="text-purple-400">物种: 64</span> · 
+                        <span class="text-green-400">健康度: 优</span>
+                    </div>
+                </div>
+
+                <div class="garden-sector rounded-lg p-4 cursor-pointer" onclick="selectSector('adaptive')">
+                    <div class="text-center mb-3">
+                        <div class="w-16 h-16 mx-auto bg-purple-900/30 rounded-full flex items-center justify-center mb-2">
+                            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold">适应进化区</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">快速适应环境变化</p>
+                    <div class="mt-3 text-xs">
+                        <span class="text-purple-400">物种: 92</span> · 
+                        <span class="text-yellow-400">健康度: 良</span>
+                    </div>
+                </div>
+
+                <div class="garden-sector rounded-lg p-4 cursor-pointer" onclick="selectSector('symbiotic')">
+                    <div class="text-center mb-3">
+                        <div class="w-16 h-16 mx-auto bg-purple-900/30 rounded-full flex items-center justify-center mb-2">
+                            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold">共生系统区</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 text-center">多物种互惠共生</p>
+                    <div class="mt-3 text-xs">
+                        <span class="text-purple-400">物种: 100</span> · 
+                        <span class="text-green-400">健康度: 优</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flora Section -->
+        <section id="flora" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">植物群落</h2>
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Flora Categories -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">特色植物</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-purple-900/20 rounded">
+                            <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">螺旋藤蔓</h4>
+                                <p class="text-xs text-gray-400">DNA结构生长模式</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-purple-900/20 rounded">
+                            <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">量子百合</h4>
+                                <p class="text-xs text-gray-400">量子态发光花卉</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-purple-900/20 rounded">
+                            <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">记忆树</h4>
+                                <p class="text-xs text-gray-400">存储生物信息</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growth Patterns -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">生长模式</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">分形生长</span>
+                                <span class="text-sm text-purple-400">活跃</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">螺旋排列</span>
+                                <span class="text-sm text-purple-400">活跃</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">自适应形态</span>
+                                <span class="text-sm text-yellow-400">调整中</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-yellow-500 h-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seasonal Changes -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">季节性变化</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-purple-900/20 rounded">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold">春季 - 萌发期</span>
+                                <span class="text-xs text-green-400">+45%生长</span>
+                            </div>
+                            <p class="text-xs text-gray-400">新芽快速生长，基因激活</p>
+                        </div>
+                        <div class="p-3 bg-purple-900/20 rounded">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold">夏季 - 繁盛期</span>
+                                <span class="text-xs text-purple-400">+60%开花</span>
+                            </div>
+                            <p class="text-xs text-gray-400">全面开花，生物发光最强</p>
+                        </div>
+                        <div class="p-3 bg-purple-900/20 rounded">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold">秋季 - 收获期</span>
+                                <span class="text-xs text-yellow-400">种子成熟</span>
+                            </div>
+                            <p class="text-xs text-gray-400">基因种子收集与储存</p>
+                        </div>
+                        <div class="p-3 bg-purple-900/20 rounded">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold">冬季 - 休眠期</span>
+                                <span class="text-xs text-blue-400">能量储备</span>
+                            </div>
+                            <p class="text-xs text-gray-400">休眠状态，内部进化</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cultivation Section -->
+        <section id="cultivation" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">培育系统</h2>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Nutrient Management -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">养分管理</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">氮循环</span>
+                                <span class="text-sm text-green-400">平衡</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">磷循环</span>
+                                <span class="text-sm text-green-400">充足</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">钾循环</span>
+                                <span class="text-sm text-yellow-400">需补充</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-yellow-500 h-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">微量元素</span>
+                                <span class="text-sm text-green-400">优化</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Environmental Control -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">环境控制</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-400">温度</span>
+                                <span class="text-lg font-bold">24°C</span>
+                            </div>
+                            <div class="text-xs text-gray-500">最适: 22-26°C</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-400">湿度</span>
+                                <span class="text-lg font-bold text-green-400">68%</span>
+                            </div>
+                            <div class="text-xs text-gray-500">最适: 65-75%</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-400">光照</span>
+                                <span class="text-lg font-bold">12h</span>
+                            </div>
+                            <div class="text-xs text-gray-500">光谱: 全波段</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-400">CO2</span>
+                                <span class="text-lg font-bold">450ppm</span>
+                            </div>
+                            <div class="text-xs text-gray-500">水平: 优化</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrades Section -->
+        <section id="upgrades" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">升级路径</h2>
+            <div class="space-y-4">
+                <!-- Upgrade Option 1 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('expansion')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">花园扩展</h3>
+                                <p class="text-sm text-gray-400">面积扩大至10km²，支持1000种植物</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">2500</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 2 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('intelligence')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">智能生态系统</h3>
+                                <p class="text-sm text-gray-400">AI管理，自动优化生长条件</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">3000</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 3 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('bioluminescence')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">生物发光网络</h3>
+                                <p class="text-sm text-gray-400">全园区生物发光照明系统</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">2000</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 backdrop-blur-sm border-t border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-400">Spiral Progeny Spiral Garden © 2024</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js Scene Setup
+        let scene, camera, renderer;
+        let garden;
+        let isRotating = true;
+        let spiralPlants = [];
+        let floatingSpores = [];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const canvas = document.getElementById('garden-canvas');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f0a1e, 10, 50);
+            
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(25, 20, 25);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x8b5cf6, 1);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0xa78bfa, 0.8);
+            pointLight1.position.set(0, 5, 0);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0xc084fc, 0.6);
+            pointLight2.position.set(10, 0, 10);
+            scene.add(pointLight2);
+            
+            createGarden();
+            animate();
+        }
+
+        function createGarden() {
+            garden = new THREE.Group();
+            
+            // Central platform
+            const platformGeometry = new THREE.CylinderGeometry(15, 15, 1, 32);
+            const platformMaterial = new THREE.MeshPhongMaterial({
+                color: 0x6d28d9,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.1,
+                metalness: 0.3,
+                roughness: 0.7
+            });
+            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+            platform.position.y = -0.5;
+            platform.receiveShadow = true;
+            garden.add(platform);
+            
+            // Create spiral arrangement of plants
+            const plantCount = 24;
+            const rings = 3;
+            
+            for (let ring = 0; ring < rings; ring++) {
+                const ringRadius = 4 + ring * 3;
+                const plantsInRing = Math.floor(plantCount / rings);
+                
+                for (let i = 0; i < plantsInRing; i++) {
+                    const angle = (i / plantsInRing) * Math.PI * 2;
+                    const x = Math.cos(angle) * ringRadius;
+                    const z = Math.sin(angle) * ringRadius;
+                    
+                    const plantGroup = new THREE.Group();
+                    
+                    // Plant stem
+                    const stemHeight = 2 + Math.random() * 3;
+                    const stemGeometry = new THREE.CylinderGeometry(0.2, 0.3, stemHeight, 8);
+                    const stemMaterial = new THREE.MeshPhongMaterial({
+                        color: 0xa78bfa,
+                        emissive: 0x8b5cf6,
+                        emissiveIntensity: 0.2
+                    });
+                    const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+                    stem.position.y = stemHeight / 2;
+                    stem.castShadow = true;
+                    plantGroup.add(stem);
+                    
+                    // Plant head/flower
+                    const headGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                    const headMaterial = new THREE.MeshPhongMaterial({
+                        color: 0xc084fc,
+                        emissive: 0xa78bfa,
+                        emissiveIntensity: 0.4,
+                        metalness: 0.2,
+                        roughness: 0.3
+                    });
+                    const head = new THREE.Mesh(headGeometry, headMaterial);
+                    head.position.y = stemHeight + 0.8;
+                    plantGroup.add(head);
+                    
+                    // Bioluminescent petals
+                    for (let j = 0; j < 6; j++) {
+                        const petalAngle = (j / 6) * Math.PI * 2;
+                        const petalGeometry = new THREE.SphereGeometry(0.4, 8, 8);
+                        const petalMaterial = new THREE.MeshBasicMaterial({
+                            color: 0xe9d5ff,
+                            transparent: true,
+                            opacity: 0.8
+                        });
+                        const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+                        petal.position.set(
+                            Math.cos(petalAngle) * 1.2,
+                            stemHeight + 0.8,
+                            Math.sin(petalAngle) * 1.2
+                        );
+                        plantGroup.add(petal);
+                    }
+                    
+                    plantGroup.position.set(x, 0, z);
+                    plantGroup.userData = {
+                        originalY: 0,
+                        swaySpeed: 0.5 + Math.random() * 0.5,
+                        swayAmount: 0.1 + Math.random() * 0.1
+                    };
+                    
+                    spiralPlants.push(plantGroup);
+                    garden.add(plantGroup);
+                }
+            }
+            
+            // Floating spores/pollen
+            for (let i = 0; i < 50; i++) {
+                const sporeGeometry = new THREE.SphereGeometry(0.1, 4, 4);
+                const sporeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xe9d5ff,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const spore = new THREE.Mesh(sporeGeometry, sporeMaterial);
+                
+                spore.position.set(
+                    (Math.random() - 0.5) * 30,
+                    Math.random() * 10,
+                    (Math.random() - 0.5) * 30
+                );
+                
+                spore.userData = {
+                    speed: 0.5 + Math.random() * 0.5,
+                    drift: (Math.random() - 0.5) * 0.1
+                };
+                
+                floatingSpores.push(spore);
+                garden.add(spore);
+            }
+            
+            scene.add(garden);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isRotating) {
+                garden.rotation.y += 0.001;
+            }
+            
+            // Animate plants
+            spiralPlants.forEach((plant, index) => {
+                const time = Date.now() * 0.001;
+                const userData = plant.userData;
+                
+                // Swaying motion
+                plant.rotation.z = Math.sin(time * userData.swaySpeed + index) * userData.swayAmount;
+                plant.position.y = userData.originalY + Math.sin(time * 2 + index) * 0.1;
+                
+                // Bioluminescence pulsing
+                if (plant.children[1]) {
+                    plant.children[1].material.emissiveIntensity = 0.4 + Math.sin(time * 3 + index) * 0.2;
+                }
+            });
+            
+            // Animate floating spores
+            floatingSpores.forEach((spore, index) => {
+                const time = Date.now() * 0.001;
+                const userData = spore.userData;
+                
+                spore.position.y += userData.speed * 0.01;
+                spore.position.x += Math.sin(time + index) * userData.drift;
+                
+                // Reset position when too high
+                if (spore.position.y > 15) {
+                    spore.position.y = 0;
+                }
+                
+                // Fade in/out
+                spore.material.opacity = 0.3 + Math.sin(time * 2 + index) * 0.3;
+            });
+            
+            renderer.render(scene, camera);
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function resetView() {
+            camera.position.set(25, 20, 25);
+            camera.lookAt(0, 0, 0);
+            garden.rotation.y = 0;
+        }
+
+        function selectSector(sector) {
+            console.log('Selected sector:', sector);
+        }
+
+        function selectUpgrade(type) {
+            console.log('Selected upgrade:', type);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>形魄收集器 - 圆环族建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 圆环族颜色主题 */
+            --circle-color: #3b82f6;
+            --circle-light: #60a5fa;
+            --circle-dark: #1e40af;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--circle-color) 0%, var(--circle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--circle-color);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--circle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--circle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 收集动画 */
+        .collector-ring {
+            position: absolute;
+            border: 2px solid var(--circle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: collect-pulse 2s ease-out infinite;
+        }
+
+        @keyframes collect-pulse {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        /* 资源粒子 */
+        .resource-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--circle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: resource-flow 3s infinite;
+        }
+
+        @keyframes resource-flow {
+            0% {
+                opacity: 0;
+                transform: translate(var(--sx), var(--sy)) scale(0);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* 效率指示器 */
+        .efficiency-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--circle-color);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .efficiency-indicator:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* 共鸣加成显示 */
+        .resonance-bonus {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resonance-bonus::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+            animation: resonance-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes resonance-pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* 建筑选择网格 */
+        .building-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 300px;
+        }
+
+        .building-slot {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .building-slot:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--circle-color);
+        }
+
+        .building-slot.occupied {
+            background: rgba(59, 130, 246, 0.2);
+            border-style: solid;
+            border-color: var(--circle-color);
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--circle-color) 0%, var(--circle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">形魄收集器</h1>
+            <p class="text-gray-400">Morph Collector - 资源收集与转化核心</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="resetView()">重置视角</button>
+                    </div>
+                </div>
+
+                <!-- 收集范围和效率 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">收集范围控制</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-2">收集范围: <span id="range-value">150</span>m</label>
+                            <input type="range" id="collect-range" min="50" max="300" value="150" 
+                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                   oninput="updateRange(this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">收集速度: <span id="speed-value">100</span>%</label>
+                            <input type="range" id="collect-speed" min="50" max="200" value="100" 
+                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                   oninput="updateSpeed(this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">圆环族</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">资源建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">120秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">2</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            形魄收集器是圆环族的核心资源建筑，能够从环境中收集形魄能量并将其转化为可用资源。
+                            通过与其他建筑的共鸣连接，可以大幅提升收集效率。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">1500/1500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">500/500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>收集效率</span>
+                                <span id="efficiency-text">100%</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="efficiency-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 收集效率计算器 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">效率计算器</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span>基础产量</span>
+                            <span class="font-semibold">50 形魄/分钟</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>范围加成</span>
+                            <span id="range-bonus" class="font-semibold">+0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>共鸣加成</span>
+                            <span id="resonance-bonus-text" class="font-semibold">+0%</span>
+                        </div>
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="flex justify-between items-center text-lg">
+                                <span class="font-bold">总产量</span>
+                                <span id="total-output" class="font-bold text-blue-400">50 形魄/分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础收集器</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准的形魄收集装置</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">200 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 共鸣连接区 -->
+        <div class="mt-8 grid lg:grid-cols-2 gap-8">
+            <!-- 建筑连接选择 -->
+            <div class="building-card p-6">
+                <h3 class="font-orbitron text-xl font-bold mb-4">共鸣连接</h3>
+                <p class="text-sm text-gray-400 mb-4">选择要建立共鸣连接的建筑</p>
+                <div class="building-grid mb-4">
+                    <div class="building-slot" onclick="toggleBuilding(this, 0)">
+                        <span class="text-xs">中央圆环</span>
+                    </div>
+                    <div class="building-slot" onclick="toggleBuilding(this, 1)">
+                        <span class="text-xs">共鸣塔</span>
+                    </div>
+                    <div class="building-slot" onclick="toggleBuilding(this, 2)">
+                        <span class="text-xs">护盾塔</span>
+                    </div>
+                    <div class="building-slot" onclick="toggleBuilding(this, 3)">
+                        <span class="text-xs">和谐圣殿</span>
+                    </div>
+                    <div class="building-slot" onclick="toggleBuilding(this, 4)">
+                        <span class="text-xs">收集器2</span>
+                    </div>
+                    <div class="building-slot" onclick="toggleBuilding(this, 5)">
+                        <span class="text-xs">收集器3</span>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-400">
+                    已连接: <span id="connected-count">0</span>/6 建筑
+                </div>
+            </div>
+
+            <!-- 共鸣效果展示 -->
+            <div class="building-card p-6">
+                <h3 class="font-orbitron text-xl font-bold mb-4">共鸣效果</h3>
+                <div class="resonance-bonus">
+                    <div class="relative z-10">
+                        <h4 class="font-bold mb-2">共鸣网络加成</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>每连接一个建筑</span>
+                                <span class="text-blue-400">+10% 效率</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>连接3个同类建筑</span>
+                                <span class="text-green-400">+25% 额外加成</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>连接中央圆环</span>
+                                <span class="text-purple-400">+15% 范围</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                    <h4 class="font-bold mb-2">当前共鸣效果</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>效率提升</span>
+                            <span id="current-bonus" class="text-green-400">+0%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>范围扩展</span>
+                            <span id="range-extension" class="text-blue-400">+0m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, collector;
+        let isRotating = true;
+        let resourceParticles = [];
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0x3b82f6, 2, 20);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建形魄收集器
+            createCollector();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createCollector() {
+            collector = new THREE.Group();
+
+            // 主支架
+            const pillarGeometry = new THREE.CylinderGeometry(0.5, 0.8, 8, 8);
+            const pillarMaterial = new THREE.MeshPhongMaterial({
+                color: 0x3b82f6,
+                emissive: 0x1e40af,
+                emissiveIntensity: 0.3,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+            pillar.position.y = 4;
+            pillar.castShadow = true;
+            collector.add(pillar);
+
+            // 收集环
+            for (let i = 0; i < 3; i++) {
+                const ringGeometry = new THREE.TorusGeometry(3 + i * 0.5, 0.2, 8, 32);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x60a5fa,
+                    emissive: 0x3b82f6,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.y = 2 + i * 1.5;
+                ring.rotation.x = Math.PI / 2;
+                ring.name = `ring-${i}`;
+                collector.add(ring);
+            }
+
+            // 核心晶体
+            const coreGeometry = new THREE.OctahedronGeometry(1, 0);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0x3b82f6,
+                emissive: 0x60a5fa,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.9
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 6;
+            core.castShadow = true;
+            collector.add(core);
+
+            // 添加收集效果
+            createCollectionEffect();
+
+            scene.add(collector);
+        }
+
+        function createCollectionEffect() {
+            // 创建资源粒子
+            for (let i = 0; i < 20; i++) {
+                const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const particleMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x60a5fa,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                
+                // 随机初始位置
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 8 + Math.random() * 4;
+                particle.position.x = Math.cos(angle) * radius;
+                particle.position.y = Math.random() * 3 + 1;
+                particle.position.z = Math.sin(angle) * radius;
+                
+                particle.userData = {
+                    speed: 0.02 + Math.random() * 0.02,
+                    angle: angle,
+                    radius: radius
+                };
+                
+                resourceParticles.push(particle);
+                scene.add(particle);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转收集器
+            if (isRotating && collector) {
+                collector.rotation.y += 0.005;
+                
+                // 旋转收集环
+                collector.children.forEach((child, index) => {
+                    if (child.name && child.name.startsWith('ring-')) {
+                        child.rotation.z += 0.02 * (index + 1);
+                    }
+                });
+                
+                // 脉动核心
+                const core = collector.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (core) {
+                    core.scale.setScalar(1 + Math.sin(Date.now() * 0.002) * 0.1);
+                }
+            }
+
+            // 动画资源粒子
+            resourceParticles.forEach(particle => {
+                particle.userData.angle += particle.userData.speed;
+                particle.userData.radius -= 0.05;
+                
+                particle.position.x = Math.cos(particle.userData.angle) * particle.userData.radius;
+                particle.position.z = Math.sin(particle.userData.angle) * particle.userData.radius;
+                particle.position.y += 0.05;
+                
+                // 重置位置
+                if (particle.userData.radius < 1) {
+                    particle.userData.radius = 8 + Math.random() * 4;
+                    particle.position.y = Math.random() * 3 + 1;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function resetView() {
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+        }
+
+        function updateRange(value) {
+            document.getElementById('range-value').textContent = value;
+            calculateEfficiency();
+            
+            // 更新3D场景中的收集范围指示器
+            updateCollectionRange(value);
+        }
+
+        function updateSpeed(value) {
+            document.getElementById('speed-value').textContent = value;
+            calculateEfficiency();
+        }
+
+        function calculateEfficiency() {
+            const baseOutput = 50;
+            const rangeBonus = (parseInt(document.getElementById('collect-range').value) - 150) / 150 * 50;
+            const speedMultiplier = parseInt(document.getElementById('collect-speed').value) / 100;
+            const resonanceBonus = parseInt(document.getElementById('resonance-bonus-text').textContent);
+            
+            const totalOutput = Math.round(baseOutput * (1 + rangeBonus / 100) * speedMultiplier * (1 + resonanceBonus / 100));
+            
+            document.getElementById('range-bonus').textContent = rangeBonus >= 0 ? `+${rangeBonus.toFixed(0)}%` : `${rangeBonus.toFixed(0)}%`;
+            document.getElementById('total-output').textContent = `${totalOutput} 形魄/分钟`;
+        }
+
+        function updateCollectionRange(range) {
+            // 更新3D场景中的范围指示器
+            // 这里可以添加范围环的视觉效果
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础收集器', desc: '标准的形魄收集装置', cost: '200 形魄', efficiency: 100 },
+            { title: 'T2 - 高级收集器', desc: '增加收集范围和速度', cost: '500 形魄', efficiency: 150 },
+            { title: 'T3 - 共鸣收集器', desc: '强大的共鸣加成效果', cost: '1000 形魄', efficiency: 200 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新效率条
+            document.getElementById('efficiency-bar').style.width = upgrade.efficiency + '%';
+            document.getElementById('efficiency-text').textContent = upgrade.efficiency + '%';
+            
+            calculateEfficiency();
+        }
+
+        let connectedBuildings = new Set();
+
+        function toggleBuilding(slot, index) {
+            slot.classList.toggle('occupied');
+            
+            if (slot.classList.contains('occupied')) {
+                connectedBuildings.add(index);
+            } else {
+                connectedBuildings.delete(index);
+            }
+            
+            updateResonanceBonus();
+        }
+
+        function updateResonanceBonus() {
+            const count = connectedBuildings.size;
+            document.getElementById('connected-count').textContent = count;
+            
+            // 计算共鸣加成
+            let bonus = count * 10;
+            let rangeExt = 0;
+            
+            // 特殊加成
+            if (connectedBuildings.has(0)) { // 中央圆环
+                rangeExt = 30;
+            }
+            
+            const collectorCount = [4, 5].filter(i => connectedBuildings.has(i)).length;
+            if (collectorCount >= 2) {
+                bonus += 25;
+            }
+            
+            document.getElementById('resonance-bonus-text').textContent = `+${bonus}%`;
+            document.getElementById('current-bonus').textContent = `+${bonus}%`;
+            document.getElementById('range-extension').textContent = `+${rangeExt}m`;
+            
+            calculateEfficiency();
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            calculateEfficiency();
+            
+            // 创建收集动画效果
+            setInterval(() => {
+                const container = document.getElementById('model-container');
+                const ring = document.createElement('div');
+                ring.className = 'collector-ring';
+                ring.style.left = '50%';
+                ring.style.top = '60%';
+                ring.style.transform = 'translate(-50%, -50%)';
+                container.appendChild(ring);
+                
+                setTimeout(() => ring.remove(), 2000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

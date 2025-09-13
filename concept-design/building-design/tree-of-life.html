@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生命之树 - 螺旋之子终极战略建筑</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        * {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        :root {
+            --spiral-color: #8b5cf6;
+            --life-glow: #a855f7;
+            --tree-bark: #7c2d12;
+            --leaves-primary: #10b981;
+            --leaves-secondary: #059669;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #e5e7eb;
+        }
+        
+        .life-aura {
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+        
+        .tree-branch {
+            background: linear-gradient(135deg, #7c2d12 0%, #dc2626 100%);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .tree-branch:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.7);
+        }
+        
+        .life-energy {
+            background: linear-gradient(90deg, #10b981 0%, #a855f7 100%);
+            background-size: 200% 100%;
+            animation: energy-flow 3s linear infinite;
+        }
+        
+        @keyframes energy-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        
+        .ultimate-ability {
+            background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .ultimate-ability:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(236, 72, 153, 0.7);
+        }
+        
+        .life-node {
+            width: 10px;
+            height: 10px;
+            background: #a855f7;
+            border-radius: 50%;
+            position: absolute;
+            animation: float-up 5s linear infinite;
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .network-line {
+            stroke: #8b5cf6;
+            stroke-width: 2;
+            fill: none;
+            opacity: 0.6;
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        
+        .tree-canopy {
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.4) 0%, transparent 60%);
+            animation: sway 8s ease-in-out infinite;
+        }
+        
+        @keyframes sway {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen relative overflow-hidden">
+    <!-- 生命光环背景 -->
+    <div class="life-aura absolute inset-0 pointer-events-none"></div>
+    
+    <!-- 网络连接效果 -->
+    <svg class="absolute inset-0 w-full h-full pointer-events-none">
+        <line class="network-line" x1="50%" y1="80%" x2="20%" y2="20%" />
+        <line class="network-line" x1="50%" y1="80%" x2="80%" y2="20%" />
+        <line class="network-line" x1="50%" y1="80%" x2="10%" y2="50%" />
+        <line class="network-line" x1="50%" y1="80%" x2="90%" y2="50%" />
+        <line class="network-line" x1="50%" y1="80%" x2="50%" y2="10%" />
+    </svg>
+    
+    <!-- 生命能量粒子 -->
+    <div id="lifeParticles" class="absolute inset-0 pointer-events-none"></div>
+    
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 relative z-10">
+        <!-- 标题区域 -->
+        <header class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+                生命之树
+            </h1>
+            <p class="text-xl text-purple-300">Tree of Life · 螺旋之子终极战略建筑</p>
+            <div class="mt-4 flex justify-center gap-2">
+                <span class="px-4 py-2 bg-purple-900/50 rounded-full text-sm">战略建筑</span>
+                <span class="px-4 py-2 bg-green-900/50 rounded-full text-sm">生命控制</span>
+                <span class="px-4 py-2 bg-pink-900/50 rounded-full text-sm">进化核心</span>
+            </div>
+        </header>
+        
+        <!-- 3D模型展示区 -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <!-- 左侧3D模型 -->
+            <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                <h2 class="text-2xl font-semibold mb-4 text-purple-400">生命之树模型</h2>
+                <div id="tree3D" class="w-full h-96 rounded-lg overflow-hidden relative">
+                    <!-- 3D场景将在这里渲染 -->
+                </div>
+                <div class="mt-4 flex justify-center gap-4">
+                    <button onclick="rotateTree()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+                        旋转视角
+                    </button>
+                    <button onclick="toggleGrowth()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                        生长动画
+                    </button>
+                    <button onclick="activateLifeBloom()" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded-lg transition">
+                        生命绽放
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 右侧核心参数 -->
+            <div class="space-y-6">
+                <!-- 建筑信息 -->
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">建筑规格</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-400">高度</p>
+                            <p class="text-2xl font-bold text-green-400">100 米</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">冠幅</p>
+                            <p class="text-2xl font-bold text-green-400">80 米</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">根系深度</p>
+                            <p class="text-2xl font-bold text-green-400">500 米</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">生命网络范围</p>
+                            <p class="text-2xl font-bold text-green-400">全地图</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 生命参数 -->
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">生命能量</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-400">生命值</span>
+                                <span class="text-sm text-green-400">50000/50000</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-3">
+                                <div class="life-energy h-3 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-400">生命连接</span>
+                                <span class="text-sm text-purple-400">256</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-3">
+                                <div class="bg-purple-600 h-3 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-400">进化能量</span>
+                                <span class="text-sm text-pink-400">100%</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-3">
+                                <div class="bg-pink-600 h-3 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 树冠系统 -->
+        <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-500/30">
+            <h2 class="text-2xl font-semibold mb-4 text-purple-400">树冠系统</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="tree-canopy rounded-lg p-4 relative overflow-hidden">
+                    <h3 class="text-lg font-semibold text-green-400 mb-2">主体结构</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            千年古木主干
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            八大主分支
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            无限次级分支
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            永恒生命核心
+                        </li>
+                    </ul>
+                </div>
+                <div class="tree-canopy rounded-lg p-4 relative overflow-hidden">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-2">生命网络</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                            连接所有生命单位
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                            实时生命状态监控
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                            生命能量传输
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
+                            群体强化效果
+                        </li>
+                    </ul>
+                </div>
+                <div class="tree-canopy rounded-lg p-4 relative overflow-hidden">
+                    <h3 class="text-lg font-semibold text-pink-400 mb-2">进化核心</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-pink-400 rounded-full"></span>
+                            终极进化控制
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-pink-400 rounded-full"></span>
+                            全局进化加速
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-pink-400 rounded-full"></span>
+                            进化路径优化
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-pink-400 rounded-full"></span>
+                            无限进化可能
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 终极能力 -->
+        <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 mb-8 border border-purple-500/30">
+            <h2 class="text-2xl font-semibold mb-4 text-purple-400">终极能力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="ultimate-ability rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">🌸</div>
+                    <h3 class="font-semibold text-green-400 mb-2">生命绽放</h3>
+                    <p class="text-sm text-gray-300 mb-3">复活所有阵亡单位，恢复满状态</p>
+                    <div class="text-xs text-gray-400">冷却时间：300秒</div>
+                    <button onclick="activateLifeBloom()" class="mt-2 w-full py-1 bg-green-600/50 hover:bg-green-600/70 rounded transition">
+                        激活
+                    </button>
+                </div>
+                <div class="ultimate-ability rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">🧬</div>
+                    <h3 class="font-semibold text-purple-400 mb-2">进化爆发</h3>
+                    <p class="text-sm text-gray-300 mb-3">所有单位立即完成一次进化</p>
+                    <div class="text-xs text-gray-400">冷却时间：240秒</div>
+                    <button onclick="activateEvolutionBurst()" class="mt-2 w-full py-1 bg-purple-600/50 hover:bg-purple-600/70 rounded transition">
+                        激活
+                    </button>
+                </div>
+                <div class="ultimate-ability rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">🛡️</div>
+                    <h3 class="font-semibold text-pink-400 mb-2">生命守护</h3>
+                    <p class="text-sm text-gray-300 mb-3">所有单位获得无敌保护60秒</p>
+                    <div class="text-xs text-gray-400">冷却时间：180秒</div>
+                    <button onclick="activateLifeGuardian()" class="mt-2 w-full py-1 bg-pink-600/50 hover:bg-pink-600/70 rounded transition">
+                        激活
+                    </button>
+                </div>
+                <div class="ultimate-ability rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <h3 class="font-semibold text-yellow-400 mb-2">生命转化</h3>
+                    <p class="text-sm text-gray-300 mb-3">将多余生命值转化为能量</p>
+                    <div class="text-xs text-gray-400">冷却时间：120秒</div>
+                    <button onclick="activateLifeTransform()" class="mt-2 w-full py-1 bg-yellow-600/50 hover:bg-yellow-600/70 rounded transition">
+                        激活
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 生命连接状态 -->
+        <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+            <h2 class="text-2xl font-semibold mb-4 text-purple-400">生命连接状态</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-purple-500/30">
+                            <th class="text-left py-2 px-4">单位类型</th>
+                            <th class="text-center py-2 px-4">数量</th>
+                            <th class="text-center py-2 px-4">生命状态</th>
+                            <th class="text-center py-2 px-4">强化效果</th>
+                            <th class="text-center py-2 px-4">进化进度</th>
+                        </tr>
+                    </thead>
+                    <tbody id="connectionTable">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer;
+        let treeOfLife;
+        let isGrowthActive = false;
+        
+        function initThreeJS() {
+            const container = document.getElementById('tree3D');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f0f1e, 50, 200);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(30, 30, 50);
+            camera.lookAt(0, 20, 0);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(50, 100, 50);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const lifeLight = new THREE.PointLight(0xa855f7, 2, 100);
+            lifeLight.position.set(0, 50, 0);
+            scene.add(lifeLight);
+            
+            // 创建生命之树
+            createTreeOfLife();
+            
+            // 开始动画循环
+            animate();
+        }
+        
+        function createTreeOfLife() {
+            treeOfLife = new THREE.Group();
+            
+            // 主干
+            const trunkGeometry = new THREE.CylinderGeometry(5, 8, 60, 32);
+            const trunkMaterial = new THREE.MeshPhongMaterial({
+                color: 0x7c2d12,
+                emissive: 0x331111,
+                emissiveIntensity: 0.3
+            });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.y = 30;
+            trunk.castShadow = true;
+            treeOfLife.add(trunk);
+            
+            // 主分支
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const branchLength = 30 + Math.random() * 20;
+                
+                const branchGeometry = new THREE.CylinderGeometry(2, 3, branchLength, 16);
+                const branchMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x8b4513,
+                    emissive: 0x441111,
+                    emissiveIntensity: 0.2
+                });
+                const branch = new THREE.Mesh(branchGeometry, branchMaterial);
+                
+                branch.position.set(
+                    Math.cos(angle) * 10,
+                    40 + Math.random() * 20,
+                    Math.sin(angle) * 10
+                );
+                branch.rotation.z = Math.PI / 6;
+                branch.rotation.y = angle;
+                branch.castShadow = true;
+                treeOfLife.add(branch);
+                
+                // 添加树叶
+                const leavesGeometry = new THREE.SphereGeometry(15, 16, 16);
+                const leavesMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x10b981,
+                    emissive: 0x0d4f3a,
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                leaves.position.copy(branch.position);
+                leaves.position.y += branchLength / 2 + 10;
+                treeOfLife.add(leaves);
+            }
+            
+            // 生命核心
+            const coreGeometry = new THREE.SphereGeometry(3, 32, 32);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0xa855f7,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 1,
+                transparent: true,
+                opacity: 0.9
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 30;
+            treeOfLife.add(core);
+            
+            // 添加光环效果
+            const ringGeometry = new THREE.TorusGeometry(10, 1, 16, 100);
+            const ringMaterial = new THREE.MeshPhongMaterial({
+                color: 0xa855f7,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.6
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.position.y = 30;
+            ring.rotation.x = Math.PI / 2;
+            treeOfLife.add(ring);
+            
+            scene.add(treeOfLife);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 旋转树
+            if (treeOfLife) {
+                treeOfLife.rotation.y += 0.002;
+            }
+            
+            // 生长动画
+            if (isGrowthActive && treeOfLife) {
+                treeOfLife.scale.x = Math.min(treeOfLife.scale.x + 0.001, 1.2);
+                treeOfLife.scale.y = Math.min(treeOfLife.scale.y + 0.001, 1.2);
+                treeOfLife.scale.z = Math.min(treeOfLife.scale.z + 0.001, 1.2);
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function rotateTree() {
+            if (treeOfLife) {
+                treeOfLife.rotation.y += Math.PI / 4;
+            }
+        }
+        
+        function toggleGrowth() {
+            isGrowthActive = !isGrowthActive;
+            if (!isGrowthActive && treeOfLife) {
+                treeOfLife.scale.set(1, 1, 1);
+            }
+        }
+        
+        function activateLifeBloom() {
+            // 生命绽放特效
+            for (let i = 0; i < 50; i++) {
+                createLifeParticle();
+            }
+            
+            // 显示效果提示
+            showEffectMessage('生命绽放已激活！所有单位恢复满状态！', 'green');
+        }
+        
+        function activateEvolutionBurst() {
+            // 进化爆发特效
+            scene.fog = new THREE.Fog(0x8b5cf6, 10, 100);
+            setTimeout(() => {
+                scene.fog = new THREE.Fog(0x0f0f1e, 50, 200);
+            }, 3000);
+            
+            showEffectMessage('进化爆发已激活！所有单位完成进化！', 'purple');
+        }
+        
+        function activateLifeGuardian() {
+            // 生命守护特效
+            if (treeOfLife) {
+                treeOfLife.children.forEach(child => {
+                    if (child.material) {
+                        child.material.emissive = new THREE.Color(0xff69b4);
+                        child.material.emissiveIntensity = 1;
+                    }
+                });
+                
+                setTimeout(() => {
+                    treeOfLife.children.forEach(child => {
+                        if (child.material) {
+                            child.material.emissive = new THREE.Color(0x331111);
+                            child.material.emissiveIntensity = 0.3;
+                        }
+                    });
+                }, 60000);
+            }
+            
+            showEffectMessage('生命守护已激活！所有单位获得60秒无敌！', 'pink');
+        }
+        
+        function activateLifeTransform() {
+            // 生命转化特效
+            showEffectMessage('生命转化已激活！生命值转化为能量！', 'yellow');
+        }
+        
+        function createLifeParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'life-node';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.top = window.innerHeight + 'px';
+            particle.style.animationDuration = (3 + Math.random() * 2) + 's';
+            document.getElementById('lifeParticles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 5000);
+        }
+        
+        function showEffectMessage(message, color) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-semibold z-50 animate-pulse`;
+            messageDiv.style.backgroundColor = color === 'green' ? '#10b981' : 
+                                             color === 'purple' ? '#8b5cf6' :
+                                             color === 'pink' ? '#ec4899' : '#f59e0b';
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // 初始化连接表格
+        function initConnectionTable() {
+            const units = [
+                { name: '孢子步兵', count: 45, health: 95, bonus: '+25%', evolution: '进化中' },
+                { name: '藤蔓战士', count: 20, health: 88, bonus: '+30%', evolution: '已完成' },
+                { name: '进化猎手', count: 12, health: 92, bonus: '+35%', evolution: '进化中' },
+                { name: '生命守护者', count: 8, health: 100, bonus: '+40%', evolution: '待进化' }
+            ];
+            
+            const tableBody = document.getElementById('connectionTable');
+            units.forEach(unit => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-purple-500/20 hover:bg-purple-500/10';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${unit.name}</td>
+                    <td class="text-center py-2 px-4">${unit.count}</td>
+                    <td class="text-center py-2 px-4">
+                        <span class="px-2 py-1 rounded text-xs ${unit.health > 90 ? 'bg-green-600/50' : 'bg-yellow-600/50'}">
+                            ${unit.health}%
+                        </span>
+                    </td>
+                    <td class="text-center py-2 px-4 text-green-400">${unit.bonus}</td>
+                    <td class="text-center py-2 px-4">
+                        <span class="px-2 py-1 rounded text-xs ${unit.evolution === '已完成' ? 'bg-purple-600/50' : 'bg-yellow-600/50'}">
+                            ${unit.evolution}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 持续生成生命粒子
+        setInterval(createLifeParticle, 500);
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            initConnectionTable();
+        });
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                const container = document.getElementById('tree3D');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        });
+    </script>
+</body>
+</html>

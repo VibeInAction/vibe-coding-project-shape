@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolution Chamber - 进化室 | Spiral Progeny</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --spiral-color: #8b5cf6;
+            --spiral-dark: #6d28d9;
+            --spiral-light: #a78bfa;
+            --spiral-glow: rgba(139, 92, 246, 0.3);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0a1e 0%, #1a0f2e 100%);
+            min-height: 100vh;
+        }
+        
+        .spiral-glow {
+            box-shadow: 0 0 20px var(--spiral-glow), 
+                        0 0 40px var(--spiral-glow),
+                        inset 0 0 20px var(--spiral-glow);
+        }
+        
+        .evolution-pulse {
+            animation: evolutionPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes evolutionPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 0.8;
+                box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+            }
+            50% { 
+                transform: scale(1.1); 
+                opacity: 1;
+                box-shadow: 0 0 60px rgba(139, 92, 246, 0.8);
+            }
+        }
+        
+        .mutation-effect {
+            animation: mutationWave 4s ease-in-out infinite;
+        }
+        
+        @keyframes mutationWave {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                filter: hue-rotate(0deg);
+            }
+            50% { 
+                transform: translateY(-10px) scale(1.05);
+                filter: hue-rotate(30deg);
+            }
+        }
+        
+        .gene-stream {
+            background: linear-gradient(90deg, transparent, var(--spiral-light), transparent);
+            animation: geneFlow 3s linear infinite;
+        }
+        
+        @keyframes geneFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .evolution-stage {
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        
+        .evolution-stage:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+        }
+        
+        .evolution-stage.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--spiral-light);
+            box-shadow: 0 0 20px var(--spiral-glow);
+        }
+        
+        .progress-evolution {
+            background: linear-gradient(90deg, var(--spiral-dark) 0%, var(--spiral-light) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-evolution::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        #canvas-container {
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold">Evolution Chamber</h1>
+                    <span class="px-3 py-1 bg-purple-900/50 text-purple-400 rounded-full text-sm">Spiral Progeny</span>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="#overview" class="hover:text-purple-400 transition">概览</a>
+                    <a href="#species" class="hover:text-purple-400 transition">物种进化</a>
+                    <a href="#mutation" class="hover:text-purple-400 transition">变异控制</a>
+                    <a href="#adaptation" class="hover:text-purple-400 transition">适应环境</a>
+                    <a href="#upgrades" class="hover:text-purple-400 transition">升级路径</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-12">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 3D Visualization -->
+                <div class="bg-gray-800/30 rounded-lg p-6 spiral-glow">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                        进化室 3D 展示
+                    </h2>
+                    <div id="canvas-container" class="relative h-96 rounded-lg overflow-hidden">
+                        <canvas id="evolution-canvas"></canvas>
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <button onclick="toggleRotation()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                            <button onclick="resetView()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chamber Info -->
+                <div class="space-y-6">
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">进化室信息</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">等级</span>
+                                <span class="text-purple-400 font-bold">Level 5</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">活跃物种</span>
+                                <span class="font-bold">12 种</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">进化速度</span>
+                                <span class="font-bold">10000x</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">成功率</span>
+                                <span class="font-bold text-purple-400">94.7%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Status -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">进化状态</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">基因稳定性</span>
+                                    <span class="text-sm text-green-400">96%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full progress-evolution" style="width: 96%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">变异压力</span>
+                                    <span class="text-sm text-yellow-400">78%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-yellow-500 h-full transition-all duration-300" style="width: 78%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">适应度</span>
+                                    <span class="text-sm text-purple-400">92%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-full transition-all duration-300" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Evolution -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">活跃进化</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                基因重组
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                表达调控
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                选择压力
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                适应性进化
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Species Section -->
+        <section id="species" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">物种进化</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Species Cards -->
+                <div class="evolution-stage bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpecies('phoenix')">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold">凤凰鸟</h3>
+                        <span class="px-2 py-1 bg-green-900/50 text-green-400 rounded text-xs">进化中</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">当前世代</span>
+                            <span>Gen 47</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">适应度</span>
+                            <span class="text-green-400">+23%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evolution-stage bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpecies('kraken')">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold">量子克拉肯</h3>
+                        <span class="px-2 py-1 bg-yellow-900/50 text-yellow-400 rounded text-xs">变异中</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">当前世代</span>
+                            <span>Gen 32</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">适应度</span>
+                            <span class="text-yellow-400">+15%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-full" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evolution-stage bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpecies('dragon')">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold">基因龙</h3>
+                        <span class="px-2 py-1 bg-purple-900/50 text-purple-400 rounded text-xs">稳定</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">当前世代</span>
+                            <span>Gen 89</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">适应度</span>
+                            <span class="text-purple-400">+45%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evolution-stage bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpecies('phoenix')">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold">水晶螳螂</h3>
+                        <span class="px-2 py-1 bg-green-900/50 text-green-400 rounded text-xs">进化中</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">当前世代</span>
+                            <span>Gen 21</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">适应度</span>
+                            <span class="text-green-400">+18%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-full" style="width: 35%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evolution-stage bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpecies('void')">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold">虚空鲸</h3>
+                        <span class="px-2 py-1 bg-blue-900/50 text-blue-400 rounded text-xs">适应中</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">当前世代</span>
+                            <span>Gen 15</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">适应度</span>
+                            <span class="text-blue-400">+12%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-full" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800/30 rounded-lg p-4 border-2 border-dashed border-gray-600">
+                    <div class="h-full flex flex-col items-center justify-center text-gray-500">
+                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <p class="text-sm">添加新物种</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mutation Section -->
+        <section id="mutation" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">变异控制</h2>
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Mutation Types -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">变异类型</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="radio" name="mutation" value="point" checked class="text-purple-500">
+                            <span>点突变</span>
+                            <span class="text-xs text-gray-400">精确基因修改</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="radio" name="mutation" value="insertion" class="text-purple-500">
+                            <span>插入突变</span>
+                            <span class="text-xs text-gray-400">添加新基因片段</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="radio" name="mutation" value="deletion" class="text-purple-500">
+                            <span>缺失突变</span>
+                            <span class="text-xs text-gray-400">移除冗余基因</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="radio" name="mutation" value="duplication" class="text-purple-500">
+                            <span>重复突变</span>
+                            <span class="text-xs text-gray-400">基因复制增强</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="radio" name="mutation" value="inversion" class="text-purple-500">
+                            <span>倒位突变</span>
+                            <span class="text-xs text-gray-400">基因序列反转</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Mutation Rate -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">变异率控制</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-1">基础变异率</label>
+                            <input type="range" min="0" max="100" value="10" class="w-full" onchange="updateMutationRate(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0%</span>
+                                <span id="mutation-value">10%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-1">定向突变</label>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm" onclick="setDirection('random')">随机</button>
+                                <button class="px-3 py-1 bg-purple-900/50 text-purple-400 rounded text-sm">智能</button>
+                                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm" onclick="setDirection('targeted')">靶向</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mutation Preview -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">变异预览</h3>
+                    <div class="relative h-48 bg-gray-900/50 rounded-lg overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-32 h-32 bg-purple-900/30 rounded-lg mutation-effect flex items-center justify-center">
+                                <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12l-3 3m0 0l3-3m-3 3V5"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="absolute top-2 left-2 text-xs text-gray-400">DNA链</div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <p class="text-gray-400">预期效果:</p>
+                        <p class="text-purple-400">适应性提升 +15-25%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Adaptation Section -->
+        <section id="adaptation" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">适应环境</h2>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Environment Parameters -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">环境参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">重力</span>
+                                <span class="text-sm">1.2G</span>
+                            </div>
+                            <input type="range" min="0.1" max="3" step="0.1" value="1.2" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">温度</span>
+                                <span class="text-sm">45°C</span>
+                            </div>
+                            <input type="range" min="-50" max="150" value="45" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">辐射水平</span>
+                                <span class="text-sm">中等</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">大气成分</span>
+                                <span class="text-sm">富氧</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="80" class="w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adaptation Progress -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">适应进度</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold">抗重力骨骼</span>
+                                <span class="text-sm text-green-400">已完成</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold">耐热表皮</span>
+                                <span class="text-sm text-green-400">已完成</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold">辐射防护</span>
+                                <span class="text-sm text-yellow-400">进行中</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-yellow-500 h-full gene-stream" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold">高效呼吸</span>
+                                <span class="text-sm text-purple-400">计划中</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrades Section -->
+        <section id="upgrades" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">升级路径</h2>
+            <div class="space-y-4">
+                <!-- Upgrade Option 1 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('quantum')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">量子进化</h3>
+                                <p class="text-sm text-gray-400">利用量子叠加态同时测试所有进化路径</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">5000</p>
+                            <p class="text-sm text-gray-400">进化点</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 2 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('time')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">时间压缩</h3>
+                                <p class="text-sm text-gray-400">进化速度提升至100000倍</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">4000</p>
+                            <p class="text-sm text-gray-400">进化点</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 3 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('collective')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">集体意识进化</h3>
+                                <p class="text-sm text-gray-400">所有物种共享进化成果</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">6000</p>
+                            <p class="text-sm text-gray-400">进化点</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 backdrop-blur-sm border-t border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-400">Spiral Progeny Evolution Chamber © 2024</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js Scene Setup
+        let scene, camera, renderer;
+        let evolutionChamber;
+        let isRotating = true;
+        let dnaStrands = [];
+        let mutationParticles = [];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const canvas = document.getElementById('evolution-canvas');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f0a1e, 10, 50);
+            
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x8b5cf6, 1);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0xa78bfa, 0.8);
+            pointLight1.position.set(0, 5, 0);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0xc084fc, 0.6);
+            pointLight2.position.set(10, 0, 10);
+            scene.add(pointLight2);
+            
+            createEvolutionChamber();
+            animate();
+        }
+
+        function createEvolutionChamber() {
+            evolutionChamber = new THREE.Group();
+            
+            // Chamber base
+            const baseGeometry = new THREE.CylinderGeometry(8, 8, 1, 32);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0x6d28d9,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = -0.5;
+            base.receiveShadow = true;
+            evolutionChamber.add(base);
+            
+            // Central evolution core
+            const coreGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0xa78bfa,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.6,
+                metalness: 0.3,
+                roughness: 0.4
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.castShadow = true;
+            evolutionChamber.add(core);
+            
+            // DNA strands floating around
+            for (let i = 0; i < 6; i++) {
+                const strandGroup = new THREE.Group();
+                
+                for (let j = 0; j < 30; j++) {
+                    const angle = (j / 30) * Math.PI * 4;
+                    const y = (j - 15) * 0.3;
+                    const radius = 4 + Math.sin(angle * 0.5) * 0.5;
+                    
+                    const x = Math.cos(angle) * radius;
+                    const z = Math.sin(angle) * radius;
+                    
+                    const nodeGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+                    const nodeMaterial = new THREE.MeshPhongMaterial({
+                        color: 0xc084fc,
+                        emissive: 0xa78bfa,
+                        emissiveIntensity: 0.3
+                    });
+                    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                    node.position.set(x, y, z);
+                    strandGroup.add(node);
+                    
+                    if (j > 0) {
+                        const prevAngle = ((j - 1) / 30) * Math.PI * 4;
+                        const prevY = ((j - 1) - 15) * 0.3;
+                        const prevRadius = 4 + Math.sin(prevAngle * 0.5) * 0.5;
+                        const prevX = Math.cos(prevAngle) * prevRadius;
+                        const prevZ = Math.sin(prevAngle) * prevRadius;
+                        
+                        const points = [];
+                        points.push(new THREE.Vector3(prevX, prevY, prevZ));
+                        points.push(new THREE.Vector3(x, y, z));
+                        
+                        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const lineMaterial = new THREE.LineBasicMaterial({
+                            color: 0xa78bfa,
+                            opacity: 0.6,
+                            transparent: true
+                        });
+                        const line = new THREE.Line(lineGeometry, lineMaterial);
+                        strandGroup.add(line);
+                    }
+                }
+                
+                strandGroup.rotation.y = (i / 6) * Math.PI * 2;
+                strandGroup.position.y = Math.sin(i) * 0.5;
+                dnaStrands.push(strandGroup);
+                evolutionChamber.add(strandGroup);
+            }
+            
+            // Mutation particles
+            for (let i = 0; i < 100; i++) {
+                const particleGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+                const particleMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xe9d5ff,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                
+                particle.position.set(
+                    (Math.random() - 0.5) * 16,
+                    Math.random() * 10 - 5,
+                    (Math.random() - 0.5) * 16
+                );
+                
+                particle.userData = {
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.1,
+                        (Math.random() - 0.5) * 0.1,
+                        (Math.random() - 0.5) * 0.1
+                    ),
+                    life: Math.random()
+                };
+                
+                mutationParticles.push(particle);
+                evolutionChamber.add(particle);
+            }
+            
+            scene.add(evolutionChamber);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isRotating) {
+                evolutionChamber.rotation.y += 0.002;
+            }
+            
+            // Animate DNA strands
+            dnaStrands.forEach((strand, index) => {
+                const time = Date.now() * 0.001;
+                strand.rotation.z = Math.sin(time + index) * 0.2;
+                strand.position.y = Math.sin(time * 0.5 + index) * 0.5;
+            });
+            
+            // Animate mutation particles
+            mutationParticles.forEach((particle, index) => {
+                const time = Date.now() * 0.001;
+                
+                // Attraction to center
+                const center = new THREE.Vector3(0, 0, 0);
+                const direction = center.clone().sub(particle.position);
+                direction.normalize().multiplyScalar(0.01);
+                particle.position.add(direction);
+                
+                // Add some randomness
+                particle.position.add(particle.userData.velocity);
+                
+                // Reset if too close to center
+                if (particle.position.length() < 2) {
+                    particle.position.set(
+                        (Math.random() - 0.5) * 16,
+                        Math.random() * 10 - 5,
+                        (Math.random() - 0.5) * 16
+                    );
+                }
+                
+                // Fade in and out
+                particle.material.opacity = 0.3 + Math.sin(time * 3 + index) * 0.5;
+            });
+            
+            renderer.render(scene, camera);
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function resetView() {
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            evolutionChamber.rotation.y = 0;
+        }
+
+        function selectSpecies(species) {
+            console.log('Selected species:', species);
+        }
+
+        function updateMutationRate(value) {
+            document.getElementById('mutation-value').textContent = `${value}%`;
+        }
+
+        function setDirection(direction) {
+            console.log('Setting mutation direction to:', direction);
+        }
+
+        function selectUpgrade(type) {
+            console.log('Selected upgrade:', type);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

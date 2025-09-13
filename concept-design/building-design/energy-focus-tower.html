@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能量聚焦塔 - 三角议会建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 三角议会颜色主题 */
+            --triangle-color: #ef4444;
+            --triangle-light: #f87171;
+            --triangle-dark: #dc2626;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--triangle-color);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--triangle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 聚焦光束效果 */
+        .focus-beam {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            animation: focus-pulse 2s ease-out;
+        }
+
+        @keyframes focus-pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* 能量波纹 */
+        .energy-wave {
+            position: absolute;
+            border: 2px solid var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: wave-expand 3s ease-out infinite;
+        }
+
+        @keyframes wave-expand {
+            0% {
+                width: 50px;
+                height: 50px;
+                opacity: 1;
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        /* 目标区域指示器 */
+        .target-area {
+            position: absolute;
+            border: 2px dashed var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* 伤害数字 */
+        .damage-number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--triangle-color);
+            pointer-events: none;
+            animation: damage-float 1s ease-out forwards;
+        }
+
+        @keyframes damage-float {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
+        /* 聚焦时间进度条 */
+        .focus-progress {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .focus-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            border-radius: 6px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+
+        .focus-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: focus-shimmer 1s linear infinite;
+        }
+
+        @keyframes focus-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 目标选择器 */
+        .target-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .target-option {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .target-option:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--triangle-color);
+        }
+
+        .target-option.active {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: var(--triangle-color);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 升级路径可视化 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+        }
+
+        .path-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">能量聚焦塔</h1>
+            <p class="text-gray-400">Energy Focus Tower - 毁灭性的范围打击武器</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                        <div class="target-area" id="target-area" style="display: none;"></div>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="startFocusing()">
+                            开始聚焦
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 聚焦控制 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">聚焦控制</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span>聚焦进度</span>
+                                <span id="focus-time-text">0.0/3.0秒</span>
+                            </div>
+                            <div class="focus-progress">
+                                <div class="focus-fill" id="focus-progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm mb-2">聚焦范围</label>
+                                <input type="range" id="focus-range" min="50" max="200" value="100" 
+                                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                       oninput="updateFocusRange(this.value)">
+                                <div class="text-xs text-gray-400 mt-1">半径: <span id="range-value">100</span>m</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2">伤害倍率</label>
+                                <input type="range" id="damage-multiplier" min="1" max="5" value="1" step="0.1"
+                                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                       oninput="updateDamageMultiplier(this.value)">
+                                <div class="text-xs text-gray-400 mt-1">倍率: <span id="multiplier-value">1.0</span>x</div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-red-900/20 rounded border border-red-500/30">
+                            <p class="text-sm">
+                                <span class="font-semibold">提示:</span> 
+                                <span class="text-red-400">聚焦时间越长，伤害越高，最大3秒</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 伤害计算器 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">伤害计算</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>基础伤害</span>
+                            <span class="font-semibold">500</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>聚焦加成</span>
+                            <span id="focus-bonus" class="font-semibold text-orange-400">+0%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>范围衰减</span>
+                            <span id="range-falloff" class="font-semibold text-blue-400">-0%</span>
+                        </div>
+                        <div class="pt-3 border-t border-gray-700">
+                            <div class="flex justify-between text-lg">
+                                <span class="font-bold">预期伤害</span>
+                                <span id="expected-damage" class="font-bold text-red-400">500</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">三角议会</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">防御建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">120秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">4</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            能量聚焦塔通过聚焦强大的能量束，对指定区域造成毁灭性的范围伤害。
+                            聚焦时间越长，伤害越高，是对付密集敌军的利器。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">1000/1000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">500/500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>能量储备</span>
+                                <span id="energy-text">100/100</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="energy-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击冷却</span>
+                                <span id="cooldown-text">5秒</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-orange-500" id="cooldown-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 攻击模式 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">攻击模式</h3>
+                    <div class="target-selector">
+                        <div class="target-option active" onclick="selectAttackMode('single')">
+                            <h4 class="font-bold mb-1">单点聚焦</h4>
+                            <p class="text-xs text-gray-400">对单个目标造成最大伤害</p>
+                            <div class="mt-2 text-xs">
+                                <span class="text-red-400">伤害: 200%</span>
+                            </div>
+                        </div>
+                        <div class="target-option" onclick="selectAttackMode('area')">
+                            <h4 class="font-bold mb-1">范围打击</h4>
+                            <p class="text-xs text-gray-400">对区域内所有目标造成伤害</p>
+                            <div class="mt-2 text-xs">
+                                <span class="text-orange-400">范围: 100m</span>
+                            </div>
+                        </div>
+                        <div class="target-option" onclick="selectAttackMode('chain')">
+                            <h4 class="font-bold mb-1">连锁聚焦</h4>
+                            <p class="text-xs text-gray-400">在多个目标间跳跃</p>
+                            <div class="mt-2 text-xs">
+                                <span class="text-yellow-400">跳跃: 5次</span>
+                            </div>
+                        </div>
+                        <div class="target-option" onclick="selectAttackMode('beam')">
+                            <h4 class="font-bold mb-1">持续光束</h4>
+                            <p class="text-xs text-gray-400">持续伤害目标区域</p>
+                            <div class="mt-2 text-xs">
+                                <span class="text-purple-400">持续: 3秒</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="upgrade-path">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础聚焦塔</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准的能量聚焦装置</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">800 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 攻击演示区 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">攻击演示</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">目标密度</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="density" value="low" checked class="mr-2">
+                            <span>稀疏 (1-3个)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="density" value="medium" class="mr-2">
+                            <span>中等 (4-8个)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="density" value="high" class="mr-2">
+                            <span>密集 (9+个)</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">目标类型</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" checked class="mr-2">
+                            <span>步兵</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" checked class="mr-2">
+                            <span>载具</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2">
+                            <span>空中单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2">
+                            <span>建筑</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">模拟结果</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>预期命中</span>
+                            <span id="expected-hits" class="text-yellow-400">3个</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>总伤害</span>
+                            <span id="total-damage" class="text-red-400">1500</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>效率评级</span>
+                            <span id="efficiency-rating" class="text-green-400">优秀</span>
+                        </div>
+                    </div>
+                    <button class="action-button w-full mt-3" onclick="simulateAttack()">
+                        运行模拟
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, focusTower;
+        let isRotating = true;
+        let isFocusing = false;
+        let focusTime = 0;
+        let maxFocusTime = 3;
+        let attackMode = 'single';
+        let cooldownTime = 0;
+        let focusRadius = 100;
+        let damageMultiplier = 1;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xef4444, 2, 20);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建能量聚焦塔
+            createFocusTower();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createFocusTower() {
+            focusTower = new THREE.Group();
+
+            // 基座
+            const baseGeometry = new THREE.CylinderGeometry(2, 3, 1, 8);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xdc2626,
+                emissiveIntensity: 0.2,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 0.5;
+            base.castShadow = true;
+            focusTower.add(base);
+
+            // 能量收集器
+            for (let i = 0; i < 3; i++) {
+                const collectorGeometry = new THREE.ConeGeometry(1.5, 2, 4);
+                const collector = new THREE.Mesh(collectorGeometry, baseMaterial);
+                const angle = i * Math.PI * 2 / 3;
+                collector.position.x = Math.cos(angle) * 2;
+                collector.position.z = Math.sin(angle) * 2;
+                collector.position.y = 2;
+                collector.rotation.y = angle;
+                focusTower.add(collector);
+            }
+
+            // 中央聚焦柱
+            const columnGeometry = new THREE.CylinderGeometry(0.8, 1, 6, 6);
+            const columnMaterial = new THREE.MeshPhongMaterial({
+                color: 0xf87171,
+                emissive: 0xef4444,
+                emissiveIntensity: 0.4,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const column = new THREE.Mesh(columnGeometry, columnMaterial);
+            column.position.y = 4;
+            column.castShadow = true;
+            focusTower.add(column);
+
+            // 聚焦阵列
+            const arrayGeometry = new THREE.RingGeometry(0.5, 2, 8);
+            const arrayMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xf87171,
+                emissiveIntensity: 0.6,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            });
+            const array = new THREE.Mesh(arrayGeometry, arrayMaterial);
+            array.position.y = 7;
+            array.rotation.x = Math.PI / 2;
+            focusTower.add(array);
+
+            // 能量核心
+            const coreGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0xfef2f2,
+                emissive: 0xf87171,
+                emissiveIntensity: 1,
+                transparent: true,
+                opacity: 0.9
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 7;
+            focusTower.add(core);
+
+            scene.add(focusTower);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转塔
+            if (isRotating && focusTower) {
+                focusTower.rotation.y += 0.003;
+                
+                // 旋转能量收集器
+                focusTower.children.forEach((child, index) => {
+                    if (child.geometry instanceof THREE.ConeGeometry) {
+                        child.rotation.z += 0.02;
+                    }
+                });
+                
+                // 旋转聚焦阵列
+                const array = focusTower.children.find(child => child.geometry instanceof THREE.RingGeometry);
+                if (array) {
+                    array.rotation.z += 0.01;
+                }
+                
+                // 脉动能量核心
+                const core = focusTower.children.find(child => child.geometry instanceof THREE.SphereGeometry);
+                if (core) {
+                    const scale = 1 + Math.sin(Date.now() * 0.003) * 0.3;
+                    core.scale.setScalar(scale);
+                    
+                    // 聚焦时增强效果
+                    if (isFocusing) {
+                        core.material.emissiveIntensity = 1 + focusTime / maxFocusTime;
+                        array.material.emissiveIntensity = 0.6 + focusTime / maxFocusTime * 0.4;
+                    }
+                }
+            }
+
+            // 更新聚焦时间
+            if (isFocusing && focusTime < maxFocusTime) {
+                focusTime += 0.016; // 约60fps
+                updateFocusDisplay();
+            }
+
+            // 更新冷却
+            if (cooldownTime > 0) {
+                cooldownTime -= 0.016;
+                updateCooldownDisplay();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function startFocusing() {
+            if (cooldownTime > 0) return;
+            
+            isFocusing = !isFocusing;
+            
+            if (isFocusing) {
+                focusTime = 0;
+                showTargetArea();
+            } else {
+                // 释放攻击
+                releaseAttack();
+                hideTargetArea();
+            }
+        }
+
+        function showTargetArea() {
+            const area = document.getElementById('target-area');
+            area.style.display = 'block';
+            area.style.width = focusRadius * 2 + 'px';
+            area.style.height = focusRadius * 2 + 'px';
+            area.style.left = '50%';
+            area.style.top = '60%';
+            area.style.transform = 'translate(-50%, -50%)';
+        }
+
+        function hideTargetArea() {
+            document.getElementById('target-area').style.display = 'none';
+        }
+
+        function updateFocusDisplay() {
+            const percent = (focusTime / maxFocusTime) * 100;
+            document.getElementById('focus-progress-bar').style.width = percent + '%';
+            document.getElementById('focus-time-text').textContent = `${focusTime.toFixed(1)}/${maxFocusTime}秒`;
+            
+            // 更新伤害计算
+            updateDamageCalculation();
+        }
+
+        function updateDamageCalculation() {
+            const baseDamage = 500;
+            const focusBonus = focusTime / maxFocusTime; // 0-1
+            const rangeFalloff = Math.max(0, (200 - focusRadius) / 200); // 范围越大衰减越小
+            
+            const expectedDamage = Math.round(baseDamage * (1 + focusBonus) * damageMultiplier * rangeFalloff);
+            
+            document.getElementById('focus-bonus').textContent = `+${Math.round(focusBonus * 100)}%`;
+            document.getElementById('range-falloff').textContent = `-${Math.round((1 - rangeFalloff) * 100)}%`;
+            document.getElementById('expected-damage').textContent = expectedDamage;
+        }
+
+        function updateFocusRange(value) {
+            focusRadius = parseInt(value);
+            document.getElementById('range-value').textContent = value;
+            updateDamageCalculation();
+            
+            if (document.getElementById('target-area').style.display !== 'none') {
+                showTargetArea();
+            }
+        }
+
+        function updateDamageMultiplier(value) {
+            damageMultiplier = parseFloat(value);
+            document.getElementById('multiplier-value').textContent = value;
+            updateDamageCalculation();
+        }
+
+        function releaseAttack() {
+            // 计算最终伤害
+            const baseDamage = 500;
+            const focusBonus = focusTime / maxFocusTime;
+            const rangeFalloff = Math.max(0, (200 - focusRadius) / 200);
+            const finalDamage = Math.round(baseDamage * (1 + focusBonus) * damageMultiplier * rangeFalloff);
+            
+            // 创建攻击效果
+            createAttackEffect(finalDamage);
+            
+            // 开始冷却
+            cooldownTime = 5;
+            updateCooldownDisplay();
+            
+            // 重置聚焦
+            focusTime = 0;
+            isFocusing = false;
+            updateFocusDisplay();
+        }
+
+        function createAttackEffect(damage) {
+            const container = document.getElementById('model-container');
+            
+            // 创建聚焦光束
+            const beam = document.createElement('div');
+            beam.className = 'focus-beam';
+            beam.style.left = '50%';
+            beam.style.top = '60%';
+            beam.style.width = focusRadius * 2 + 'px';
+            beam.style.height = focusRadius * 2 + 'px';
+            container.appendChild(beam);
+            
+            setTimeout(() => beam.remove(), 2000);
+            
+            // 创建能量波纹
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const wave = document.createElement('div');
+                    wave.className = 'energy-wave';
+                    wave.style.left = '50%';
+                    wave.style.top = '60%';
+                    wave.style.animationDelay = `${i * 0.3}s`;
+                    container.appendChild(wave);
+                    
+                    setTimeout(() => wave.remove(), 3000);
+                }, i * 300);
+            }
+            
+            // 显示伤害数字
+            const damageNum = document.createElement('div');
+            damageNum.className = 'damage-number';
+            damageNum.textContent = damage;
+            damageNum.style.left = '50%';
+            damageNum.style.top = '60%';
+            damageNum.style.transform = 'translate(-50%, -50%)';
+            container.appendChild(damageNum);
+            
+            setTimeout(() => damageNum.remove(), 1000);
+        }
+
+        function updateCooldownDisplay() {
+            const percent = Math.max(0, (5 - cooldownTime) / 5 * 100);
+            document.getElementById('cooldown-bar').style.width = percent + '%';
+            
+            if (cooldownTime > 0) {
+                document.getElementById('cooldown-text').textContent = `${cooldownTime.toFixed(1)}秒`;
+            } else {
+                document.getElementById('cooldown-text').textContent = '就绪';
+            }
+        }
+
+        function selectAttackMode(mode) {
+            attackMode = mode;
+            document.querySelectorAll('.target-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 根据模式更新参数
+            updateAttackParameters(mode);
+        }
+
+        function updateAttackParameters(mode) {
+            // 这里可以根据不同模式调整伤害计算方式
+            switch(mode) {
+                case 'single':
+                    damageMultiplier = 2;
+                    break;
+                case 'area':
+                    damageMultiplier = 1;
+                    focusRadius = 100;
+                    break;
+                case 'chain':
+                    damageMultiplier = 1.2;
+                    break;
+                case 'beam':
+                    damageMultiplier = 1.5;
+                    break;
+            }
+            
+            document.getElementById('damage-multiplier').value = damageMultiplier;
+            document.getElementById('multiplier-value').textContent = damageMultiplier.toFixed(1);
+            updateDamageCalculation();
+        }
+
+        function simulateAttack() {
+            // 模拟攻击结果
+            const density = document.querySelector('input[name="density"]:checked').value;
+            const targetCounts = { low: 3, medium: 6, high: 12 };
+            const hits = targetCounts[density];
+            
+            const baseDamage = 500;
+            const focusBonus = 0.5; // 假设聚焦50%
+            const totalDamage = Math.round(baseDamage * (1 + focusBonus) * damageMultiplier * hits);
+            
+            document.getElementById('expected-hits').textContent = `${hits}个`;
+            document.getElementById('total-damage').textContent = totalDamage;
+            
+            // 效率评级
+            let efficiency = '一般';
+            if (totalDamage > 5000) efficiency = '优秀';
+            else if (totalDamage > 3000) efficiency = '良好';
+            
+            document.getElementById('efficiency-rating').textContent = efficiency;
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础聚焦塔', desc: '标准的能量聚焦装置', cost: '800 形魄', health: 1000, shield: 500 },
+            { title: 'T2 - 强化聚焦塔', desc: '增加聚焦速度和伤害', cost: '1600 形魄', health: 1500, shield: 750 },
+            { title: 'T3 - 超级聚焦塔', desc: '解锁特殊攻击模式', cost: '3200 形魄', health: 2000, shield: 1000 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新参数
+            document.getElementById('health-bar').style.width = '100%';
+            document.getElementById('health-text').textContent = `${upgrade.health}/${upgrade.health}`;
+            document.getElementById('shield-bar').style.width = '100%';
+            document.getElementById('shield-text').textContent = `${upgrade.shield}/${upgrade.shield}`;
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            updateDamageCalculation();
+        });
+    </script>
+</body>
+</html>

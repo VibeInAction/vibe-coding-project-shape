@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方尖碑 - 方碑盟约建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 方碑盟约颜色主题 */
+            --square-color: #10b981;
+            --square-light: #34d399;
+            --square-dark: #059669;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--square-color) 0%, var(--square-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--square-color);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--square-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--square-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 模块插槽 */
+        .module-slot {
+            width: 80px;
+            height: 80px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px dashed rgba(16, 185, 129, 0.5);
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .module-slot:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--square-color);
+            transform: scale(1.05);
+        }
+
+        .module-slot.equipped {
+            background: rgba(16, 185, 129, 0.2);
+            border-style: solid;
+            border-color: var(--square-color);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        /* 量子计算效果 */
+        .quantum-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--square-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: quantum-pulse 2s ease-out infinite;
+        }
+
+        @keyframes quantum-pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* 数据流效果 */
+        .data-stream {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, var(--square-color), transparent);
+            opacity: 0.6;
+            animation: data-flow 2s linear infinite;
+        }
+
+        @keyframes data-flow {
+            0% { transform: translateY(-20px); }
+            100% { transform: translateY(20px); }
+        }
+
+        /* 功能切换标签 */
+        .function-tab {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 0.5rem 0.5rem 0 0;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .function-tab:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--square-color);
+        }
+
+        .function-tab.active {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--square-color);
+            border-bottom-color: transparent;
+        }
+
+        /* 研究进度条 */
+        .research-progress {
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .research-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--square-color), var(--square-light));
+            border-radius: 12px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+
+        .research-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: research-shimmer 1s linear infinite;
+        }
+
+        @keyframes research-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--square-color) 0%, var(--square-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 模块选择器 */
+        .module-selector {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .module-item {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--square-color);
+            transform: translateX(4px);
+        }
+
+        .module-item.selected {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: var(--square-color);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        /* 预测指示器 */
+        .prediction-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+
+        .prediction-indicator.high {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .prediction-indicator.medium {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .prediction-indicator.low {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">方尖碑</h1>
+            <p class="text-gray-400">Obelisk - 量子计算与模块化枢纽</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="toggleQuantumMode()">
+                            <span id="quantum-text">量子模式</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 模块配置 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">模块配置</h3>
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="module-slot" onclick="openModuleSelector(0)">
+                            <span class="text-2xl">⚡</span>
+                            <span class="text-xs mt-1">能量模块</span>
+                        </div>
+                        <div class="module-slot equipped" onclick="openModuleSelector(1)">
+                            <span class="text-2xl">🔬</span>
+                            <span class="text-xs mt-1">研究模块</span>
+                        </div>
+                        <div class="module-slot" onclick="openModuleSelector(2)">
+                            <span class="text-2xl">🛡️</span>
+                            <span class="text-xs mt-1">防御模块</span>
+                        </div>
+                        <div class="module-slot equipped" onclick="openModuleSelector(3)">
+                            <span class="text-2xl">📡</span>
+                            <span class="text-xs mt-1">通讯模块</span>
+                        </div>
+                        <div class="module-slot" onclick="openModuleSelector(4)">
+                            <span class="text-2xl">⚙️</span>
+                            <span class="text-xs mt-1">工程模块</span>
+                        </div>
+                        <div class="module-slot" onclick="openModuleSelector(5)">
+                            <span class="text-2xl">🔮</span>
+                            <span class="text-xs mt-1">预测模块</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-sm text-gray-400">已装备: <span id="equipped-count" class="text-green-400">2</span>/6 模块</span>
+                    </div>
+                </div>
+
+                <!-- 量子计算演示 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">量子计算状态</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span>计算进度</span>
+                                <span id="compute-percent">0%</span>
+                            </div>
+                            <div class="research-progress">
+                                <div class="research-fill" id="compute-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">计算复杂度</label>
+                            <select id="complexity" class="w-full p-2 bg-gray-800 rounded" onchange="updateComplexity()">
+                                <option value="simple">简单计算</option>
+                                <option value="medium">中等复杂度</option>
+                                <option value="complex">复杂计算</option>
+                                <option value="quantum">量子纠缠</option>
+                            </select>
+                        </div>
+                        <div class="text-center">
+                            <button class="action-button" onclick="startComputation()">
+                                开始计算
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">方碑盟约</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">多功能建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">240秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">6</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            方尖碑是方碑盟约的核心建筑，通过模块化设计实现多种功能。
+                            集成了量子计算技术，能够进行复杂的研究和预测。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 功能切换 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">功能模式</h3>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <div class="function-tab active" onclick="switchFunction('research')">
+                            研究模式
+                        </div>
+                        <div class="function-tab" onclick="switchFunction('defense')">
+                            防御模式
+                        </div>
+                        <div class="function-tab" onclick="switchFunction('communication')">
+                            通讯模式
+                        </div>
+                        <div class="function-tab" onclick="switchFunction('engineering')">
+                            工程模式
+                        </div>
+                    </div>
+                    <div id="function-content" class="p-4 bg-gray-800/50 rounded-lg">
+                        <h4 class="font-bold mb-2">研究模式</h4>
+                        <p class="text-sm text-gray-400 mb-3">
+                            加速科技研究，提供研究点数加成
+                        </p>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="text-gray-400">研究速度:</span>
+                                <span class="text-green-400">+50%</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">效率:</span>
+                                <span class="text-green-400">85%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">2000/2000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">1000/1000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>能量输出</span>
+                                <span id="energy-text">150/150</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="energy-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>计算能力</span>
+                                <span id="compute-text">1000 TFLOPS</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-cyan-500" id="compute-bar" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础方尖碑</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准的模块化方尖碑</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">2000 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 预测功能 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">量子预测系统</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">预测类型</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="prediction" value="battle" checked class="mr-2">
+                            <span>战况预测</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="prediction" value="resource" class="mr-2">
+                            <span>资源预测</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="prediction" value="enemy" class="mr-2">
+                            <span>敌军动向</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="prediction" value="weather" class="mr-2">
+                            <span>环境变化</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">预测结果</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span>胜率</span>
+                            <div class="prediction-indicator high">
+                                <span>87%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>风险等级</span>
+                            <div class="prediction-indicator medium">
+                                <span>中等</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>建议行动</span>
+                            <div class="prediction-indicator low">
+                                <span>进攻</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">操作</h4>
+                    <button class="action-button w-full mb-2" onclick="runPrediction()">
+                        运行预测
+                    </button>
+                    <div class="text-xs text-gray-400">
+                        准确度: <span class="text-green-400">92%</span> | 
+                        耗时: <span class="text-blue-400">5秒</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块选择器（隐藏） -->
+        <div id="module-selector" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="module-selector max-w-md w-full mx-4">
+                <h3 class="font-orbitron text-xl font-bold mb-4">选择模块</h3>
+                <div id="module-list">
+                    <div class="module-item" onclick="selectModule('energy')">
+                        <h4 class="font-bold">能量模块</h4>
+                        <p class="text-sm text-gray-400">增加能量产出和存储</p>
+                    </div>
+                    <div class="module-item selected" onclick="selectModule('research')">
+                        <h4 class="font-bold">研究模块</h4>
+                        <p class="text-sm text-gray-400">加速科技研究进度</p>
+                    </div>
+                    <div class="module-item" onclick="selectModule('defense')">
+                        <h4 class="font-bold">防御模块</h4>
+                        <p class="text-sm text-gray-400">增强防御系统和护盾</p>
+                    </div>
+                    <div class="module-item selected" onclick="selectModule('communication')">
+                        <h4 class="font-bold">通讯模块</h4>
+                        <p class="text-sm text-gray-400">扩展通讯范围和效率</p>
+                    </div>
+                    <div class="module-item" onclick="selectModule('engineering')">
+                        <h4 class="font-bold">工程模块</h4>
+                        <p class="text-sm text-gray-400">提升建筑和维修速度</p>
+                    </div>
+                    <div class="module-item" onclick="selectModule('prediction')">
+                        <h4 class="font-bold">预测模块</h4>
+                        <p class="text-sm text-gray-400">解锁量子预测功能</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button class="action-button" onclick="closeModuleSelector()">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, obelisk;
+        let isRotating = true;
+        let quantumMode = false;
+        let computeProgress = 0;
+        let currentFunction = 'research';
+        let currentUpgrade = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // 创建量子光效
+            for (let i = 0; i < 4; i++) {
+                const pointLight = new THREE.PointLight(0x10b981, 0.5, 15);
+                pointLight.position.set(
+                    Math.cos(i * Math.PI / 2) * 5,
+                    5,
+                    Math.sin(i * Math.PI / 2) * 5
+                );
+                scene.add(pointLight);
+            }
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建方尖碑
+            createObelisk();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createObelisk() {
+            obelisk = new THREE.Group();
+
+            // 基座
+            const baseGeometry = new THREE.BoxGeometry(6, 1, 6);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0x10b981,
+                emissive: 0x059669,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 0.5;
+            base.castShadow = true;
+            obelisk.add(base);
+
+            // 主体结构
+            const bodyGeometry = new THREE.BoxGeometry(3, 8, 3);
+            const bodyMaterial = new THREE.MeshPhongMaterial({
+                color: 0x34d399,
+                emissive: 0x10b981,
+                emissiveIntensity: 0.3,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.y = 5;
+            body.castShadow = true;
+            obelisk.add(body);
+
+            // 顶部晶体
+            const crystalGeometry = new THREE.OctahedronGeometry(1.5, 0);
+            const crystalMaterial = new THREE.MeshPhongMaterial({
+                color: 0x6ee7b7,
+                emissive: 0x34d399,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.9
+            });
+            const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+            crystal.position.y = 10;
+            crystal.castShadow = true;
+            obelisk.add(crystal);
+
+            // 量子环
+            for (let i = 0; i < 4; i++) {
+                const ringGeometry = new THREE.TorusGeometry(2.5, 0.1, 8, 32);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x10b981,
+                    emissive: 0x34d399,
+                    emissiveIntensity: 0.6,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.y = 2 + i * 2;
+                ring.rotation.x = Math.PI / 2;
+                ring.name = `quantum-ring-${i}`;
+                obelisk.add(ring);
+            }
+
+            // 数据节点
+            for (let i = 0; i < 8; i++) {
+                const nodeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+                const nodeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x6ee7b7,
+                    emissive: 0x10b981
+                });
+                const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                const angle = i * Math.PI / 4;
+                const radius = 1.8;
+                node.position.x = Math.cos(angle) * radius;
+                node.position.z = Math.sin(angle) * radius;
+                node.position.y = 5;
+                obelisk.add(node);
+            }
+
+            scene.add(obelisk);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转方尖碑
+            if (isRotating && obelisk) {
+                obelisk.rotation.y += 0.002;
+                
+                // 旋转量子环
+                obelisk.children.forEach((child, index) => {
+                    if (child.name && child.name.startsWith('quantum-ring-')) {
+                        child.rotation.z += 0.01 * (index % 2 === 0 ? 1 : -1);
+                    }
+                });
+                
+                // 脉动顶部晶体
+                const crystal = obelisk.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (crystal) {
+                    const scale = 1 + Math.sin(Date.now() * 0.003) * 0.2;
+                    crystal.scale.setScalar(scale);
+                    
+                    if (quantumMode) {
+                        crystal.material.emissiveIntensity = 1.5;
+                    }
+                }
+            }
+
+            // 量子模式效果
+            if (quantumMode) {
+                // 增强发光
+                obelisk.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissiveIntensity = Math.min(1, child.material.emissiveIntensity + 0.01);
+                    }
+                });
+            }
+
+            // 更新计算进度
+            if (computeProgress < 100) {
+                computeProgress += 0.2;
+                updateComputeDisplay();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function toggleQuantumMode() {
+            quantumMode = !quantumMode;
+            document.getElementById('quantum-text').textContent = quantumMode ? '普通模式' : '量子模式';
+            
+            if (quantumMode) {
+                createQuantumEffects();
+            }
+        }
+
+        function createQuantumEffects() {
+            const container = document.getElementById('model-container');
+            
+            setInterval(() => {
+                if (quantumMode) {
+                    const effect = document.createElement('div');
+                    effect.className = 'quantum-effect';
+                    effect.style.left = Math.random() * 100 + '%';
+                    effect.style.top = Math.random() * 100 + '%';
+                    container.appendChild(effect);
+                    
+                    setTimeout(() => effect.remove(), 2000);
+                }
+            }, 500);
+        }
+
+        function openModuleSelector(slot) {
+            document.getElementById('module-selector').classList.remove('hidden');
+            // 这里可以根据slot显示对应的模块列表
+        }
+
+        function closeModuleSelector() {
+            document.getElementById('module-selector').classList.add('hidden');
+        }
+
+        function selectModule(moduleType) {
+            // 更新模块选择
+            document.querySelectorAll('.module-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // 更新已装备模块数量
+            const count = document.querySelectorAll('.module-slot.equipped').length;
+            document.getElementById('equipped-count').textContent = count;
+        }
+
+        function startComputation() {
+            computeProgress = 0;
+            const complexity = document.getElementById('complexity').value;
+            const speeds = { simple: 2, medium: 1.5, complex: 1, quantum: 0.5 };
+            
+            const interval = setInterval(() => {
+                computeProgress += speeds[complexity];
+                if (computeProgress >= 100) {
+                    computeProgress = 100;
+                    clearInterval(interval);
+                    completeComputation();
+                }
+                updateComputeDisplay();
+            }, 100);
+        }
+
+        function updateComputeDisplay() {
+            document.getElementById('compute-bar').style.width = computeProgress + '%';
+            document.getElementById('compute-percent').textContent = Math.round(computeProgress) + '%';
+        }
+
+        function completeComputation() {
+            // 计算完成效果
+            const container = document.getElementById('model-container');
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const stream = document.createElement('div');
+                    stream.className = 'data-stream';
+                    stream.style.left = '50%';
+                    stream.style.top = '20%';
+                    stream.style.transform = `translateX(${(i - 2) * 20}px)`;
+                    container.appendChild(stream);
+                    
+                    setTimeout(() => stream.remove(), 2000);
+                }, i * 100);
+            }
+        }
+
+        function updateComplexity() {
+            // 根据复杂度更新显示
+        }
+
+        function switchFunction(mode) {
+            currentFunction = mode;
+            document.querySelectorAll('.function-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新功能内容
+            const content = document.getElementById('function-content');
+            const functions = {
+                research: {
+                    title: '研究模式',
+                    desc: '加速科技研究，提供研究点数加成',
+                    stats: { speed: '+50%', efficiency: '85%' }
+                },
+                defense: {
+                    title: '防御模式',
+                    desc: '激活防御系统，提供护盾和反制能力',
+                    stats: { shield: '+40%', range: '200m' }
+                },
+                communication: {
+                    title: '通讯模式',
+                    desc: '扩展通讯网络，增强信息传递效率',
+                    stats: { range: '+300%', speed: '+25%' }
+                },
+                engineering: {
+                    title: '工程模式',
+                    desc: '提升建筑和维修效率，优化资源利用',
+                    stats: { build: '+60%', repair: '+80%' }
+                }
+            };
+            
+            const func = functions[mode];
+            content.innerHTML = `
+                <h4 class="font-bold mb-2">${func.title}</h4>
+                <p class="text-sm text-gray-400 mb-3">${func.desc}</p>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    ${Object.entries(func.stats).map(([key, value]) => `
+                        <div>
+                            <span class="text-gray-400">${key === 'speed' ? '速度:' : key === 'efficiency' ? '效率:' : 
+                                key === 'shield' ? '护盾:' : key === 'range' ? '范围:' : 
+                                key === 'build' ? '建造:' : '维修:'}</span>
+                            <span class="text-green-400">${value}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function runPrediction() {
+            // 模拟预测过程
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '预测中...';
+            
+            setTimeout(() => {
+                button.disabled = false;
+                button.textContent = '运行预测';
+                
+                // 更新预测结果
+                updatePredictionResults();
+            }, 2000);
+        }
+
+        function updatePredictionResults() {
+            // 这里可以更新预测结果的显示
+        }
+
+        currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础方尖碑', desc: '标准的模块化方尖碑', cost: '2000 形魄', slots: 2 },
+            { title: 'T2 - 高级方尖碑', desc: '增加模块插槽和计算能力', cost: '4000 形魄', slots: 4 },
+            { title: 'T3 - 量子方尖碑', desc: '解锁量子计算和高级模块', cost: '8000 形魄', slots: 6 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新参数
+            const health = [2000, 3000, 5000][level];
+            document.getElementById('health-bar').style.width = '100%';
+            document.getElementById('health-text').textContent = `${health}/${health}`;
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+        });
+    </script>
+</body>
+</html>

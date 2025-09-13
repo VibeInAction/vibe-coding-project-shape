@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spore Cannon - 孢子大炮 | Spiral Progeny</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --spiral-color: #8b5cf6;
+            --spiral-dark: #6d28d9;
+            --spiral-light: #a78bfa;
+            --spiral-glow: rgba(139, 92, 246, 0.3);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0a1e 0%, #1a0f2e 100%);
+            min-height: 100vh;
+        }
+        
+        .spiral-glow {
+            box-shadow: 0 0 20px var(--spiral-glow), 
+                        0 0 40px var(--spiral-glow),
+                        inset 0 0 20px var(--spiral-glow);
+        }
+        
+        .cannon-charge {
+            animation: cannonCharge 2s ease-in-out infinite;
+        }
+        
+        @keyframes cannonCharge {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1;
+            }
+        }
+        
+        .spore-flight {
+            animation: sporeFly 1s ease-out;
+        }
+        
+        @keyframes sporeFly {
+            0% { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        .bio-mass-flow {
+            background: linear-gradient(90deg, transparent, var(--spiral-light), transparent);
+            animation: bioFlow 3s linear infinite;
+        }
+        
+        @keyframes bioFlow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .target-lock {
+            animation: targetLock 2s ease-in-out infinite;
+        }
+        
+        @keyframes targetLock {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+        
+        .spore-type {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .spore-type:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+        
+        .spore-type.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--spiral-light);
+            box-shadow: 0 0 15px var(--spiral-glow);
+        }
+        
+        .range-indicator {
+            background: radial-gradient(circle, var(--spiral-glow) 0%, transparent 70%);
+        }
+        
+        #canvas-container {
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold">Spore Cannon</h1>
+                    <span class="px-3 py-1 bg-purple-900/50 text-purple-400 rounded-full text-sm">Spiral Progeny</span>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="#overview" class="hover:text-purple-400 transition">概览</a>
+                    <a href="#spores" class="hover:text-purple-400 transition">孢子类型</a>
+                    <a href="#targets" class="hover:text-purple-400 transition">目标系统</a>
+                    <a href="#deployment" class="hover:text-purple-400 transition">部署控制</a>
+                    <a href="#upgrades" class="hover:text-purple-400 transition">升级路径</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-12">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 3D Visualization -->
+                <div class="bg-gray-800/30 rounded-lg p-6 spiral-glow">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        孢子大炮 3D 展示
+                    </h2>
+                    <div id="canvas-container" class="relative h-96 rounded-lg overflow-hidden">
+                        <canvas id="cannon-canvas"></canvas>
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <button onclick="toggleRotation()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                            <button onclick="resetView()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cannon Info -->
+                <div class="space-y-6">
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">大炮信息</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">等级</span>
+                                <span class="text-purple-400 font-bold">Level 4</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">射程</span>
+                                <span class="font-bold">50 km</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">发射速率</span>
+                                <span class="font-bold">3 发/秒</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">精度</span>
+                                <span class="font-bold text-purple-400">99.2%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Status -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">当前状态</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">能量储备</span>
+                                    <span class="text-sm text-purple-400">85%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-full transition-all duration-300" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">生物质储备</span>
+                                    <span class="text-sm text-green-400">72%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">冷却系统</span>
+                                    <span class="text-sm text-green-400">正常</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Operations -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">活跃操作</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                自动瞄准
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                生物合成
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                轨道校正
+                            </span>
+                            <span class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm border border-purple-500/30">
+                                孢子培育
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Spores Section -->
+        <section id="spores" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">孢子类型</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Spore Type Cards -->
+                <div class="spore-type bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpore('terra')">
+                    <div class="h-24 bg-gradient-to-br from-purple-900/30 to-green-700/20 rounded-lg mb-3 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 00-2-2h-3.064M15 20.488V18a2 2 0 012-2h3.064"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-1">生态孢子</h3>
+                    <p class="text-xs text-gray-400 mb-2">快速生态系统建立</p>
+                    <div class="text-xs">
+                        <span class="text-green-400">效率: 高</span> · 
+                        <span class="text-purple-400">射程: 50km</span>
+                    </div>
+                </div>
+
+                <div class="spore-type bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpore('defense')">
+                    <div class="h-24 bg-gradient-to-br from-purple-900/30 to-red-700/20 rounded-lg mb-3 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-1">防御孢子</h3>
+                    <p class="text-xs text-gray-400 mb-2">快速生长防御屏障</p>
+                    <div class="text-xs">
+                        <span class="text-yellow-400">效率: 中</span> · 
+                        <span class="text-purple-400">射程: 30km</span>
+                    </div>
+                </div>
+
+                <div class="spore-type bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpore('nanotech')">
+                    <div class="h-24 bg-gradient-to-br from-purple-900/30 to-blue-700/20 rounded-lg mb-3 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-1">纳米孢子</h3>
+                    <p class="text-xs text-gray-400 mb-2">纳米机器人集群</p>
+                    <div class="text-xs">
+                        <span class="text-green-400">效率: 极高</span> · 
+                        <span class="text-purple-400">射程: 20km</span>
+                    </div>
+                </div>
+
+                <div class="spore-type bg-gray-800/30 rounded-lg p-4 border border-gray-700" onclick="selectSpore('quantum')">
+                    <div class="h-24 bg-gradient-to-br from-purple-900/30 to-purple-700/20 rounded-lg mb-3 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-1">量子孢子</h3>
+                    <p class="text-xs text-gray-400 mb-2">量子态生命形式</p>
+                    <div class="text-xs">
+                        <span class="text-green-400">效率: 未知</span> · 
+                        <span class="text-purple-400">射程: 100km</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Targets Section -->
+        <section id="targets" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">目标系统</h2>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Target Map -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">目标地图</h3>
+                    <div class="relative h-64 bg-gray-900/50 rounded-lg overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-48 h-48 border-2 border-purple-500 rounded-full target-lock"></div>
+                        </div>
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2">
+                            <div class="text-center">
+                                <div class="text-lg font-bold text-purple-400">北纬 34.05°</div>
+                                <div class="text-sm text-gray-400">西经 118.24°</div>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                <span class="text-xs">已锁定</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 right-4">
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                <span class="text-xs">待确认</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target List -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">目标队列</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-green-900/20 rounded border-l-4 border-green-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold">区域 A-7</h4>
+                                    <p class="text-xs text-gray-400">荒漠地带生态重建</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-green-400">就绪</span>
+                                    <p class="text-xs text-gray-500">优先级: 高</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-yellow-900/20 rounded border-l-4 border-yellow-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold">轨道站 Gamma</h4>
+                                    <p class="text-xs text-gray-400">生命支持系统修复</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-yellow-400">计算中</span>
+                                    <p class="text-xs text-gray-500">优先级: 中</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-700/20 rounded border-l-4 border-gray-500">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold">深海区域 B-3</h4>
+                                    <p class="text-xs text-gray-400">深海生态监测</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400">待机</span>
+                                    <p class="text-xs text-gray-500">优先级: 低</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deployment Section -->
+        <section id="deployment" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">部署控制</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Deployment Parameters -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">部署参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-1">发射角度</label>
+                            <input type="range" min="0" max="90" value="45" class="w-full" onchange="updateAngle(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0°</span>
+                                <span id="angle-value">45°</span>
+                                <span>90°</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-1">发射功率</label>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm" onclick="setPower('low')">低</button>
+                                <button class="px-3 py-1 bg-purple-900/50 text-purple-400 rounded text-sm">中</button>
+                                <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm" onclick="setPower('high')">高</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-1">扩散模式</label>
+                            <select class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                                <option>集中投放</option>
+                                <option>扇形扩散</option>
+                                <option>全域覆盖</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biomass Management -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">生物质管理</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">生态孢子</span>
+                            <span class="text-sm">450 单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-green-500 h-full bio-mass-flow" style="width: 75%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">防御孢子</span>
+                            <span class="text-sm">280 单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-red-500 h-full" style="width: 47%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">纳米孢子</span>
+                            <span class="text-sm">120 单位</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-500 h-full" style="width: 20%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Launch Control -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">发射控制</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-purple-900/20 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold">系统状态</span>
+                                <span class="text-sm text-green-400">就绪</span>
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                目标已锁定，参数已优化
+                            </div>
+                        </div>
+                        <button onclick="launchSpores()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 rounded font-bold transition">
+                            发射孢子
+                        </button>
+                        <div class="text-xs text-gray-500 text-center">
+                            预计到达时间: 15分钟
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrades Section -->
+        <section id="upgrades" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">升级路径</h2>
+            <div class="space-y-4">
+                <!-- Upgrade Option 1 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('range')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">超远程发射</h3>
+                                <p class="text-sm text-gray-400">射程扩展至200公里</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">2500</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 2 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('multispore')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">多重孢子发射</h3>
+                                <p class="text-sm text-gray-400">同时发射多种孢子类型</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">3000</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 3 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('ai')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">智能瞄准系统</h3>
+                                <p class="text-sm text-gray-400">AI优化投放精度和效率</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-purple-400">2000</p>
+                            <p class="text-sm text-gray-400">生物质</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 backdrop-blur-sm border-t border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-400">Spiral Progeny Spore Cannon © 2024</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js Scene Setup
+        let scene, camera, renderer;
+        let sporeCannon;
+        let isRotating = true;
+        let cannonBarrel;
+        let sporeProjectiles = [];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const canvas = document.getElementById('cannon-canvas');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f0a1e, 10, 50);
+            
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x8b5cf6, 1);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0xa78bfa, 0.8);
+            pointLight1.position.set(0, 5, 0);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0xc084fc, 0.6);
+            pointLight2.position.set(10, 0, 10);
+            scene.add(pointLight2);
+            
+            createSporeCannon();
+            animate();
+        }
+
+        function createSporeCannon() {
+            sporeCannon = new THREE.Group();
+            
+            // Cannon base
+            const baseGeometry = new THREE.CylinderGeometry(4, 5, 2, 32);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0x6d28d9,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = -1;
+            base.receiveShadow = true;
+            sporeCannon.add(base);
+            
+            // Cannon barrel
+            const barrelGeometry = new THREE.CylinderGeometry(1.5, 2, 8, 32);
+            const barrelMaterial = new THREE.MeshPhongMaterial({
+                color: 0xa78bfa,
+                emissive: 0x8b5cf6,
+                emissiveIntensity: 0.3,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            cannonBarrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
+            cannonBarrel.position.y = 3;
+            cannonBarrel.rotation.z = -Math.PI / 6;
+            cannonBarrel.castShadow = true;
+            sporeCannon.add(cannonBarrel);
+            
+            // Cannon mount
+            const mountGeometry = new THREE.SphereGeometry(2, 16, 16);
+            const mountMaterial = new THREE.MeshPhongMaterial({
+                color: 0x8b5cf6,
+                emissive: 0x6d28d9,
+                emissiveIntensity: 0.4
+            });
+            const mount = new THREE.Mesh(mountGeometry, mountMaterial);
+            mount.position.y = 0;
+            sporeCannon.add(mount);
+            
+            // Energy core
+            const coreGeometry = new THREE.SphereGeometry(1, 16, 16);
+            const coreMaterial = new THREE.MeshBasicMaterial({
+                color: 0xe9d5ff,
+                emissive: 0xa78bfa
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 0;
+            sporeCannon.add(core);
+            
+            // Spore containment units
+            for (let i = 0; i < 3; i++) {
+                const containerGeometry = new THREE.CylinderGeometry(0.8, 0.8, 1.5, 16);
+                const containerMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xc084fc,
+                    emissive: 0xa78bfa,
+                    emissiveIntensity: 0.2,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const container = new THREE.Mesh(containerGeometry, containerMaterial);
+                const angle = (i / 3) * Math.PI * 2;
+                container.position.set(
+                    Math.cos(angle) * 3,
+                    1,
+                    Math.sin(angle) * 3
+                );
+                sporeCannon.add(container);
+            }
+            
+            scene.add(sporeCannon);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isRotating) {
+                sporeCannon.rotation.y += 0.005;
+            }
+            
+            // Animate barrel
+            const time = Date.now() * 0.001;
+            cannonBarrel.rotation.z = -Math.PI / 6 + Math.sin(time) * 0.1;
+            
+            // Update spore projectiles
+            sporeProjectiles = sporeProjectiles.filter(projectile => {
+                projectile.position.add(projectile.userData.velocity);
+                projectile.userData.life -= 0.01;
+                
+                if (projectile.userData.life <= 0) {
+                    scene.remove(projectile);
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Create new spore particles occasionally
+            if (Math.random() < 0.05) {
+                createSporeParticle();
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        function createSporeParticle() {
+            const particleGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const particleMaterial = new THREE.MeshBasicMaterial({
+                color: 0xe9d5ff,
+                transparent: true,
+                opacity: 0.8
+            });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            
+            // Start from barrel tip
+            const barrelTip = new THREE.Vector3(0, 7, 0);
+            barrelTip.applyMatrix4(cannonBarrel.matrixWorld);
+            
+            particle.position.copy(barrelTip);
+            
+            // Random velocity in barrel direction
+            const direction = new THREE.Vector3(0, 1, 0);
+            direction.applyMatrix4(cannonBarrel.matrixWorld);
+            direction.sub(barrelTip);
+            direction.normalize();
+            
+            particle.userData = {
+                velocity: direction.multiplyScalar(0.5 + Math.random() * 0.3),
+                life: 1
+            };
+            
+            sporeProjectiles.push(particle);
+            scene.add(particle);
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function resetView() {
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            sporeCannon.rotation.y = 0;
+        }
+
+        function selectSpore(type) {
+            const cards = document.querySelectorAll('.spore-type');
+            cards.forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            console.log('Selected spore type:', type);
+        }
+
+        function updateAngle(value) {
+            document.getElementById('angle-value').textContent = `${value}°`;
+        }
+
+        function setPower(power) {
+            console.log('Setting power to:', power);
+        }
+
+        function launchSpores() {
+            console.log('Launching spores...');
+            // Create multiple spore particles for launch effect
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createSporeParticle(), i * 50);
+            }
+        }
+
+        function selectUpgrade(type) {
+            console.log('Selected upgrade:', type);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

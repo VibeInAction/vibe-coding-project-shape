@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和谐圣殿 - 圆环族建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 圆环族颜色主题 */
+            --circle-color: #3b82f6;
+            --circle-light: #60a5fa;
+            --circle-dark: #1e40af;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--circle-color) 0%, var(--circle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--circle-color);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--circle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--circle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 和谐光环效果 */
+        .harmony-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
+            animation: harmony-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes harmony-pulse {
+            0%, 100% { 
+                transform: scale(0.8);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        /* 共振波纹 */
+        .resonance-wave {
+            position: absolute;
+            border: 2px solid var(--circle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: resonance-expand 3s ease-out infinite;
+        }
+
+        @keyframes resonance-expand {
+            0% {
+                width: 50px;
+                height: 50px;
+                opacity: 1;
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        /* 能量连接线 */
+        .energy-connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--circle-color), transparent);
+            transform-origin: left center;
+            opacity: 0.6;
+            animation: energy-flow 2s linear infinite;
+        }
+
+        @keyframes energy-flow {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+
+        /* 特效选择器 */
+        .effect-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .effect-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .effect-card:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--circle-color);
+            transform: translateY(-2px);
+        }
+
+        .effect-card.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: var(--circle-color);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        /* 终极能力按钮 */
+        .ultimate-button {
+            background: linear-gradient(135deg, var(--circle-color) 0%, var(--circle-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .ultimate-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        .ultimate-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ultimate-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .ultimate-button:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        /* 网络节点 */
+        .network-node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--circle-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .network-node:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+        }
+
+        .network-node.active {
+            background: var(--circle-color);
+            color: white;
+        }
+
+        /* 冷却时间显示 */
+        .cooldown-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cooldown-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--circle-color), var(--circle-light));
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">和谐圣殿</h1>
+            <p class="text-gray-400">Harmony Sanctuary - 共鸣网络的核心枢纽</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="toggleEffects()">
+                            <span id="effects-text">关闭特效</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 特效选择 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">共鸣特效</h3>
+                    <div class="effect-selector">
+                        <div class="effect-card active" onclick="selectEffect('healing')">
+                            <h4 class="font-bold mb-2">治愈光环</h4>
+                            <p class="text-sm text-gray-400">恢复范围内友方建筑生命值</p>
+                            <div class="mt-2 text-xs text-blue-400">范围: 200m | 效果: 50/秒</div>
+                        </div>
+                        <div class="effect-card" onclick="selectEffect('shield')">
+                            <h4 class="font-bold mb-2">护盾增幅</h4>
+                            <p class="text-sm text-gray-400">提升所有圆环族建筑护盾强度</p>
+                            <div class="mt-2 text-xs text-blue-400">加成: +30% | 持续: 60秒</div>
+                        </div>
+                        <div class="effect-card" onclick="selectEffect('resonance')">
+                            <h4 class="font-bold mb-2">深度共鸣</h4>
+                            <p class="text-sm text-gray-400">增强所有建筑的共鸣效果</p>
+                            <div class="mt-2 text-xs text-blue-400">效率: +50% | 范围: 全图</div>
+                        </div>
+                        <div class="effect-card" onclick="selectEffect('harmony')">
+                            <h4 class="font-bold mb-2">和谐之律</h4>
+                            <p class="text-sm text-gray-400">暂时禁用敌方特殊能力</p>
+                            <div class="mt-2 text-xs text-blue-400">范围: 300m | 持续: 30秒</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 终极能力 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">终极能力</h3>
+                    <div class="text-center mb-4">
+                        <h4 class="font-bold text-lg mb-2">和谐共鸣爆发</h4>
+                        <p class="text-sm text-gray-400 mb-4">释放全部共鸣能量，产生强大的范围效果</p>
+                        <button class="ultimate-button" id="ultimate-btn" onclick="activateUltimate()">
+                            激活终极能力
+                        </button>
+                        <div class="mt-2 text-sm">
+                            冷却时间: <span id="cooldown-text">就绪</span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="cooldown-bar">
+                                <div class="cooldown-fill" id="cooldown-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">圆环族</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">支援建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">180秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">4</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            和谐圣殿是圆环族的终极支援建筑，能够协调整个共鸣网络，
+                            提供强大的范围增益效果和独特的终极能力。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">2500/2500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">1000/1000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>能量储备</span>
+                                <span id="energy-text">200/200</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="energy-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 共鸣网络 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">共鸣网络状态</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span>连接建筑数量</span>
+                            <span class="font-semibold text-blue-400">8/12</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>网络强度</span>
+                            <span class="font-semibold text-green-400">85%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>加成效果</span>
+                            <span class="font-semibold text-purple-400">+40%</span>
+                        </div>
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="network-node active" title="中央圆环">
+                                    <span class="text-xs">CR</span>
+                                </div>
+                                <div class="network-node active" title="共鸣塔">
+                                    <span class="text-xs">RT</span>
+                                </div>
+                                <div class="network-node active" title="护盾塔">
+                                    <span class="text-xs">ES</span>
+                                </div>
+                                <div class="network-node active" title="形魄收集器">
+                                    <span class="text-xs">MC</span>
+                                </div>
+                                <div class="network-node" title="三角要塞">
+                                    <span class="text-xs">TF</span>
+                                </div>
+                                <div class="network-node" title="棱镜炮塔">
+                                    <span class="text-xs">PC</span>
+                                </div>
+                                <div class="network-node" title="方尖碑">
+                                    <span class="text-xs">OB</span>
+                                </div>
+                                <div class="network-node active" title="生命核心">
+                                    <span class="text-xs">LC</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础圣殿</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">提供基础的共鸣协调功能</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">800 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 协同演示区 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">建筑协同演示</h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">选择协同建筑</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('tower')">
+                            共鸣塔
+                        </button>
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('shield')">
+                            护盾塔
+                        </button>
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('collector')">
+                            收集器
+                        </button>
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('fortress')">
+                            三角要塞
+                        </button>
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('obelisk')">
+                            方尖碑
+                        </button>
+                        <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="addSynergy('lifecore')">
+                            生命核心
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-sm text-gray-400">当前协同: <span id="synergy-list" class="text-blue-400">无</span></p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">协同效果</h4>
+                    <div id="synergy-effects" class="space-y-2 text-sm">
+                        <div class="p-2 bg-gray-800 rounded">
+                            <span class="text-gray-400">基础效果:</span>
+                            <span class="text-green-400">所有友方建筑 +10% 效率</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-3 bg-blue-900/20 rounded border border-blue-500/30">
+                        <p class="text-sm">
+                            <span class="font-semibold">总加成:</span>
+                            <span id="total-synergy" class="text-blue-400">+10%</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, sanctuary;
+        let isRotating = true;
+        let showEffects = true;
+        let harmonyOrbs = [];
+        let resonanceWaves = [];
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // 创建和谐的彩色光点
+            for (let i = 0; i < 5; i++) {
+                const pointLight = new THREE.PointLight(
+                    [0x3b82f6, 0x60a5fa, 0x93c5fd, 0xbfdbfe, 0xdbfefb][i],
+                    1,
+                    15
+                );
+                pointLight.position.set(
+                    Math.cos(i * Math.PI * 2 / 5) * 8,
+                    5,
+                    Math.sin(i * Math.PI * 2 / 5) * 8
+                );
+                scene.add(pointLight);
+            }
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建和谐圣殿
+            createSanctuary();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createSanctuary() {
+            sanctuary = new THREE.Group();
+
+            // 中央柱体
+            const centralGeometry = new THREE.CylinderGeometry(1.5, 2, 10, 8);
+            const centralMaterial = new THREE.MeshPhongMaterial({
+                color: 0x3b82f6,
+                emissive: 0x1e40af,
+                emissiveIntensity: 0.3,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const central = new THREE.Mesh(centralGeometry, centralMaterial);
+            central.position.y = 5;
+            central.castShadow = true;
+            sanctuary.add(central);
+
+            // 谐和环
+            for (let i = 0; i < 5; i++) {
+                const ringGeometry = new THREE.TorusGeometry(4 + i * 0.8, 0.3, 8, 32);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: [0x3b82f6, 0x60a5fa, 0x93c5fd, 0xbfdbfe, 0x60a5fa][i],
+                    emissive: 0x3b82f6,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.y = 2 + i * 1.2;
+                ring.rotation.x = Math.PI / 2 + i * 0.2;
+                ring.name = `harmony-ring-${i}`;
+                sanctuary.add(ring);
+            }
+
+            // 顶部水晶
+            const crystalGeometry = new THREE.OctahedronGeometry(1.5, 0);
+            const crystalMaterial = new THREE.MeshPhongMaterial({
+                color: 0x60a5fa,
+                emissive: 0x3b82f6,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.9
+            });
+            const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+            crystal.position.y = 10;
+            crystal.castShadow = true;
+            sanctuary.add(crystal);
+
+            // 创建和谐光环效果
+            createHarmonyEffects();
+
+            scene.add(sanctuary);
+        }
+
+        function createHarmonyEffects() {
+            // 创建和谐光环
+            for (let i = 0; i < 3; i++) {
+                const orbGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const orbMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x60a5fa,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+                
+                orb.userData = {
+                    radius: 6 + i * 2,
+                    speed: 0.01 + i * 0.005,
+                    height: 3 + i * 2,
+                    offset: i * Math.PI * 2 / 3
+                };
+                
+                harmonyOrbs.push(orb);
+                scene.add(orb);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转圣殿
+            if (isRotating && sanctuary) {
+                sanctuary.rotation.y += 0.003;
+                
+                // 旋转谐和环
+                sanctuary.children.forEach((child, index) => {
+                    if (child.name && child.name.startsWith('harmony-ring-')) {
+                        child.rotation.z += 0.01 * (index % 2 === 0 ? 1 : -1);
+                    }
+                });
+                
+                // 脉动顶部水晶
+                const crystal = sanctuary.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (crystal) {
+                    crystal.scale.setScalar(1 + Math.sin(Date.now() * 0.003) * 0.2);
+                    crystal.rotation.y += 0.01;
+                }
+            }
+
+            // 动画和谐光环
+            harmonyOrbs.forEach((orb, index) => {
+                const data = orb.userData;
+                const time = Date.now() * 0.001;
+                
+                orb.position.x = Math.cos(time * data.speed + data.offset) * data.radius;
+                orb.position.z = Math.sin(time * data.speed + data.offset) * data.radius;
+                orb.position.y = data.height + Math.sin(time * data.speed * 2) * 0.5;
+                
+                orb.material.opacity = 0.5 + Math.sin(time * 2 + index) * 0.3;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function toggleEffects() {
+            showEffects = !showEffects;
+            document.getElementById('effects-text').textContent = showEffects ? '关闭特效' : '开启动效';
+            
+            // 切换特效显示
+            harmonyOrbs.forEach(orb => {
+                orb.visible = showEffects;
+            });
+        }
+
+        let currentEffect = 'healing';
+        const effectData = {
+            healing: { range: 200, effect: '50生命/秒', duration: '持续' },
+            shield: { range: '全局', effect: '+30%护盾', duration: '60秒' },
+            resonance: { range: '全局', effect: '+50%效率', duration: '持续' },
+            harmony: { range: 300, effect: '禁用能力', duration: '30秒' }
+        };
+
+        function selectEffect(effect) {
+            currentEffect = effect;
+            document.querySelectorAll('.effect-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新3D场景中的特效
+            updateSanctuaryEffect(effect);
+        }
+
+        function updateSanctuaryEffect(effect) {
+            // 根据选择的特效更新3D场景
+            // 这里可以添加特定的视觉效果
+        }
+
+        // 终极能力相关
+        let ultimateCooldown = 0;
+        let ultimateActive = false;
+
+        function activateUltimate() {
+            if (ultimateCooldown > 0) return;
+            
+            ultimateActive = true;
+            const button = document.getElementById('ultimate-btn');
+            button.disabled = true;
+            button.textContent = '和谐共鸣爆发中...';
+            
+            // 触发特效
+            triggerUltimateEffect();
+            
+            // 开始冷却
+            setTimeout(() => {
+                ultimateActive = false;
+                ultimateCooldown = 300; // 5分钟冷却
+                startCooldown();
+            }, 10000); // 持续10秒
+        }
+
+        function triggerUltimateEffect() {
+            // 创建强烈的视觉特效
+            const container = document.getElementById('model-container');
+            
+            // 创建多个扩散的波纹
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const wave = document.createElement('div');
+                    wave.className = 'resonance-wave';
+                    wave.style.left = '50%';
+                    wave.style.top = '50%';
+                    wave.style.transform = 'translate(-50%, -50%)';
+                    wave.style.animationDelay = `${i * 0.2}s`;
+                    container.appendChild(wave);
+                    
+                    setTimeout(() => wave.remove(), 3000);
+                }, i * 200);
+            }
+            
+            // 3D场景中的特效
+            if (sanctuary) {
+                // 强烈的发光效果
+                sanctuary.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissiveIntensity = 2;
+                        setTimeout(() => {
+                            child.material.emissiveIntensity = 0.5;
+                        }, 2000);
+                    }
+                });
+            }
+        }
+
+        function startCooldown() {
+            const button = document.getElementById('ultimate-btn');
+            const fill = document.getElementById('cooldown-fill');
+            const text = document.getElementById('cooldown-text');
+            
+            const interval = setInterval(() => {
+                ultimateCooldown--;
+                const progress = (300 - ultimateCooldown) / 300 * 100;
+                fill.style.width = progress + '%';
+                
+                const minutes = Math.floor(ultimateCooldown / 60);
+                const seconds = ultimateCooldown % 60;
+                text.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (ultimateCooldown <= 0) {
+                    clearInterval(interval);
+                    button.disabled = false;
+                    button.textContent = '激活终极能力';
+                    text.textContent = '就绪';
+                    fill.style.width = '0%';
+                }
+            }, 1000);
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础圣殿', desc: '提供基础的共鸣协调功能', cost: '800 形魄', efficiency: 100 },
+            { title: 'T2 - 强化圣殿', desc: '增强共鸣效果和范围', cost: '1500 形魄', efficiency: 150 },
+            { title: 'T3 - 终极圣殿', desc: '解锁终极能力和深度共鸣', cost: '3000 形魄', efficiency: 200 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新参数
+            updateBuildingParameters(level);
+        }
+
+        function updateBuildingParameters(level) {
+            const multipliers = [1, 1.5, 2];
+            const mult = multipliers[level];
+            
+            document.getElementById('health-bar').style.width = (100 * mult) + '%';
+            document.getElementById('health-text').textContent = `${Math.round(2500 * mult)}/2500`;
+            
+            document.getElementById('shield-bar').style.width = (100 * mult) + '%';
+            document.getElementById('shield-text').textContent = `${Math.round(1000 * mult)}/1000`;
+            
+            document.getElementById('energy-bar').style.width = (100 * mult) + '%';
+            document.getElementById('energy-text').textContent = `${Math.round(200 * mult)}/200`;
+        }
+
+        // 协同系统
+        let synergyBuildings = new Set();
+
+        function addSynergy(building) {
+            if (synergyBuildings.has(building)) {
+                synergyBuildings.delete(building);
+            } else {
+                synergyBuildings.add(building);
+            }
+            
+            updateSynergyDisplay();
+        }
+
+        function updateSynergyDisplay() {
+            const list = document.getElementById('synergy-list');
+            const effects = document.getElementById('synergy-effects');
+            const total = document.getElementById('total-synergy');
+            
+            if (synergyBuildings.size === 0) {
+                list.textContent = '无';
+                total.textContent = '+10%';
+            } else {
+                const buildingNames = {
+                    tower: '共鸣塔',
+                    shield: '护盾塔',
+                    collector: '收集器',
+                    fortress: '三角要塞',
+                    obelisk: '方尖碑',
+                    lifecore: '生命核心'
+                };
+                
+                list.textContent = Array.from(synergyBuildings).map(b => buildingNames[b]).join(', ');
+                
+                // 计算总加成
+                let bonus = 10; // 基础加成
+                
+                synergyBuildings.forEach(building => {
+                    switch(building) {
+                        case 'tower':
+                            bonus += 15;
+                            break;
+                        case 'shield':
+                            bonus += 10;
+                            break;
+                        case 'collector':
+                            bonus += 20;
+                            break;
+                        case 'fortress':
+                            bonus += 5;
+                            break;
+                        case 'obelisk':
+                            bonus += 25;
+                            break;
+                        case 'lifecore':
+                            bonus += 30;
+                            break;
+                    }
+                });
+                
+                // 特殊组合加成
+                if (synergyBuildings.has('tower') && synergyBuildings.has('shield')) {
+                    bonus += 10;
+                }
+                
+                total.textContent = `+${bonus}%`;
+                
+                // 更新效果列表
+                effects.innerHTML = `
+                    <div class="p-2 bg-gray-800 rounded">
+                        <span class="text-gray-400">基础效果:</span>
+                        <span class="text-green-400">所有友方建筑 +10% 效率</span>
+                    </div>
+                    ${Array.from(synergyBuildings).map(building => {
+                        const buildingEffects = {
+                            tower: '<span class="text-blue-400">共鸣塔: +15% 攻击速度</span>',
+                            shield: '<span class="text-blue-400">护盾塔: +10% 护盾强度</span>',
+                            collector: '<span class="text-blue-400">收集器: +20% 资源产量</span>',
+                            fortress: '<span class="text-blue-400">三角要塞: +5% 建筑生命值</span>',
+                            obelisk: '<span class="text-blue-400">方尖碑: +25% 研究速度</span>',
+                            lifecore: '<span class="text-blue-400">生命核心: +30% 再生速度</span>'
+                        };
+                        return `<div class="p-2 bg-gray-800 rounded">${buildingEffects[building]}</div>`;
+                    }).join('')}
+                    ${synergyBuildings.has('tower') && synergyBuildings.has('shield') ? 
+                        '<div class="p-2 bg-purple-900/30 rounded border border-purple-500/30"><span class="text-purple-400">特殊组合: 防御专精 +10%</span></div>' : ''}
+                `;
+            }
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            
+            // 创建和谐光环效果
+            setInterval(() => {
+                if (showEffects) {
+                    const container = document.getElementById('model-container');
+                    const orb = document.createElement('div');
+                    orb.className = 'harmony-orb';
+                    orb.style.width = '100px';
+                    orb.style.height = '100px';
+                    orb.style.left = '50%';
+                    orb.style.top = '50%';
+                    orb.style.transform = 'translate(-50%, -50%)';
+                    container.appendChild(orb);
+                    
+                    setTimeout(() => orb.remove(), 4000);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共鸣塔 - 圆环族建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --accent-color: #60a5fa;
+            --attack-color: #ef4444;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 卡片样式 */
+        .info-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        /* 3D展示区 */
+        .model-viewer {
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 攻击范围指示器 */
+        .range-indicator {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .range-circle {
+            width: 120px;
+            height: 120px;
+            border: 2px solid var(--attack-color);
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .range-circle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: var(--attack-color);
+            border-radius: 50%;
+        }
+
+        /* 攻击动画 */
+        .attack-animation {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: var(--attack-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: attack-pulse 2s infinite;
+        }
+
+        @keyframes attack-pulse {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+            }
+            100% {
+                width: 80px;
+                height: 80px;
+                opacity: 0;
+            }
+        }
+
+        /* 参数条 */
+        .parameter-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .parameter-fill.attack {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .parameter-fill.defense {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .parameter-fill.speed {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        /* 目标选择器 */
+        .target-selector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .target-type {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .target-type:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .target-type.selected {
+            background: var(--primary-color);
+        }
+
+        /* 共鸣效果 */
+        .resonance-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: resonance-wave 3s infinite;
+        }
+
+        @keyframes resonance-wave {
+            0% {
+                width: 100px;
+                height: 100px;
+                opacity: 0.8;
+            }
+            100% {
+                width: 300px;
+                height: 300px;
+                opacity: 0;
+            }
+        }
+
+        /* 特殊效果标签 */
+        .effect-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 2rem;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .effect-tag:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .effect-tag.attack {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* 攻击模式切换 */
+        .attack-modes {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .attack-mode {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .attack-mode:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .attack-mode.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        /* 升级节点 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .upgrade-node.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .upgrade-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border-color);
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav-bar fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <h1 class="font-orbitron text-xl font-bold">共鸣塔</h1>
+                    <span class="tag bg-blue-500/20 text-blue-400 border border-blue-500/30">圆环族防御建筑</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="control-button w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition" onclick="toggleSound()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6a9 9 0 010 12"></path>
+                        </svg>
+                    </button>
+                    <button class="control-button w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition" onclick="toggleAttackDemo()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-container pt-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 左侧：3D展示区 -->
+            <div>
+                <div class="info-card h-full">
+                    <h2 class="font-orbitron text-2xl font-bold mb-4">建筑展示</h2>
+                    <div id="model-container" class="model-viewer">
+                        <!-- 3D模型将在这里渲染 -->
+                        <div class="resonance-effect"></div>
+                        
+                        <!-- 攻击范围指示器 -->
+                        <div class="range-indicator">
+                            <div class="text-center mb-2 text-sm">攻击范围</div>
+                            <div class="range-circle">
+                                <div class="attack-animation" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                            </div>
+                            <div class="text-center mt-2 text-xs">25格</div>
+                        </div>
+                        
+                        <!-- 目标选择器 -->
+                        <div class="target-selector">
+                            <div class="text-center mb-2 text-sm">目标类型</div>
+                            <div class="target-type selected" onclick="selectTarget(this, 'ground')">地面</div>
+                            <div class="target-type" onclick="selectTarget(this, 'air')">空中</div>
+                            <div class="target-type" onclick="selectTarget(this, 'both')">混合</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：信息面板 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-400">建筑类型</label>
+                            <div class="font-semibold">防御建筑</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">种族</label>
+                            <div class="font-semibold text-blue-400">圆环族</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">占地面积</label>
+                            <div class="font-semibold">15×15米</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">高度</label>
+                            <div class="font-semibold">20米</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战斗属性 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">战斗属性</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between">
+                                <span>攻击力</span>
+                                <span>150</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill attack" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>攻击速度</span>
+                                <span>1.2次/秒</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill speed" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>攻击范围</span>
+                                <span>25格</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill defense" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>护盾强度</span>
+                                <span>2000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill defense" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 特殊效果 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">特殊效果</h3>
+                    <div class="flex flex-wrap">
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            共鸣攻击
+                        </div>
+                        <div class="effect-tag attack">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                            减速30%
+                        </div>
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            范围伤害
+                        </div>
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            能量共鸣
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 攻击模式 -->
+        <div class="info-card mt-6">
+            <h3 class="font-orbitron text-2xl font-bold mb-4">攻击模式</h3>
+            <div class="attack-modes">
+                <div class="attack-mode active" onclick="selectAttackMode(this, 'single')">
+                    <h4 class="font-bold mb-1">单目标模式</h4>
+                    <p class="text-xs text-gray-400">集中火力攻击单个目标</p>
+                    <div class="mt-2 text-sm">伤害: <span class="text-yellow-400">150</span></div>
+                </div>
+                <div class="attack-mode" onclick="selectAttackMode(this, 'spread')">
+                    <h4 class="font-bold mb-1">扩散模式</h4>
+                    <p class="text-xs text-gray-400">攻击周围多个目标</p>
+                    <div class="mt-2 text-sm">伤害: <span class="text-yellow-400">75×3</span></div>
+                </div>
+                <div class="attack-mode" onclick="selectAttackMode(this, 'chain')">
+                    <h4 class="font-bold mb-1">连锁模式</h4>
+                    <p class="text-xs text-gray-400">能量在目标间跳跃</p>
+                    <div class="mt-2 text-sm">伤害: <span class="text-yellow-400">100×2</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级系统 -->
+        <div class="info-card mt-6">
+            <h3 class="font-orbitron text-2xl font-bold mb-6">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-node active" onclick="selectUpgrade(this, 0)">
+                    <span class="font-orbitron font-bold">T1</span>
+                    <span class="text-xs mt-1">基础</span>
+                </div>
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node" onclick="selectUpgrade(this, 1)">
+                    <span class="font-orbitron font-bold">T2</span>
+                    <span class="text-xs mt-1">进阶</span>
+                </div>
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node" onclick="selectUpgrade(this, 2)">
+                    <span class="font-orbitron font-bold">T3</span>
+                    <span class="text-xs mt-1">高级</span>
+                </div>
+            </div>
+            
+            <!-- 升级详情 -->
+            <div id="upgrade-details" class="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                <h4 class="font-bold mb-2">T1 - 基础共鸣塔</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">建造成本</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>形魄能量</span>
+                                <span>800</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>建造时间</span>
+                                <span>60秒</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">基础属性</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>攻击力</span>
+                                <span>150</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>攻击范围</span>
+                                <span>25格</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 战术分析 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="info-card">
+                <h3 class="font-orbitron text-xl font-bold mb-4">优势</h3>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-green-400 mr-2">✓</span>
+                        <span>攻击范围远，可覆盖大片区域</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-green-400 mr-2">✓</span>
+                        <span>减速效果限制敌人机动</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-green-400 mr-2">✓</span>
+                        <span>多种攻击模式适应不同战况</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-green-400 mr-2">✓</span>
+                        <span>共鸣效果增强附近防御</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h3 class="font-orbitron text-xl font-bold mb-4">劣势</h3>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">✗</span>
+                        <span>单体伤害相对较低</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">✗</span>
+                        <span>建筑成本较高</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">✗</span>
+                        <span>对高速单位效果一般</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-400 mr-2">✗</span>
+                        <span>需要良好的位置布局</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Three.js 3D场景设置
+        let scene, camera, renderer, resonanceTower;
+        let attackDemo = false;
+        let selectedTarget = 'ground';
+
+        function init3D() {
+            const container = document.getElementById('model-container');
+            
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // 添加光源
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x3b82f6, 1);
+            directionalLight.position.set(5, 10, 5);
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x60a5fa, 1);
+            pointLight.position.set(0, 10, 0);
+            scene.add(pointLight);
+            
+            // 创建共鸣塔模型
+            createResonanceTower();
+            
+            // 添加星星背景
+            createStarField();
+            
+            // 开始动画循环
+            animate();
+        }
+
+        function createResonanceTower() {
+            const group = new THREE.Group();
+            
+            // 基座
+            const baseGeometry = new THREE.CylinderGeometry(6, 8, 2, 6);
+            const baseMaterial = new THREE.MeshPhongMaterial({ color: 0x475569 });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 1;
+            group.add(base);
+            
+            // 三个环形发射器
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                const ringGroup = new THREE.Group();
+                
+                // 支柱
+                const pillarGeometry = new THREE.CylinderGeometry(0.5, 0.8, 12);
+                const pillarMaterial = new THREE.MeshPhongMaterial({ color: 0x64748b });
+                const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                pillar.position.x = Math.cos(angle) * 4;
+                pillar.position.z = Math.sin(angle) * 4;
+                pillar.position.y = 7;
+                ringGroup.add(pillar);
+                
+                // 发射环
+                const ringGeometry = new THREE.TorusGeometry(3, 0.3, 8, 50);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x3b82f6,
+                    emissive: 0x1e40af,
+                    emissiveIntensity: 0.5
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.x = Math.cos(angle) * 4;
+                ring.position.z = Math.sin(angle) * 4;
+                ring.position.y = 12;
+                ring.rotation.x = Math.PI / 2;
+                ringGroup.add(ring);
+                
+                // 能量球
+                const energyGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+                const energyMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x60a5fa,
+                    emissive: 0x3b82f6,
+                    emissiveIntensity: 1
+                });
+                const energy = new THREE.Mesh(energyGeometry, energyMaterial);
+                energy.position.x = Math.cos(angle) * 4;
+                energy.position.z = Math.sin(angle) * 4;
+                energy.position.y = 12;
+                ringGroup.add(energy);
+                
+                group.add(ringGroup);
+            }
+            
+            // 中心连接结构
+            const centerGeometry = new THREE.CylinderGeometry(1, 1, 10);
+            const centerMaterial = new THREE.MeshPhongMaterial({ color: 0x334155 });
+            const center = new THREE.Mesh(centerGeometry, centerMaterial);
+            center.position.y = 7;
+            group.add(center);
+            
+            resonanceTower = group;
+            scene.add(resonanceTower);
+        }
+
+        function createStarField() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 3000; i++) {
+                const x = (Math.random() - 0.5) * 200;
+                const y = (Math.random() - 0.5) * 200;
+                const z = (Math.random() - 0.5) * 200;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 旋转共鸣塔
+            if (resonanceTower) {
+                resonanceTower.rotation.y += 0.005;
+                
+                // 旋转发射环
+                resonanceTower.children.forEach((child, index) => {
+                    if (index > 0 && index < 4) {
+                        child.rotation.y += 0.02 * (index % 2 === 0 ? 1 : -1);
+                        const energy = child.children[2];
+                        if (energy) {
+                            energy.position.y = 12 + Math.sin(Date.now() * 0.001 + index) * 0.5;
+                        }
+                    }
+                });
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // 升级数据
+        const upgradeData = [
+            {
+                level: "T1 - 基础共鸣塔",
+                cost: { energy: 800, time: 60 },
+                stats: { damage: 150, range: 25 }
+            },
+            {
+                level: "T2 - 进阶共鸣塔",
+                cost: { energy: 1600, time: 90 },
+                stats: { damage: 225, range: 30 },
+                bonus: "攻击速度+25%"
+            },
+            {
+                level: "T3 - 高级共鸣塔",
+                cost: { energy: 3200, time: 120 },
+                stats: { damage: 350, range: 35 },
+                bonus: "连锁攻击+1目标"
+            }
+        ];
+
+        function selectUpgrade(node, index) {
+            document.querySelectorAll('.upgrade-node').forEach(n => n.classList.remove('active'));
+            node.classList.add('active');
+            
+            const details = document.getElementById('upgrade-details');
+            const data = upgradeData[index];
+            
+            details.innerHTML = `
+                <h4 class="font-bold mb-2">${data.level}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">建造成本</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>形魄能量</span>
+                                <span>${data.cost.energy}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>建造时间</span>
+                                <span>${data.cost.time}秒</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">属性</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>攻击力</span>
+                                <span>${data.stats.damage}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>攻击范围</span>
+                                <span>${data.stats.range}格</span>
+                            </div>
+                            ${data.bonus ? `<div class="flex justify-between text-sm text-yellow-400">
+                                <span>特殊加成</span>
+                                <span>${data.bonus}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectTarget(element, type) {
+            document.querySelectorAll('.target-type').forEach(t => t.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTarget = type;
+            // 更新模型或显示相应效果
+        }
+
+        function selectAttackMode(element, mode) {
+            document.querySelectorAll('.attack-mode').forEach(m => m.classList.remove('active'));
+            element.classList.add('active');
+            // 更新攻击模式显示
+        }
+
+        function toggleAttackDemo() {
+            attackDemo = !attackDemo;
+            if (attackDemo) {
+                // 启动攻击演示动画
+                const container = document.getElementById('model-container');
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const attack = document.createElement('div');
+                        attack.className = 'attack-animation';
+                        attack.style.left = Math.random() * 80 + 10 + '%';
+                        attack.style.top = Math.random() * 80 + 10 + '%';
+                        container.appendChild(attack);
+                        setTimeout(() => attack.remove(), 2000);
+                    }, i * 400);
+                }
+            }
+        }
+
+        function toggleSound() {
+            // 实现音效切换
+        }
+
+        // 响应式处理
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                const container = document.getElementById('model-container');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        });
+
+        // 初始化
+        init3D();
+    </script>
+</body>
+</html>

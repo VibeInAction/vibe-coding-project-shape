@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角要塞 - 三角议会建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 三角议会颜色主题 */
+            --triangle-color: #ef4444;
+            --triangle-light: #f87171;
+            --triangle-dark: #dc2626;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--triangle-color);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--triangle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 武器系统样式 */
+        .weapon-system {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .weapon-system:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--triangle-color);
+        }
+
+        .weapon-system.active {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: var(--triangle-color);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 牺牲系统样式 */
+        .sacrifice-slot {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .sacrifice-slot:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--triangle-color);
+        }
+
+        .sacrifice-slot.filled {
+            background: rgba(239, 68, 68, 0.2);
+            border-style: solid;
+            border-color: var(--triangle-color);
+        }
+
+        /* 攻击范围指示器 */
+        .range-indicator {
+            position: absolute;
+            border: 2px solid var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* 防御塔样式 */
+        .defense-tower {
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 2px solid var(--triangle-color);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .defense-tower:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+        }
+
+        .defense-tower.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 能量核心样式 */
+        .energy-core {
+            width: 20px;
+            height: 20px;
+            background: var(--triangle-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: core-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes core-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0.5;
+            }
+        }
+
+        /* 攻击动画 */
+        .attack-beam {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, var(--triangle-color), transparent);
+            transform-origin: left center;
+            opacity: 0;
+            animation: beam-shoot 1s ease-out;
+        }
+
+        @keyframes beam-shoot {
+            0% {
+                opacity: 1;
+                width: 0;
+            }
+            50% {
+                opacity: 1;
+                width: 200px;
+            }
+            100% {
+                opacity: 0;
+                width: 200px;
+            }
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 升级路径可视化 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+        }
+
+        .path-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .path-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: path-flow 2s linear infinite;
+        }
+
+        @keyframes path-flow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">三角要塞</h1>
+            <p class="text-gray-400">Triangle Fortress - 力量与牺牲的象征</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                        <div class="range-indicator" id="range-indicator" style="display: none;"></div>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="toggleAttackMode()">
+                            <span id="attack-mode-text">攻击模式: 自动</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 武器系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">武器系统</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="weapon-system active" onclick="selectWeapon('plasma')">
+                            <h4 class="font-bold mb-2">等离子炮塔</h4>
+                            <p class="text-sm text-gray-400 mb-2">高伤害单体攻击</p>
+                            <div class="text-xs">
+                                <span class="text-red-400">伤害: 800</span> | 
+                                <span class="text-yellow-400">射速: 0.8/秒</span>
+                            </div>
+                        </div>
+                        <div class="weapon-system" onclick="selectWeapon('missile')">
+                            <h4 class="font-bold mb-2">导弹发射井</h4>
+                            <p class="text-sm text-gray-400 mb-2">范围爆炸伤害</p>
+                            <div class="text-xs">
+                                <span class="text-red-400">伤害: 1200</span> | 
+                                <span class="text-yellow-400">射速: 0.3/秒</span>
+                            </div>
+                        </div>
+                        <div class="weapon-system" onclick="selectWeapon('laser')">
+                            <h4 class="font-bold mb-2">激光阵列</h4>
+                            <p class="text-sm text-gray-400 mb-2">持续 beam 伤害</p>
+                            <div class="text-xs">
+                                <span class="text-red-400">伤害: 500/秒</span> | 
+                                <span class="text-yellow-400">射速: 持续</span>
+                            </div>
+                        </div>
+                        <div class="weapon-system" onclick="selectWeapon('tesla')">
+                            <h4 class="font-bold mb-2">特斯拉线圈</h4>
+                            <p class="text-sm text-gray-400 mb-2">连锁闪电攻击</p>
+                            <div class="text-xs">
+                                <span class="text-red-400">伤害: 400</span> | 
+                                <span class="text-yellow-400">射速: 1.2/秒</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 防御塔配置 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">防御塔布局</h3>
+                    <div class="relative bg-gray-800/50 rounded-lg p-4" style="height: 200px;">
+                        <!-- 塔位网格 -->
+                        <div class="absolute top-4 left-4 defense-tower" onclick="toggleTower(this, 0)">
+                            <div class="energy-core"></div>
+                        </div>
+                        <div class="absolute top-4 right-4 defense-tower" onclick="toggleTower(this, 1)">
+                            <div class="energy-core"></div>
+                        </div>
+                        <div class="absolute bottom-4 left-1/4 defense-tower" onclick="toggleTower(this, 2)">
+                            <div class="energy-core"></div>
+                        </div>
+                        <div class="absolute bottom-4 right-1/4 defense-tower" onclick="toggleTower(this, 3)">
+                            <div class="energy-core"></div>
+                        </div>
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="text-xs text-gray-400">要塞核心</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-between text-sm">
+                        <span>已部署: <span id="tower-count" class="text-red-400">0</span>/4 塔位</span>
+                        <span>防御加成: <span id="defense-bonus" class="text-green-400">+0%</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">三角议会</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">防御建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">200秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">6</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            三角要塞是三角议会的终极防御建筑，拥有强大的武器系统和牺牲机制。
+                            通过牺牲自身生命值，可以释放毁灭性的攻击。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">5000/5000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">2000/2000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击力</span>
+                                <span id="attack-text">800</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-red-500" id="attack-bar" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击范围</span>
+                                <span id="range-text">300m</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-orange-500" id="range-bar" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 牺牲机制 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">牺牲机制</h3>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="sacrifice-slot" onclick="sacrificeHealth(0)">
+                                <h4 class="font-bold text-sm mb-1">生命献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲 25% 生命值</p>
+                                <p class="text-xs text-red-400 mt-1">获得 +50% 攻击力</p>
+                            </div>
+                            <div class="sacrifice-slot" onclick="sacrificeShield(1)">
+                                <h4 class="font-bold text-sm mb-1">护盾献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲所有护盾</p>
+                                <p class="text-xs text-blue-400 mt-1">获得 范围护盾</p>
+                            </div>
+                            <div class="sacrifice-slot" onclick="sacrificeSpeed(2)">
+                                <h4 class="font-bold text-sm mb-1">速度献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲 50% 移动</p>
+                                <p class="text-xs text-yellow-400 mt-1">获得 瞬间爆发</p>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-red-900/20 rounded border border-red-500/30">
+                            <p class="text-sm">
+                                <span class="font-semibold">警告:</span> 
+                                <span class="text-red-400">牺牲效果持续30秒，冷却时间60秒</span>
+                            </p>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            当前状态: <span id="sacrifice-status" class="text-green-400">正常</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级路径 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="upgrade-path">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础要塞</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准的三角防御要塞</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">1200 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 攻击演示区 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">攻击演示</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">目标选择</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="target" value="ground" checked class="mr-2">
+                            <span>地面单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="target" value="air" class="mr-2">
+                            <span>空中单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="target" value="both" class="mr-2">
+                            <span>混合目标</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">攻击模式</h4>
+                    <select id="attack-pattern" class="w-full p-2 bg-gray-800 rounded" onchange="updateAttackPattern()">
+                        <option value="single">单体攻击</option>
+                        <option value="splash">范围溅射</option>
+                        <option value="chain">连锁攻击</option>
+                        <option value="beam">持续光束</option>
+                    </select>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">操作</h4>
+                    <div class="space-y-2">
+                        <button class="action-button w-full" onclick="simulateAttack()">
+                            模拟攻击
+                        </button>
+                        <div class="text-xs text-gray-400">
+                            伤害: <span id="sim-damage" class="text-red-400">800</span> | 
+                            DPS: <span id="sim-dps" class="text-yellow-400">640</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, fortress;
+        let isRotating = true;
+        let activeWeapon = 'plasma';
+        let attackMode = 'auto';
+        let defenseTowers = new Set();
+        let currentHealth = 5000;
+        let currentShield = 2000;
+        let sacrificeCooldown = false;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xef4444, 2, 20);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(40, 40);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建三角要塞
+            createFortress();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createFortress() {
+            fortress = new THREE.Group();
+
+            // 主基座 - 三角形
+            const baseGeometry = new THREE.ConeGeometry(8, 3, 3);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xdc2626,
+                emissiveIntensity: 0.3,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 1.5;
+            base.castShadow = true;
+            fortress.add(base);
+
+            // 中央塔
+            const towerGeometry = new THREE.CylinderGeometry(1.5, 2, 12, 6);
+            const towerMaterial = new THREE.MeshPhongMaterial({
+                color: 0xf87171,
+                emissive: 0xef4444,
+                emissiveIntensity: 0.4,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+            tower.position.y = 8;
+            tower.castShadow = true;
+            fortress.add(tower);
+
+            // 武器平台
+            for (let i = 0; i < 3; i++) {
+                const angle = i * Math.PI * 2 / 3;
+                const platformGeometry = new THREE.BoxGeometry(3, 1, 3);
+                const platformMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xef4444,
+                    emissive: 0xdc2626,
+                    emissiveIntensity: 0.2
+                });
+                const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+                platform.position.x = Math.cos(angle) * 6;
+                platform.position.z = Math.sin(angle) * 6;
+                platform.position.y = 5;
+                platform.castShadow = true;
+                fortress.add(platform);
+
+                // 武器炮塔
+                const turretGeometry = new THREE.CylinderGeometry(0.8, 1, 2, 8);
+                const turret = new THREE.Mesh(turretGeometry, towerMaterial);
+                turret.position.x = Math.cos(angle) * 6;
+                turret.position.z = Math.sin(angle) * 6;
+                turret.position.y = 6.5;
+                turret.rotation.z = Math.cos(angle) * 0.3;
+                fortress.add(turret);
+            }
+
+            // 防护尖刺
+            for (let i = 0; i < 12; i++) {
+                const spikeGeometry = new THREE.ConeGeometry(0.3, 1.5, 4);
+                const spikeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf87171,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.5
+                });
+                const spike = new THREE.Mesh(spikeGeometry, spikeMaterial);
+                const angle = i * Math.PI * 2 / 12;
+                const radius = 8 + Math.random() * 2;
+                spike.position.x = Math.cos(angle) * radius;
+                spike.position.z = Math.sin(angle) * radius;
+                spike.position.y = 1.5;
+                spike.rotation.z = Math.PI / 2;
+                fortress.add(spike);
+            }
+
+            // 能量核心
+            const coreGeometry = new THREE.OctahedronGeometry(1, 0);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xf87171,
+                emissiveIntensity: 1,
+                transparent: true,
+                opacity: 0.8
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 8;
+            fortress.add(core);
+
+            scene.add(fortress);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转要塞
+            if (isRotating && fortress) {
+                fortress.rotation.y += 0.003;
+                
+                // 旋转武器平台
+                fortress.children.forEach((child, index) => {
+                    if (child.geometry instanceof THREE.BoxGeometry) {
+                        child.rotation.y += 0.01;
+                    }
+                });
+                
+                // 脉动能量核心
+                const core = fortress.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (core) {
+                    core.scale.setScalar(1 + Math.sin(Date.now() * 0.003) * 0.2);
+                    core.rotation.y += 0.02;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function toggleAttackMode() {
+            attackMode = attackMode === 'auto' ? 'manual' : 'auto';
+            document.getElementById('attack-mode-text').textContent = `攻击模式: ${attackMode === 'auto' ? '自动' : '手动'}`;
+        }
+
+        function selectWeapon(weapon) {
+            activeWeapon = weapon;
+            document.querySelectorAll('.weapon-system').forEach(sys => {
+                sys.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新攻击力显示
+            const weaponDamage = {
+                plasma: 800,
+                missile: 1200,
+                laser: 500,
+                tesla: 400
+            };
+            
+            document.getElementById('attack-text').textContent = weaponDamage[weapon];
+            document.getElementById('attack-bar').style.width = (weaponDamage[weapon] / 1000 * 100) + '%';
+            document.getElementById('sim-damage').textContent = weaponDamage[weapon];
+            
+            // 更新DPS
+            const weaponSpeed = {
+                plasma: 0.8,
+                missile: 0.3,
+                laser: 1,
+                tesla: 1.2
+            };
+            const dps = Math.round(weaponDamage[weapon] * weaponSpeed[weapon]);
+            document.getElementById('sim-dps').textContent = dps;
+        }
+
+        function toggleTower(tower, index) {
+            tower.classList.toggle('active');
+            
+            if (tower.classList.contains('active')) {
+                defenseTowers.add(index);
+            } else {
+                defenseTowers.delete(index);
+            }
+            
+            document.getElementById('tower-count').textContent = defenseTowers.size;
+            
+            // 计算防御加成
+            const bonus = defenseTowers.size * 15;
+            document.getElementById('defense-bonus').textContent = `+${bonus}%`;
+        }
+
+        // 牺牲机制
+        function sacrificeHealth(slot) {
+            if (sacrificeCooldown) return;
+            
+            const sacrificeAmount = currentHealth * 0.25;
+            currentHealth -= sacrificeAmount;
+            
+            updateHealthDisplay();
+            
+            // 激活牺牲效果
+            activateSacrificeEffect('health', slot);
+            
+            // 显示效果
+            showSacrificeMessage('生命献祭激活！攻击力 +50%', 'text-red-400');
+        }
+
+        function sacrificeShield(slot) {
+            if (sacrificeCooldown || currentShield === 0) return;
+            
+            currentShield = 0;
+            updateHealthDisplay();
+            
+            activateSacrificeEffect('shield', slot);
+            showSacrificeMessage('护盾献祭激活！获得范围护盾', 'text-blue-400');
+        }
+
+        function sacrificeSpeed(slot) {
+            if (sacrificeCooldown) return;
+            
+            activateSacrificeEffect('speed', slot);
+            showSacrificeMessage('速度献祭激活！瞬间爆发就绪', 'text-yellow-400');
+        }
+
+        function activateSacrificeEffect(type, slot) {
+            sacrificeCooldown = true;
+            const slots = document.querySelectorAll('.sacrifice-slot');
+            slots[slot].classList.add('filled');
+            
+            document.getElementById('sacrifice-status').textContent = '献祭状态';
+            document.getElementById('sacrifice-status').className = 'text-red-400';
+            
+            // 30秒后结束效果
+            setTimeout(() => {
+                slots[slot].classList.remove('filled');
+                document.getElementById('sacrifice-status').textContent = '正常';
+                document.getElementById('sacrifice-status').className = 'text-green-400';
+                
+                // 60秒冷却
+                setTimeout(() => {
+                    sacrificeCooldown = false;
+                }, 60000);
+            }, 30000);
+        }
+
+        function showSacrificeMessage(message, colorClass) {
+            // 创建临时消息显示
+            const msg = document.createElement('div');
+            msg.className = `fixed top-4 right-4 p-4 bg-gray-800 rounded-lg border border-red-500 ${colorClass}`;
+            msg.textContent = message;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        function updateHealthDisplay() {
+            const healthPercent = (currentHealth / 5000) * 100;
+            const shieldPercent = (currentShield / 2000) * 100;
+            
+            document.getElementById('health-bar').style.width = healthPercent + '%';
+            document.getElementById('health-text').textContent = `${Math.round(currentHealth)}/5000`;
+            
+            document.getElementById('shield-bar').style.width = shieldPercent + '%';
+            document.getElementById('shield-text').textContent = `${Math.round(currentShield)}/2000`;
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础要塞', desc: '标准的三角防御要塞', cost: '1200 形魄', health: 5000, shield: 2000 },
+            { title: 'T2 - 强化要塞', desc: '增加武器平台和防御力', cost: '2400 形魄', health: 7500, shield: 3000 },
+            { title: 'T3 - 终极要塞', desc: '解锁终极武器系统', cost: '4800 形魄', health: 10000, shield: 5000 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新参数
+            document.getElementById('health-bar').style.width = '100%';
+            document.getElementById('health-text').textContent = `${upgrade.health}/${upgrade.health}`;
+            document.getElementById('shield-bar').style.width = '100%';
+            document.getElementById('shield-text').textContent = `${upgrade.shield}/${upgrade.shield}`;
+            
+            currentHealth = upgrade.health;
+            currentShield = upgrade.shield;
+        }
+
+        function updateAttackPattern() {
+            const pattern = document.getElementById('attack-pattern').value;
+            // 根据攻击模式更新模拟数据
+            // 这里可以添加具体的逻辑
+        }
+
+        function simulateAttack() {
+            // 创建攻击视觉效果
+            const container = document.getElementById('model-container');
+            const beam = document.createElement('div');
+            beam.className = 'attack-beam';
+            beam.style.left = '50%';
+            beam.style.top = '50%';
+            beam.style.width = '0px';
+            beam.style.transform = 'translate(0, -50%)';
+            container.appendChild(beam);
+            
+            setTimeout(() => beam.remove(), 1000);
+            
+            // 显示攻击范围指示器
+            const indicator = document.getElementById('range-indicator');
+            indicator.style.display = 'block';
+            indicator.style.width = '300px';
+            indicator.style.height = '300px';
+            indicator.style.left = '50%';
+            indicator.style.top = '50%';
+            indicator.style.transform = 'translate(-50%, -50%)';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+        });
+    </script>
+</body>
+</html>

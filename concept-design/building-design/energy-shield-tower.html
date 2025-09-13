@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>能量护盾塔 - 圆环族建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --shield-color: #06b6d4;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 卡片样式 */
+        .info-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--shield-color);
+            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
+        }
+
+        /* 3D展示区 */
+        .model-viewer {
+            height: 500px;
+            background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 护盾效果 */
+        .shield-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border: 3px solid var(--shield-color);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: shield-pulse 2s infinite;
+        }
+
+        .shield-effect::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 2px solid var(--shield-color);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: shield-rotate 3s linear infinite;
+        }
+
+        @keyframes shield-pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes shield-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 护盾强度指示器 */
+        .shield-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-width: 200px;
+        }
+
+        .shield-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        .shield-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--shield-color), #0891b2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .shield-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 影响范围控制 */
+        .range-control {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .range-slider {
+            width: 150px;
+            margin-top: 0.5rem;
+        }
+
+        /* 参数条 */
+        .parameter-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease;
+        }
+
+        .parameter-fill.shield {
+            background: linear-gradient(90deg, #06b6d4, #0891b2);
+        }
+
+        .parameter-fill.regen {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .parameter-fill.efficiency {
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        }
+
+        /* 建筑选择网格 */
+        .building-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .building-item {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 2rem;
+        }
+
+        .building-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--shield-color);
+            transform: scale(1.1);
+        }
+
+        .building-item.protected {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: var(--shield-color);
+        }
+
+        /* 升级节点 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .upgrade-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-node:hover {
+            border-color: var(--shield-color);
+            transform: scale(1.1);
+        }
+
+        .upgrade-node.active {
+            background: var(--shield-color);
+            border-color: var(--shield-color);
+            color: white;
+        }
+
+        .upgrade-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border-color);
+            margin: 0 1rem;
+        }
+
+        /* 特效标签 */
+        .effect-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(6, 182, 212, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 2rem;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .effect-tag:hover {
+            background: rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav-bar fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <h1 class="font-orbitron text-xl font-bold">能量护盾塔</h1>
+                    <span class="tag bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">圆环族防御建筑</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="control-button w-10 h-10 bg-cyan-600 rounded-full flex items-center justify-center hover:bg-cyan-700 transition" onclick="toggleShield()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </button>
+                    <button class="control-button w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition" onclick="toggleSound()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6a9 9 0 010 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-container pt-20">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 左侧：3D展示区 -->
+            <div>
+                <div class="info-card h-full">
+                    <h2 class="font-orbitron text-2xl font-bold mb-4">护盾展示</h2>
+                    <div id="model-container" class="model-viewer">
+                        <!-- 3D模型将在这里渲染 -->
+                        <div class="shield-effect"></div>
+                        
+                        <!-- 护盾强度指示器 -->
+                        <div class="shield-indicator">
+                            <div class="text-sm font-semibold">护盾强度</div>
+                            <div class="shield-bar">
+                                <div class="shield-fill" id="shield-strength" style="width: 100%"></div>
+                            </div>
+                            <div class="text-center mt-1 text-xs">
+                                <span id="shield-value">3000</span> / 3000
+                            </div>
+                        </div>
+                        
+                        <!-- 影响范围控制 -->
+                        <div class="range-control">
+                            <div class="text-sm font-semibold">影响范围</div>
+                            <input type="range" class="range-slider" min="10" max="40" value="20" 
+                                   oninput="updateRange(this.value)">
+                            <div class="text-center mt-1 text-xs">
+                                <span id="range-value">20</span> 格
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：信息面板 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">基础信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-400">建筑类型</label>
+                            <div class="font-semibold">防御建筑</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">种族</label>
+                            <div class="font-semibold text-blue-400">圆环族</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">占地面积</label>
+                            <div class="font-semibold">10×10米</div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400">高度</label>
+                            <div class="font-semibold">15米</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 护盾属性 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">护盾属性</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between">
+                                <span>护盾强度</span>
+                                <span>3000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill shield" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>恢复速度</span>
+                                <span>50/秒</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill regen" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>能量消耗</span>
+                                <span>20/秒</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill" style="width: 40%; background: #ef4444;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>护盾效率</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill efficiency" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 特殊效果 -->
+                <div class="info-card">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">护盾效果</h3>
+                    <div class="flex flex-wrap">
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            能量护盾
+                        </div>
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            快速恢复
+                        </div>
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            共振增强
+                        </div>
+                        <div class="effect-tag">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 11c0 2.21-2 3-2 3s1 3 2 3 2-1 2-1c1 1 2.21 2 3.5 2s2.5-1 2.5-1-1-1-1-2c0-1.21.79-2 2-2 2 0 2.657 1.343 3.657 2.343z"></path>
+                            </svg>
+                            范围保护
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 保护建筑选择 -->
+        <div class="info-card mt-6">
+            <h3 class="font-orbitron text-2xl font-bold mb-4">保护建筑</h3>
+            <p class="text-sm text-gray-400 mb-4">选择要保护的建筑类型（最多6个）</p>
+            <div class="building-grid">
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="central">○</div>
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="tower">△</div>
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="collector">□</div>
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="shield">◇</div>
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="sanctuary">◎</div>
+                <div class="building-item" onclick="toggleBuilding(this)" data-type="unit">◐</div>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+                <div class="text-sm">
+                    已选择: <span id="protected-count" class="text-cyan-400 font-bold">0</span> / 6
+                </div>
+                <button class="px-4 py-2 bg-cyan-600 rounded-lg hover:bg-cyan-700 transition"
+                        onclick="applyProtection()">
+                    应用保护
+                </button>
+            </div>
+        </div>
+
+        <!-- 升级系统 -->
+        <div class="info-card mt-6">
+            <h3 class="font-orbitron text-2xl font-bold mb-6">升级路径</h3>
+            <div class="upgrade-path">
+                <div class="upgrade-node active" onclick="selectUpgrade(this, 0)">
+                    <span class="font-orbitron font-bold">T1</span>
+                    <span class="text-xs mt-1">基础</span>
+                </div>
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node" onclick="selectUpgrade(this, 1)">
+                    <span class="font-orbitron font-bold">T2</span>
+                    <span class="text-xs mt-1">进阶</span>
+                </div>
+                <div class="upgrade-line"></div>
+                <div class="upgrade-node" onclick="selectUpgrade(this, 2)">
+                    <span class="font-orbitron font-bold">T3</span>
+                    <span class="text-xs mt-1">高级</span>
+                </div>
+            </div>
+            
+            <!-- 升级详情 -->
+            <div id="upgrade-details" class="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                <h4 class="font-bold mb-2">T1 - 基础护盾塔</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">建造成本</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>形魄能量</span>
+                                <span>600</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>纯净形魄</span>
+                                <span>50</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>建造时间</span>
+                                <span>90秒</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">护盾属性</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>护盾强度</span>
+                                <span>3000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>影响范围</span>
+                                <span>20格</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>恢复速度</span>
+                                <span>50/秒</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 护盾效果说明 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="info-card">
+                <h3 class="font-orbitron text-xl font-bold mb-4">护盾机制</h3>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>为范围内所有建筑提供护盾保护</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>护盾可以吸收所有类型的伤害</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>护盾被破坏后自动恢复</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>多个护盾塔效果可以叠加</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>护盾强度随距离衰减</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h3 class="font-orbitron text-xl font-bold mb-4">战术应用</h3>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>保护关键建筑免受突袭</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>在敌人进攻路线上布置</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>配合共鸣塔形成防御网络</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>为脆弱的科技建筑提供保护</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-cyan-400 mr-2">●</span>
+                        <span>在重要资源点周围部署</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Three.js 3D场景设置
+        let scene, camera, renderer, shieldTower;
+        let shieldActive = true;
+        let shieldStrength = 100;
+        let selectedBuildings = new Set();
+
+        function init3D() {
+            const container = document.getElementById('model-container');
+            
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // 添加光源
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x06b6d4, 1);
+            directionalLight.position.set(5, 10, 5);
+            scene.add(directionalLight);
+            
+            // 创建护盾塔模型
+            createShieldTower();
+            
+            // 添加星星背景
+            createStarField();
+            
+            // 开始动画循环
+            animate();
+        }
+
+        function createShieldTower() {
+            const group = new THREE.Group();
+            
+            // 基座
+            const baseGeometry = new THREE.CylinderGeometry(4, 5, 1, 8);
+            const baseMaterial = new THREE.MeshPhongMaterial({ color: 0x475569 });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 0.5;
+            group.add(base);
+            
+            // 中央支柱
+            const pillarGeometry = new THREE.CylinderGeometry(0.8, 1, 8);
+            const pillarMaterial = new THREE.MeshPhongMaterial({ color: 0x64748b });
+            const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+            pillar.position.y = 5;
+            group.add(pillar);
+            
+            // 护盾发射器
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                const emitterGroup = new THREE.Group();
+                
+                // 发射器底座
+                const emitterGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+                const emitterMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x06b6d4,
+                    emissive: 0x06b6d4,
+                    emissiveIntensity: 0.5
+                });
+                const emitter = new THREE.Mesh(emitterGeometry, emitterMaterial);
+                emitter.position.x = Math.cos(angle) * 2;
+                emitter.position.z = Math.sin(angle) * 2;
+                emitter.position.y = 8;
+                emitterGroup.add(emitter);
+                
+                // 能量环
+                const ringGeometry = new THREE.TorusGeometry(1.5, 0.1, 8, 30);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x06b6d4,
+                    emissive: 0x06b6d4,
+                    emissiveIntensity: 0.3,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.copy(emitter.position);
+                ring.rotation.x = Math.PI / 2;
+                emitterGroup.add(ring);
+                
+                group.add(emitterGroup);
+            }
+            
+            // 顶部能量核心
+            const coreGeometry = new THREE.OctahedronGeometry(1, 0);
+            const coreMaterial = new THREE.MeshPhongMaterial({
+                color: 0x06b6d4,
+                emissive: 0x06b6d4,
+                emissiveIntensity: 1
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            core.position.y = 10;
+            group.add(core);
+            
+            shieldTower = group;
+            scene.add(shieldTower);
+        }
+
+        function createStarField() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.1,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 3000; i++) {
+                const x = (Math.random() - 0.5) * 200;
+                const y = (Math.random() - 0.5) * 200;
+                const z = (Math.random() - 0.5) * 200;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 旋转护盾塔
+            if (shieldTower) {
+                shieldTower.rotation.y += 0.003;
+                
+                // 旋转发射器
+                shieldTower.children.forEach((child, index) => {
+                    if (index > 1 && index < 5) {
+                        child.rotation.y += 0.02;
+                        const ring = child.children[1];
+                        if (ring) {
+                            ring.rotation.z += 0.05;
+                        }
+                    }
+                });
+                
+                // 顶部核心旋转
+                const core = shieldTower.children[shieldTower.children.length - 1];
+                if (core) {
+                    core.rotation.y += 0.02;
+                    core.rotation.x += 0.01;
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // 升级数据
+        const upgradeData = [
+            {
+                level: "T1 - 基础护盾塔",
+                cost: { energy: 600, pure: 50, time: 90 },
+                stats: { shield: 3000, range: 20, regen: 50 }
+            },
+            {
+                level: "T2 - 进阶护盾塔",
+                cost: { energy: 1200, pure: 100, time: 120 },
+                stats: { shield: 5000, range: 25, regen: 80 },
+                bonus: "护盾效率+20%"
+            },
+            {
+                level: "T3 - 高级护盾塔",
+                cost: { energy: 2400, pure: 200, time: 180 },
+                stats: { shield: 8000, range: 30, regen: 120 },
+                bonus: "共鸣护盾网络"
+            }
+        ];
+
+        function selectUpgrade(node, index) {
+            document.querySelectorAll('.upgrade-node').forEach(n => n.classList.remove('active'));
+            node.classList.add('active');
+            
+            const details = document.getElementById('upgrade-details');
+            const data = upgradeData[index];
+            
+            details.innerHTML = `
+                <h4 class="font-bold mb-2">${data.level}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">建造成本</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>形魄能量</span>
+                                <span>${data.cost.energy}</span>
+                            </div>
+                            ${data.cost.pure ? `<div class="flex justify-between text-sm">
+                                <span>纯净形魄</span>
+                                <span>${data.cost.pure}</span>
+                            </div>` : ''}
+                            <div class="flex justify-between text-sm">
+                                <span>建造时间</span>
+                                <span>${data.cost.time}秒</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-sm text-gray-400 mb-2">护盾属性</h5>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-sm">
+                                <span>护盾强度</span>
+                                <span>${data.stats.shield}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>影响范围</span>
+                                <span>${data.stats.range}格</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>恢复速度</span>
+                                <span>${data.stats.regen}/秒</span>
+                            </div>
+                            ${data.bonus ? `<div class="flex justify-between text-sm text-cyan-400">
+                                <span>特殊加成</span>
+                                <span>${data.bonus}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleShield() {
+            shieldActive = !shieldActive;
+            const shieldEffect = document.querySelector('.shield-effect');
+            if (shieldActive) {
+                shieldEffect.style.display = 'block';
+            } else {
+                shieldEffect.style.display = 'none';
+            }
+        }
+
+        function toggleBuilding(element) {
+            if (selectedBuildings.has(element)) {
+                selectedBuildings.delete(element);
+                element.classList.remove('protected');
+            } else if (selectedBuildings.size < 6) {
+                selectedBuildings.add(element);
+                element.classList.add('protected');
+            }
+            document.getElementById('protected-count').textContent = selectedBuildings.size;
+        }
+
+        function applyProtection() {
+            if (selectedBuildings.size > 0) {
+                // 显示保护应用效果
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-4 bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = `已为 ${selectedBuildings.size} 个建筑应用护盾保护`;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+        }
+
+        function updateRange(value) {
+            document.getElementById('range-value').textContent = value;
+            // 更新护盾范围视觉效果
+        }
+
+        function toggleSound() {
+            // 实现音效切换
+        }
+
+        // 响应式处理
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                const container = document.getElementById('model-container');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        });
+
+        // 初始化
+        init3D();
+    </script>
+</body>
+</html>

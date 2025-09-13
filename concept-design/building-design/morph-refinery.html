@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>形魄精炼厂 - 三角议会建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 三角议会颜色主题 */
+            --triangle-color: #ef4444;
+            --triangle-light: #f87171;
+            --triangle-dark: #dc2626;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--triangle-color);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--triangle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 精炼管线 */
+        .refinery-pipe {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            opacity: 0.8;
+            animation: energy-flow 2s linear infinite;
+        }
+
+        @keyframes energy-flow {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+
+        /* 处理罐 */
+        .processing-tank {
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--triangle-color);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .processing-tank::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--triangle-color);
+            transition: height 0.5s ease;
+        }
+
+        /* 精炼粒子 */
+        .refine-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particle-flow 3s infinite;
+        }
+
+        @keyframes particle-flow {
+            0% {
+                opacity: 0;
+                transform: translate(var(--sx), var(--sy)) scale(0);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1);
+            }
+        }
+
+        /* 产量图表 */
+        .production-chart {
+            height: 200px;
+            position: relative;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(to top, var(--triangle-color), var(--triangle-light));
+            border-radius: 0.25rem 0.25rem 0 0;
+            transition: height 0.5s ease;
+        }
+
+        /* 效率对比 */
+        .efficiency-comparison {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        .efficiency-bar {
+            flex: 1;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .efficiency-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 升级选项 */
+        .upgrade-option {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upgrade-option:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--triangle-color);
+            transform: translateY(-2px);
+        }
+
+        .upgrade-option.selected {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--triangle-color);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 资源类型标签 */
+        .resource-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--triangle-color);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .resource-tag:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">形魄精炼厂</h1>
+            <p class="text-gray-400">Morph Refinery - 高效资源转化设施</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="toggleProcessing()">
+                            <span id="processing-text">开始精炼</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 精炼流程控制 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">精炼控制</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-2">精炼速度</label>
+                            <input type="range" id="refine-speed" min="50" max="200" value="100" 
+                                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                   oninput="updateRefineSpeed(this.value)">
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>50%</span>
+                                <span>当前: <span id="speed-value">100</span>%</span>
+                                <span>200%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">产出类型</label>
+                            <select id="output-type" class="w-full p-2 bg-gray-800 rounded" onchange="updateOutputType()">
+                                <option value="morph">纯净形魄</option>
+                                <option value="energy">浓缩能量</option>
+                                <option value="material">稀有材料</option>
+                                <option value="mixed">混合产出</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">质量控制</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="setQuality('standard')">
+                                    标准品质
+                                </button>
+                                <button class="p-2 bg-gray-800 rounded hover:bg-gray-700 transition" onclick="setQuality('premium')">
+                                    优质品质
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时产出 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">实时产出</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span>输入原料</span>
+                            <span class="font-semibold">100 原始形魄/分钟</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>处理效率</span>
+                            <span class="font-semibold text-green-400">85%</span>
+                        </div>
+                        <div class="border-t border-gray-700 pt-3">
+                            <div class="flex justify-between items-center">
+                                <span>产出资源</span>
+                                <span id="output-rate" class="font-bold text-lg text-red-400">85 纯净形魄/分钟</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            副产物: <span class="text-yellow-400">15 废料/分钟</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">三角议会</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">资源建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">150秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">3</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            形魄精炼厂能够将原始形魄转化为高纯度资源，通过高效的精炼流程，
+                            大幅提升资源利用率。是三角议会经济发展的重要建筑。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">800/800</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">400/400</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>处理能力</span>
+                                <span id="capacity-text">100/100</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-orange-500" id="capacity-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>存储容量</span>
+                                <span id="storage-text">500/500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="storage-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 效率对比 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">效率对比</h3>
+                    <div class="space-y-3">
+                        <div class="efficiency-comparison">
+                            <span class="font-semibold w-24">标准收集器</span>
+                            <div class="efficiency-bar">
+                                <div class="efficiency-fill" style="width: 40%"></div>
+                            </div>
+                            <span class="text-sm w-16 text-right">40%</span>
+                        </div>
+                        <div class="efficiency-comparison">
+                            <span class="font-semibold w-24">形魄精炼厂</span>
+                            <div class="efficiency-bar">
+                                <div class="efficiency-fill" style="width: 85%"></div>
+                            </div>
+                            <span class="text-sm w-16 text-right">85%</span>
+                        </div>
+                        <div class="efficiency-comparison">
+                            <span class="font-semibold w-24">升级后</span>
+                            <div class="efficiency-bar">
+                                <div class="efficiency-fill" id="upgrade-efficiency" style="width: 85%"></div>
+                            </div>
+                            <span class="text-sm w-16 text-right" id="upgrade-percent">85%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级系统</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础精炼厂</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准精炼设备</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">1000 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 产出计算器 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">产出计算器</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">输入设置</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm mb-1">原料投入</label>
+                            <input type="number" id="input-amount" value="100" min="0" max="1000"
+                                   class="w-full p-2 bg-gray-800 rounded" onchange="calculateProduction()">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">精炼时间</label>
+                            <input type="number" id="refine-time" value="60" min="10" max="300"
+                                   class="w-full p-2 bg-gray-800 rounded" onchange="calculateProduction()">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">产出结果</h4>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-gray-800 rounded">
+                            <div class="flex justify-between">
+                                <span>主产物</span>
+                                <span id="main-output" class="font-semibold text-green-400">85 单位</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded">
+                            <div class="flex justify-between">
+                                <span>副产物</span>
+                                <span id="by-output" class="font-semibold text-yellow-400">15 单位</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-800 rounded">
+                            <div class="flex justify-between">
+                                <span>总价值</span>
+                                <span id="total-value" class="font-semibold text-purple-400">850 形魄</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">优化建议</h4>
+                    <div id="optimization-tips" class="space-y-2 text-sm">
+                        <div class="p-2 bg-blue-900/20 rounded border border-blue-500/30">
+                            <span class="text-blue-400">提高精炼速度可增加产出</span>
+                        </div>
+                        <div class="p-2 bg-green-900/20 rounded border border-green-500/30">
+                            <span class="text-green-400">优质品质可获得额外加成</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史产量图表 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">产量历史</h3>
+            <div class="production-chart" id="production-chart">
+                <!-- 图表将通过JavaScript动态生成 -->
+            </div>
+            <div class="mt-4 flex justify-center space-x-4">
+                <span class="resource-tag">纯净形魄</span>
+                <span class="resource-tag">浓缩能量</span>
+                <span class="resource-tag">稀有材料</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, refinery;
+        let isRotating = true;
+        let isProcessing = false;
+        let refineSpeed = 100;
+        let currentUpgrade = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xef4444, 2, 20);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建形魄精炼厂
+            createRefinery();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createRefinery() {
+            refinery = new THREE.Group();
+
+            // 主建筑基座
+            const baseGeometry = new THREE.BoxGeometry(8, 2, 8);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xdc2626,
+                emissiveIntensity: 0.2,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 1;
+            base.castShadow = true;
+            refinery.add(base);
+
+            // 精炼塔
+            for (let i = 0; i < 4; i++) {
+                const towerGeometry = new THREE.CylinderGeometry(1, 1.2, 6, 8);
+                const towerMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf87171,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.3
+                });
+                const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+                const angle = i * Math.PI / 2;
+                tower.position.x = Math.cos(angle) * 3;
+                tower.position.z = Math.sin(angle) * 3;
+                tower.position.y = 4;
+                tower.castShadow = true;
+                refinery.add(tower);
+
+                // 塔顶容器
+                const containerGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                const container = new THREE.Mesh(containerGeometry, towerMaterial);
+                container.position.x = Math.cos(angle) * 3;
+                container.position.z = Math.sin(angle) * 3;
+                container.position.y = 7;
+                refinery.add(container);
+            }
+
+            // 中央处理器
+            const processorGeometry = new THREE.CylinderGeometry(2, 2.5, 3, 8);
+            const processorMaterial = new THREE.MeshPhongMaterial({
+                color: 0xfef2f2,
+                emissive: 0xf87171,
+                emissiveIntensity: 0.5,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const processor = new THREE.Mesh(processorGeometry, processorMaterial);
+            processor.position.y = 3;
+            processor.castShadow = true;
+            refinery.add(processor);
+
+            // 连接管道
+            for (let i = 0; i < 8; i++) {
+                const pipeGeometry = new THREE.CylinderGeometry(0.2, 0.2, 5, 8);
+                const pipeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf87171,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.4
+                });
+                const pipe = new THREE.Mesh(pipeGeometry, pipeMaterial);
+                const angle = i * Math.PI / 4;
+                pipe.position.x = Math.cos(angle) * 2;
+                pipe.position.z = Math.sin(angle) * 2;
+                pipe.position.y = 3;
+                pipe.rotation.z = Math.PI / 2 + (i % 2) * Math.PI / 2;
+                refinery.add(pipe);
+            }
+
+            scene.add(refinery);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转精炼厂
+            if (isRotating && refinery) {
+                refinery.rotation.y += 0.003;
+                
+                // 旋转处理器
+                const processor = refinery.children.find(child => child.geometry instanceof THREE.CylinderGeometry && child.position.y === 3);
+                if (processor) {
+                    processor.rotation.y += 0.02;
+                }
+                
+                // 脉动塔顶容器
+                refinery.children.forEach((child, index) => {
+                    if (child.geometry instanceof THREE.SphereGeometry && child.position.y === 7) {
+                        const scale = 1 + Math.sin(Date.now() * 0.002 + index) * 0.1;
+                        child.scale.setScalar(scale);
+                    }
+                });
+            }
+
+            // 处理时的特效
+            if (isProcessing) {
+                // 增强发光效果
+                refinery.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissiveIntensity = 0.8;
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function toggleProcessing() {
+            isProcessing = !isProcessing;
+            document.getElementById('processing-text').textContent = isProcessing ? '停止精炼' : '开始精炼';
+            
+            if (isProcessing) {
+                startRefiningEffect();
+            }
+        }
+
+        function startRefiningEffect() {
+            const container = document.getElementById('model-container');
+            
+            // 创建精炼粒子效果
+            setInterval(() => {
+                if (isProcessing) {
+                    const particle = document.createElement('div');
+                    particle.className = 'refine-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '40%';
+                    particle.style.setProperty('--sx', (Math.random() - 0.5) * 100 + 'px');
+                    particle.style.setProperty('--sy', '-50px');
+                    particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                    particle.style.setProperty('--ty', '100px');
+                    container.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 3000);
+                }
+            }, 200);
+        }
+
+        function updateRefineSpeed(value) {
+            refineSpeed = parseInt(value);
+            document.getElementById('speed-value').textContent = value;
+            calculateProduction();
+        }
+
+        function updateOutputType() {
+            const type = document.getElementById('output-type').value;
+            const outputRates = {
+                morph: '85 纯净形魄/分钟',
+                energy: '60 浓缩能量/分钟',
+                material: '40 稀有材料/分钟',
+                mixed: '50 混合资源/分钟'
+            };
+            document.getElementById('output-rate').textContent = outputRates[type];
+        }
+
+        function setQuality(quality) {
+            // 更新品质设置
+            const efficiency = quality === 'premium' ? 95 : 85;
+            updateEfficiencyDisplay(efficiency);
+        }
+
+        function updateEfficiencyDisplay(efficiency) {
+            document.getElementById('output-rate').textContent = `${efficiency} 纯净形魄/分钟`;
+            
+            // 更新效率对比
+            const upgradeEfficiency = efficiency + (currentUpgrade * 5);
+            document.getElementById('upgrade-efficiency').style.width = upgradeEfficiency + '%';
+            document.getElementById('upgrade-percent').textContent = upgradeEfficiency + '%';
+        }
+
+        function calculateProduction() {
+            const input = parseInt(document.getElementById('input-amount').value);
+            const time = parseInt(document.getElementById('refine-time').value);
+            const speed = refineSpeed / 100;
+            
+            const mainOutput = Math.round(input * 0.85 * speed);
+            const byOutput = Math.round(input * 0.15 * speed);
+            const totalValue = mainOutput * 10;
+            
+            document.getElementById('main-output').textContent = mainOutput + ' 单位';
+            document.getElementById('by-output').textContent = byOutput + ' 单位';
+            document.getElementById('total-value').textContent = totalValue + ' 形魄';
+        }
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新效率
+            updateEfficiencyDisplay(85 + level * 5);
+        }
+
+        const upgradeData = [
+            { title: 'T1 - 基础精炼厂', desc: '标准精炼设备', cost: '1000 形魄', efficiency: 85 },
+            { title: 'T2 - 高效精炼厂', desc: '提升处理速度和效率', cost: '2000 形魄', efficiency: 90 },
+            { title: 'T3 - 超级精炼厂', desc: '最高效的精炼系统', cost: '4000 形魄', efficiency: 95 }
+        ];
+
+        // 初始化图表
+        function initChart() {
+            const chart = document.getElementById('production-chart');
+            const data = [65, 72, 78, 85, 82, 88, 92, 85];
+            const max = Math.max(...data);
+            
+            data.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.left = (index * 12 + 2) + '%';
+                bar.style.width = '8%';
+                bar.style.height = (value / max * 100) + '%';
+                chart.appendChild(bar);
+            });
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            calculateProduction();
+            initChart();
+        });
+    </script>
+</body>
+</html>

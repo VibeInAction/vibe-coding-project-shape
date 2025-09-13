@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Computing Center - 量子计算中心 | Square Covenant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --square-color: #10b981;
+            --square-dark: #059669;
+            --square-light: #34d399;
+            --square-glow: rgba(16, 185, 129, 0.3);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0f0c 0%, #0d1411 100%);
+            min-height: 100vh;
+        }
+        
+        .square-glow {
+            box-shadow: 0 0 20px var(--square-glow), 
+                        0 0 40px var(--square-glow),
+                        inset 0 0 20px var(--square-glow);
+        }
+        
+        .quantum-pulse {
+            animation: quantumPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes quantumPulse {
+            0%, 100% { 
+                opacity: 0.6; 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.1);
+                box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
+            }
+        }
+        
+        .quantum-state {
+            animation: quantumState 3s linear infinite;
+        }
+        
+        @keyframes quantumState {
+            0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+        }
+        
+        .data-stream {
+            animation: dataStream 1.5s linear infinite;
+        }
+        
+        @keyframes dataStream {
+            0% { transform: translateY(100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
+        }
+        
+        .quantum-node {
+            background: radial-gradient(circle, var(--square-light) 0%, transparent 70%);
+            animation: nodePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 0.4; }
+        }
+        
+        .algorithm-card {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid var(--square-dark);
+            transition: all 0.3s ease;
+        }
+        
+        .algorithm-card:hover {
+            background: rgba(5, 150, 105, 0.2);
+            border-color: var(--square-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        .algorithm-card.active {
+            background: rgba(5, 150, 105, 0.3);
+            border-color: var(--square-light);
+            box-shadow: 0 0 15px var(--square-glow);
+        }
+        
+        .qubit-bar {
+            background: linear-gradient(90deg, var(--square-dark) 0%, var(--square-light) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qubit-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        #canvas-container {
+            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold">Quantum Computing Center</h1>
+                    <span class="px-3 py-1 bg-green-900/50 text-green-400 rounded-full text-sm">Square Covenant</span>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="#overview" class="hover:text-green-400 transition">概览</a>
+                    <a href="#quantum-core" class="hover:text-green-400 transition">量子核心</a>
+                    <a href="#algorithms" class="hover:text-green-400 transition">量子算法</a>
+                    <a href="#applications" class="hover:text-green-400 transition">应用场景</a>
+                    <a href="#upgrades" class="hover:text-green-400 transition">升级路径</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-12">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 3D Visualization -->
+                <div class="bg-gray-800/30 rounded-lg p-6 square-glow">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        量子计算中心 3D 展示
+                    </h2>
+                    <div id="canvas-container" class="relative h-96 rounded-lg overflow-hidden">
+                        <canvas id="quantum-canvas"></canvas>
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <button onclick="toggleRotation()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                            <button onclick="resetView()" class="p-2 bg-gray-800/80 rounded hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Building Info -->
+                <div class="space-y-6">
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">建筑信息</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">等级</span>
+                                <span class="text-green-400 font-bold">Level 4</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">量子比特数</span>
+                                <span class="font-bold">256 Qubits</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">相干时间</span>
+                                <span class="font-bold">100 μs</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">门操作保真度</span>
+                                <span class="font-bold text-green-400">99.9%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Status -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">当前状态</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">量子处理器温度</span>
+                                    <span class="text-sm text-green-400">15 mK</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 15%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">量子态稳定性</span>
+                                    <span class="text-sm text-green-400">98.5%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 98.5%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">计算队列</span>
+                                    <span class="text-sm text-yellow-400">12/50</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-yellow-500 h-full transition-all duration-300" style="width: 24%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Algorithms -->
+                    <div class="bg-gray-800/30 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">活跃算法</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-sm border border-green-500/30">
+                                Shor算法
+                            </span>
+                            <span class="px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-sm border border-green-500/30">
+                                Grover搜索
+                            </span>
+                            <span class="px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-sm border border-green-500/30">
+                                VQE优化
+                            </span>
+                            <span class="px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-sm border border-green-500/30">
+                                QAOA
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quantum Core Section -->
+        <section id="quantum-core" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">量子核心配置</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Qubit Configuration -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">量子比特配置</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">超导量子比特</span>
+                            <span class="font-bold">192</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">拓扑量子比特</span>
+                            <span class="font-bold">64</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">错误率</span>
+                            <span class="font-bold text-green-400">0.001%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full qubit-bar" style="width: 100%"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-400">量子态准备进度: 100%</div>
+                    </div>
+                </div>
+
+                <!-- Cooling System -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">冷却系统</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">稀释制冷机</span>
+                            <span class="font-bold text-green-400">在线</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">温度</span>
+                            <span class="font-bold">15 mK</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">制冷功率</span>
+                            <span class="font-bold">400 μW</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-cyan-500" style="width: 85%"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-400">制冷效率: 85%</div>
+                    </div>
+                </div>
+
+                <!-- Control System -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">控制系统</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">微波控制</span>
+                            <span class="font-bold text-green-400">稳定</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">磁场控制</span>
+                            <span class="font-bold text-green-400">稳定</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">读取保真度</span>
+                            <span class="font-bold">99.8%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-purple-500" style="width: 95%"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-400">系统同步率: 95%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithms Section -->
+        <section id="algorithms" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">量子算法库</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Algorithm Cards -->
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('shor')">
+                    <h3 class="font-bold mb-2">Shor算法</h3>
+                    <p class="text-sm text-gray-400 mb-3">大数分解算法，指数级加速</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 已优化</span>
+                        <span class="text-xs text-green-400">速度: 100x</span>
+                    </div>
+                </div>
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('grover')">
+                    <h3 class="font-bold mb-2">Grover搜索</h3>
+                    <p class="text-sm text-gray-400 mb-3">无序数据库搜索，平方级加速</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 已部署</span>
+                        <span class="text-xs text-green-400">速度: 10x</span>
+                    </div>
+                </div>
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('vqe')">
+                    <h3 class="font-bold mb-2">VQE</h3>
+                    <p class="text-sm text-gray-400 mb-3">变分量子本征求解器</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 运行中</span>
+                        <span class="text-xs text-green-400">精度: 99.5%</span>
+                    </div>
+                </div>
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('qaoa')">
+                    <h3 class="font-bold mb-2">QAOA</h3>
+                    <p class="text-sm text-gray-400 mb-3">量子近似优化算法</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 测试中</span>
+                        <span class="text-xs text-yellow-400">进度: 65%</span>
+                    </div>
+                </div>
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('qml')">
+                    <h3 class="font-bold mb-2">量子机器学习</h3>
+                    <p class="text-sm text-gray-400 mb-3">量子神经网络训练</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 研发中</span>
+                        <span class="text-xs text-yellow-400">进度: 30%</span>
+                    </div>
+                </div>
+                <div class="algorithm-card rounded-lg p-4 cursor-pointer" onclick="selectAlgorithm('qft')">
+                    <h3 class="font-bold mb-2">量子傅里叶变换</h3>
+                    <p class="text-sm text-gray-400 mb-3">信号处理与相位估计</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">状态: 已部署</span>
+                        <span class="text-xs text-green-400">精度: 99.9%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">应用场景</h2>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Current Applications -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">当前应用</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                            <div>
+                                <h4 class="font-semibold">密码破解</h4>
+                                <p class="text-sm text-gray-400">使用Shor算法分解RSA-2048</p>
+                                <div class="mt-1 text-xs text-gray-500">进度: 23% | 预计完成: 72小时</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                            <div>
+                                <h4 class="font-semibold">材料设计</h4>
+                                <p class="text-sm text-gray-400">VQE模拟新型超导材料</p>
+                                <div class="mt-1 text-xs text-gray-500">收敛精度: 99.7%</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2"></div>
+                            <div>
+                                <h4 class="font-semibold">金融建模</h4>
+                                <p class="text-sm text-gray-400">量子蒙特卡洛期权定价</p>
+                                <div class="mt-1 text-xs text-gray-500">计算量: 10^16 | 并行度: 256</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="bg-gray-800/30 rounded-lg p-6">
+                    <h3 class="text-lg font-bold mb-4">性能指标</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="text-3xl font-bold text-green-400 mb-1">2^256</div>
+                            <div class="text-sm text-gray-400">计算状态空间</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="text-3xl font-bold mb-1">10^9</div>
+                            <div class="text-sm text-gray-400">门操作/秒</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="text-3xl font-bold text-green-400 mb-1">100</div>
+                            <div class="text-sm text-gray-400">μs 相干时间</div>
+                        </div>
+                        <div class="bg-gray-700/20 rounded p-4">
+                            <div class="text-3xl font-bold mb-1">99.9%</div>
+                            <div class="text-sm text-gray-400">门保真度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrades Section -->
+        <section id="upgrades" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">升级路径</h2>
+            <div class="space-y-4">
+                <!-- Upgrade Option 1 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('error-correction')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">量子纠错系统</h3>
+                                <p class="text-sm text-gray-400">实现表面码纠错，错误率降至10^-6</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-green-400">2000</p>
+                            <p class="text-sm text-gray-400">量子点</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 2 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('qubit-expansion')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">量子比特扩展</h3>
+                                <p class="text-sm text-gray-400">增加到1024个量子比特，支持更复杂算法</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-green-400">3500</p>
+                            <p class="text-sm text-gray-400">量子点</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Option 3 -->
+                <div class="bg-gray-800/30 rounded-lg p-6 hover:bg-gray-800/40 transition cursor-pointer" onclick="selectUpgrade('hybrid')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">量子-经典混合计算</h3>
+                                <p class="text-sm text-gray-400">集成经典超级计算机，优化混合算法</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold text-green-400">2800</p>
+                            <p class="text-sm text-gray-400">量子点</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 backdrop-blur-sm border-t border-gray-700 mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <p class="text-sm text-gray-400">Square Covenant Quantum Computing Center © 2024</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-green-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-400 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js Scene Setup
+        let scene, camera, renderer;
+        let quantumCenter;
+        let isRotating = true;
+        let qubits = [];
+        let quantumFields = [];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const canvas = document.getElementById('quantum-canvas');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0a0f0c, 10, 50);
+            
+            camera = new THREE.PerspectiveCamera(
+                75,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x10b981, 1);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight1 = new THREE.PointLight(0x34d399, 0.8);
+            pointLight1.position.set(0, 5, 0);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0x06b6d4, 0.6);
+            pointLight2.position.set(10, 0, 10);
+            scene.add(pointLight2);
+            
+            createQuantumCenter();
+            animate();
+        }
+
+        function createQuantumCenter() {
+            quantumCenter = new THREE.Group();
+            
+            // Central quantum processor
+            const processorGeometry = new THREE.CylinderGeometry(3, 3, 1, 32);
+            const processorMaterial = new THREE.MeshPhongMaterial({
+                color: 0x10b981,
+                emissive: 0x059669,
+                emissiveIntensity: 0.4,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const processor = new THREE.Mesh(processorGeometry, processorMaterial);
+            processor.castShadow = true;
+            quantumCenter.add(processor);
+            
+            // Create qubit nodes in circular arrangement
+            const qubitCount = 8;
+            const radius = 6;
+            
+            for (let i = 0; i < qubitCount; i++) {
+                const angle = (i / qubitCount) * Math.PI * 2;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+                
+                // Qubit node
+                const qubitGroup = new THREE.Group();
+                
+                // Core
+                const coreGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                const coreMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x34d399,
+                    emissive: 0x10b981,
+                    emissiveIntensity: 0.6,
+                    metalness: 0.8,
+                    roughness: 0.2
+                });
+                const core = new THREE.Mesh(coreGeometry, coreMaterial);
+                qubitGroup.add(core);
+                
+                // Quantum field around qubit
+                const fieldGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                const fieldMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x34d399,
+                    transparent: true,
+                    opacity: 0.2,
+                    wireframe: true
+                });
+                const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
+                qubitGroup.add(field);
+                
+                qubitGroup.position.set(x, 2, z);
+                qubits.push({ group: qubitGroup, core: core, field: field });
+                quantumCenter.add(qubitGroup);
+                
+                // Connection to center
+                const points = [];
+                points.push(new THREE.Vector3(0, 0.5, 0));
+                points.push(new THREE.Vector3(x, 2, z));
+                
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                const lineMaterial = new THREE.LineBasicMaterial({
+                    color: 0x34d399,
+                    opacity: 0.5,
+                    transparent: true
+                });
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                quantumCenter.add(line);
+            }
+            
+            // Cooling chamber
+            const chamberGeometry = new THREE.CylinderGeometry(10, 10, 8, 32);
+            const chamberMaterial = new THREE.MeshPhongMaterial({
+                color: 0x1f2937,
+                emissive: 0x065f46,
+                emissiveIntensity: 0.1,
+                metalness: 0.9,
+                roughness: 0.3,
+                transparent: true,
+                opacity: 0.3
+            });
+            const chamber = new THREE.Mesh(chamberGeometry, chamberMaterial);
+            chamber.position.y = -2;
+            quantumCenter.add(chamber);
+            
+            scene.add(quantumCenter);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isRotating) {
+                quantumCenter.rotation.y += 0.003;
+            }
+            
+            // Animate qubits
+            qubits.forEach((qubit, index) => {
+                const time = Date.now() * 0.001;
+                
+                // Quantum state animation
+                qubit.core.rotation.x = Math.sin(time * 2 + index) * 0.3;
+                qubit.core.rotation.z = Math.cos(time * 2 + index) * 0.3;
+                
+                // Field pulsing
+                const scale = 1 + Math.sin(time * 3 + index) * 0.2;
+                qubit.field.scale.set(scale, scale, scale);
+                qubit.field.material.opacity = 0.1 + Math.sin(time * 3 + index) * 0.1;
+                
+                // Vertical oscillation
+                qubit.group.position.y = 2 + Math.sin(time * 1.5 + index) * 0.5;
+            });
+            
+            renderer.render(scene, camera);
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+        }
+
+        function resetView() {
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            quantumCenter.rotation.y = 0;
+        }
+
+        function selectAlgorithm(type) {
+            const cards = document.querySelectorAll('.algorithm-card');
+            cards.forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Show algorithm details
+            console.log('Selected algorithm:', type);
+        }
+
+        function selectUpgrade(type) {
+            // Implement upgrade selection
+            console.log('Selected upgrade:', type);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

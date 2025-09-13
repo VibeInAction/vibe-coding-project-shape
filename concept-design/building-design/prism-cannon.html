@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>棱镜炮塔 - 三角议会建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 三角议会颜色主题 */
+            --triangle-color: #ef4444;
+            --triangle-light: #f87171;
+            --triangle-dark: #dc2626;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--triangle-color);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--triangle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 棱镜光束效果 */
+        .prism-beam {
+            position: absolute;
+            background: linear-gradient(90deg, 
+                var(--triangle-color) 0%, 
+                rgba(248, 113, 113, 0.8) 20%,
+                rgba(252, 165, 165, 0.6) 40%,
+                rgba(254, 202, 202, 0.4) 60%,
+                transparent 100%
+            );
+            height: 6px;
+            transform-origin: left center;
+            opacity: 0;
+            filter: blur(2px);
+        }
+
+        @keyframes beam-fire {
+            0% {
+                opacity: 0;
+                width: 0;
+            }
+            10% {
+                opacity: 1;
+                width: 50px;
+            }
+            90% {
+                opacity: 1;
+                width: 300px;
+            }
+            100% {
+                opacity: 0;
+                width: 300px;
+            }
+        }
+
+        /* 充能效果 */
+        .charge-effect {
+            position: absolute;
+            border: 2px solid var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: charge-pulse 1.5s ease-out;
+        }
+
+        @keyframes charge-pulse {
+            0% {
+                width: 30px;
+                height: 30px;
+                opacity: 1;
+            }
+            100% {
+                width: 120px;
+                height: 120px;
+                opacity: 0;
+            }
+        }
+
+        /* 目标选择器 */
+        .target-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .target-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .target-card:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--triangle-color);
+            transform: translateY(-2px);
+        }
+
+        .target-card.active {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: var(--triangle-color);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 炮塔旋转指示器 */
+        .turret-indicator {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--triangle-color);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .turret-indicator::before {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 30px;
+            background: var(--triangle-color);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            transform-origin: bottom center;
+        }
+
+        /* 穿透指示器 */
+        .penetration-indicator {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, var(--triangle-color), transparent);
+            opacity: 0.8;
+            animation: penetration-sweep 2s linear infinite;
+        }
+
+        @keyframes penetration-sweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 多重射击效果 */
+        .multi-shot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        @keyframes multi-shot-fly {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.5);
+            }
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 冷却显示 */
+        .cooldown-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cooldown-ring {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: conic-gradient(var(--triangle-color) 0deg, transparent 0deg);
+            position: relative;
+        }
+
+        .cooldown-ring::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: var(--dark-bg);
+        }
+
+        .cooldown-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">棱镜炮塔</h1>
+            <p class="text-gray-400">Prism Cannon - 精准与毁灭的完美结合</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                        <div class="turret-indicator" id="turret-indicator"></div>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="manualFire()">
+                            手动开火
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 充能控制 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">充能系统</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span>充能进度</span>
+                                <span id="charge-percent">0%</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-orange-500" id="charge-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm mb-2">充能速度</label>
+                                <input type="range" id="charge-speed" min="1" max="10" value="5" 
+                                       class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                                       oninput="updateChargeSpeed(this.value)">
+                                <div class="text-xs text-gray-400 mt-1">速度: <span id="speed-value">5</span></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2">最大充能</label>
+                                <select id="max-charge" class="w-full p-2 bg-gray-800 rounded" onchange="updateMaxCharge()">
+                                    <option value="100">100%</option>
+                                    <option value="150">150%</option>
+                                    <option value="200">200%</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="action-button" onclick="startCharging()" id="charge-btn">
+                                开始充能
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 射击模式 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">射击模式</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="target-card active" onclick="selectFireMode('single')">
+                            <h4 class="font-bold mb-1">单发模式</h4>
+                            <p class="text-xs text-gray-400">高伤害单目标</p>
+                        </div>
+                        <div class="target-card" onclick="selectFireMode('burst')">
+                            <h4 class="font-bold mb-1">连发模式</h4>
+                            <p class="text-xs text-gray-400">快速连续射击</p>
+                        </div>
+                        <div class="target-card" onclick="selectFireMode('multi')">
+                            <h4 class="font-bold mb-1">多重射击</h4>
+                            <p class="text-xs text-gray-400">同时攻击多个目标</p>
+                        </div>
+                        <div class="target-card" onclick="selectFireMode('penetrate')">
+                            <h4 class="font-bold mb-1">穿透模式</h4>
+                            <p class="text-xs text-gray-400">穿过多个目标</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">三角议会</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">防御建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">90秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">3</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            棱镜炮塔是三角议会的主力防御武器，通过棱镜聚焦能量束，
+                            能够对目标造成毁灭性的伤害。充能系统可以大幅提升攻击力。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">1200/1200</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">600/600</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击力</span>
+                                <span id="damage-text">500-1000</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-red-500" id="damage-bar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>攻击速度</span>
+                                <span id="speed-text">1.2/秒</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-yellow-500" id="speed-bar" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 特殊能力 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">特殊能力</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-red-900/20 rounded border border-red-500/30">
+                            <div>
+                                <h4 class="font-semibold">棱镜聚焦</h4>
+                                <p class="text-xs text-gray-400">充能100%后伤害翻倍</p>
+                            </div>
+                            <div class="cooldown-display">
+                                <div class="cooldown-ring" id="ability1-cooldown">
+                                    <span class="cooldown-text">就绪</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-orange-900/20 rounded border border-orange-500/30">
+                            <div>
+                                <h4 class="font-semibold">超载射击</h4>
+                                <p class="text-xs text-gray-400">消耗50%能量造成范围伤害</p>
+                            </div>
+                            <div class="cooldown-display">
+                                <div class="cooldown-ring" id="ability2-cooldown">
+                                    <span class="cooldown-text">就绪</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-purple-900/20 rounded border border-purple-500/30">
+                            <div>
+                                <h4 class="font-semibold">能量吸收</h4>
+                                <p class="text-xs text-gray-400">攻击时恢复10%能量</p>
+                            </div>
+                            <span class="text-green-400 text-sm">被动</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="flex-1 h-0.5 bg-gray-600"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础棱镜</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">标准棱镜炮塔</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">600 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 攻击演示区 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">攻击演示</h3>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-3">目标类型</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" checked class="mr-2">
+                            <span>轻型单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" checked class="mr-2">
+                            <span>中型单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2">
+                            <span>重型单位</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2">
+                            <span>建筑</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">攻击范围</h4>
+                    <div>
+                        <input type="range" id="attack-range" min="100" max="400" value="250" 
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                               oninput="updateAttackRange(this.value)">
+                        <div class="text-xs text-gray-400 mt-1">范围: <span id="range-value">250</span>m</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">穿透深度</h4>
+                    <div>
+                        <select id="penetration-depth" class="w-full p-2 bg-gray-800 rounded">
+                            <option value="1">1个目标</option>
+                            <option value="2">2个目标</option>
+                            <option value="3">3个目标</option>
+                            <option value="5">5个目标</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-3">操作</h4>
+                    <button class="action-button w-full" onclick="demonstrateAttack()">
+                        演示攻击
+                    </button>
+                    <div class="mt-2 text-xs text-gray-400">
+                        DPS: <span id="dps-value" class="text-yellow-400">600</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, prismCannon;
+        let isRotating = true;
+        let charging = false;
+        let chargeLevel = 0;
+        let chargeSpeed = 5;
+        let maxCharge = 100;
+        let fireMode = 'single';
+        let turretRotation = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xef4444, 2, 20);
+            pointLight.position.set(0, 5, 0);
+            scene.add(pointLight);
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建棱镜炮塔
+            createPrismCannon();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createPrismCannon() {
+            prismCannon = new THREE.Group();
+
+            // 底座
+            const baseGeometry = new THREE.CylinderGeometry(3, 4, 2, 6);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xdc2626,
+                emissiveIntensity: 0.2,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 1;
+            base.castShadow = true;
+            prismCannon.add(base);
+
+            // 旋转平台
+            const platformGeometry = new THREE.CylinderGeometry(2.5, 2.5, 0.5, 8);
+            const platformMaterial = new THREE.MeshPhongMaterial({
+                color: 0xf87171,
+                emissive: 0xef4444,
+                emissiveIntensity: 0.3
+            });
+            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+            platform.position.y = 2.5;
+            prismCannon.add(platform);
+
+            // 炮管支架
+            const supportGeometry = new THREE.BoxGeometry(1, 3, 1);
+            const support = new THREE.Mesh(supportGeometry, baseMaterial);
+            support.position.y = 4;
+            prismCannon.add(support);
+
+            // 棱镜发射器
+            const prismGeometry = new THREE.OctahedronGeometry(1.5, 0);
+            const prismMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xf87171,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.9
+            });
+            const prism = new THREE.Mesh(prismGeometry, prismMaterial);
+            prism.position.y = 6;
+            prism.castShadow = true;
+            prismCannon.add(prism);
+
+            // 能量聚焦环
+            for (let i = 0; i < 3; i++) {
+                const ringGeometry = new THREE.TorusGeometry(2 - i * 0.3, 0.1, 8, 32);
+                const ringMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf87171,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.5,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.y = 6;
+                ring.rotation.x = Math.PI / 2;
+                ring.name = `focus-ring-${i}`;
+                prismCannon.add(ring);
+            }
+
+            scene.add(prismCannon);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转炮塔
+            if (isRotating && prismCannon) {
+                prismCannon.rotation.y += 0.005;
+                
+                // 旋转聚焦环
+                prismCannon.children.forEach((child) => {
+                    if (child.name && child.name.startsWith('focus-ring-')) {
+                        child.rotation.z += 0.02;
+                    }
+                });
+                
+                // 脉动棱镜
+                const prism = prismCannon.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (prism) {
+                    const scale = 1 + Math.sin(Date.now() * 0.003) * 0.1;
+                    prism.scale.setScalar(scale);
+                    
+                    // 充能时增强发光
+                    if (charging) {
+                        prism.material.emissiveIntensity = 0.8 + chargeLevel / maxCharge * 1.2;
+                    }
+                }
+            }
+
+            // 更新充能
+            if (charging && chargeLevel < maxCharge) {
+                chargeLevel += chargeSpeed * 0.1;
+                if (chargeLevel > maxCharge) chargeLevel = maxCharge;
+                updateChargeDisplay();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function manualFire() {
+            if (chargeLevel > 20) {
+                firePrismBeam();
+                chargeLevel = Math.max(0, chargeLevel - 20);
+                updateChargeDisplay();
+            }
+        }
+
+        function startCharging() {
+            charging = !charging;
+            const btn = document.getElementById('charge-btn');
+            btn.textContent = charging ? '停止充能' : '开始充能';
+        }
+
+        function updateChargeSpeed(value) {
+            chargeSpeed = parseInt(value);
+            document.getElementById('speed-value').textContent = value;
+        }
+
+        function updateMaxCharge() {
+            maxCharge = parseInt(document.getElementById('max-charge').value);
+            if (chargeLevel > maxCharge) {
+                chargeLevel = maxCharge;
+                updateChargeDisplay();
+            }
+        }
+
+        function updateChargeDisplay() {
+            const percent = Math.round((chargeLevel / maxCharge) * 100);
+            document.getElementById('charge-percent').textContent = percent + '%';
+            document.getElementById('charge-bar').style.width = percent + '%';
+            
+            // 更新伤害显示
+            const baseDamage = 500;
+            const maxDamage = 1000;
+            const currentDamage = baseDamage + (maxDamage - baseDamage) * (chargeLevel / maxCharge);
+            document.getElementById('damage-text').textContent = `${Math.round(baseDamage)}-${Math.round(currentDamage)}`;
+            document.getElementById('damage-bar').style.width = (chargeLevel / maxCharge * 50 + 50) + '%';
+        }
+
+        function firePrismBeam() {
+            const container = document.getElementById('model-container');
+            const beam = document.createElement('div');
+            beam.className = 'prism-beam';
+            beam.style.left = '50%';
+            beam.style.top = '50%';
+            beam.style.transform = 'translate(0, -50%)';
+            beam.style.animation = 'beam-fire 0.5s ease-out';
+            container.appendChild(beam);
+            
+            setTimeout(() => beam.remove(), 500);
+            
+            // 3D场景中的射击效果
+            if (prismCannon) {
+                // 炮管后坐力
+                const prism = prismCannon.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (prism) {
+                    prism.position.z = -0.5;
+                    setTimeout(() => {
+                        prism.position.z = 0;
+                    }, 100);
+                }
+            }
+            
+            // 创建充能效果
+            const charge = document.createElement('div');
+            charge.className = 'charge-effect';
+            charge.style.left = '50%';
+            charge.style.top = '50%';
+            charge.style.transform = 'translate(-50%, -50%)';
+            container.appendChild(charge);
+            
+            setTimeout(() => charge.remove(), 1500);
+        }
+
+        function selectFireMode(mode) {
+            fireMode = mode;
+            document.querySelectorAll('.target-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新攻击参数
+            updateFireParameters(mode);
+        }
+
+        function updateFireParameters(mode) {
+            const modes = {
+                single: { damage: [500, 1000], speed: 1.2, dps: 600 },
+                burst: { damage: [400, 800], speed: 2.0, dps: 800 },
+                multi: { damage: [300, 600], speed: 1.5, dps: 450 },
+                penetrate: { damage: [600, 1200], speed: 0.8, dps: 480 }
+            };
+            
+            const params = modes[mode];
+            document.getElementById('damage-text').textContent = `${params.damage[0]}-${params.damage[1]}`;
+            document.getElementById('speed-text').textContent = `${params.speed}/秒`;
+            document.getElementById('dps-value').textContent = params.dps;
+            
+            // 更新参数条
+            document.getElementById('damage-bar').style.width = (chargeLevel / maxCharge * 50 + 50) + '%';
+            document.getElementById('speed-bar').style.width = (params.speed / 2 * 100) + '%';
+        }
+
+        function updateAttackRange(value) {
+            document.getElementById('range-value').textContent = value;
+            // 更新3D场景中的范围指示器
+        }
+
+        function demonstrateAttack() {
+            // 根据当前模式演示攻击
+            switch(fireMode) {
+                case 'single':
+                    firePrismBeam();
+                    break;
+                case 'burst':
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => firePrismBeam(), i * 200);
+                    }
+                    break;
+                case 'multi':
+                    demonstrateMultiShot();
+                    break;
+                case 'penetrate':
+                    demonstratePenetration();
+                    break;
+            }
+        }
+
+        function demonstrateMultiShot() {
+            const container = document.getElementById('model-container');
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const shot = document.createElement('div');
+                    shot.className = 'multi-shot';
+                    shot.style.left = '50%';
+                    shot.style.top = '50%';
+                    const angle = (i - 2) * 15;
+                    shot.style.setProperty('--tx', `${Math.cos(angle * Math.PI / 180) * 200}px`);
+                    shot.style.setProperty('--ty', `${Math.sin(angle * Math.PI / 180) * 200}px`);
+                    shot.style.animation = 'multi-shot-fly 1s ease-out';
+                    container.appendChild(shot);
+                    
+                    setTimeout(() => shot.remove(), 1000);
+                }, i * 100);
+            }
+        }
+
+        function demonstratePenetration() {
+            const container = document.getElementById('model-container');
+            const penetration = document.createElement('div');
+            penetration.className = 'penetration-indicator';
+            penetration.style.left = '0';
+            penetration.style.top = '50%';
+            penetration.style.width = '100%';
+            container.appendChild(penetration);
+            
+            setTimeout(() => penetration.remove(), 2000);
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础棱镜', desc: '标准棱镜炮塔', cost: '600 形魄', health: 1200, shield: 600 },
+            { title: 'T2 - 强化棱镜', desc: '增加充能速度和伤害', cost: '1200 形魄', health: 1800, shield: 900 },
+            { title: 'T3 - 超级棱镜', desc: '解锁特殊射击模式', cost: '2400 形魄', health: 2400, shield: 1200 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新参数
+            document.getElementById('health-bar').style.width = '100%';
+            document.getElementById('health-text').textContent = `${upgrade.health}/${upgrade.health}`;
+            document.getElementById('shield-bar').style.width = '100%';
+            document.getElementById('shield-text').textContent = `${upgrade.shield}/${upgrade.shield}`;
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            updateChargeDisplay();
+        });
+    </script>
+</body>
+</html>

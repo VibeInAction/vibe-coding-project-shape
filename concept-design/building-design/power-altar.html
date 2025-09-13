@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>力量祭坛 - 三角议会建筑设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 三角议会颜色主题 */
+            --triangle-color: #ef4444;
+            --triangle-light: #f87171;
+            --triangle-dark: #dc2626;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 主标题样式 */
+        .main-title {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 建筑卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--triangle-color);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: var(--triangle-color);
+        }
+
+        .upgrade-node.active {
+            background: var(--triangle-color);
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.1) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 祭坛光环 */
+        .altar-aura {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%);
+            opacity: 0.6;
+            animation: aura-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes aura-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        /* 牺牲仪式 */
+        .sacrifice-ritual {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--triangle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: ritual-expand 2s ease-out;
+        }
+
+        @keyframes ritual-expand {
+            0% {
+                width: 50px;
+                height: 50px;
+                opacity: 1;
+                border-width: 6px;
+            }
+            100% {
+                width: 150px;
+                height: 150px;
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+
+        /* 能量符文 */
+        .rune-symbol {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--triangle-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            animation: rune-float 4s ease-in-out infinite;
+        }
+
+        @keyframes rune-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 强化效果 */
+        .buff-effect {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .buff-effect:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.2));
+            border-color: var(--triangle-color);
+            transform: translateY(-2px);
+        }
+
+        /* 终极能力按钮 */
+        .ultimate-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .ultimate-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+        }
+
+        .ultimate-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ultimate-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .ultimate-button:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        /* 献祭进度 */
+        .sacrifice-progress {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sacrifice-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            border-radius: 6px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+
+        /* 交互按钮 */
+        .action-button {
+            background: linear-gradient(135deg, var(--triangle-color) 0%, var(--triangle-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .action-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 献祭选项 */
+        .sacrifice-option {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sacrifice-option:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--triangle-color);
+        }
+
+        .sacrifice-option.selected {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--triangle-color);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 升级路径可视化 */
+        .upgrade-path {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+        }
+
+        .path-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--triangle-color), var(--triangle-light));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .path-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: path-flow 2s linear infinite;
+        }
+
+        @keyframes path-flow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-4xl font-bold main-title mb-2">力量祭坛</h1>
+            <p class="text-gray-400">Power Altar - 牺牲与强化的神圣之地</p>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- 左侧：3D展示和控制 -->
+            <div class="space-y-6">
+                <!-- 3D模型展示 -->
+                <div class="building-card p-6">
+                    <div class="model-container" id="model-container">
+                        <!-- Three.js 3D场景将在这里渲染 -->
+                        <div class="altar-aura" style="left: 50%; top: 50%;"></div>
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button class="action-button" onclick="toggleRotation()">
+                            <span id="rotation-text">暂停旋转</span>
+                        </button>
+                        <button class="action-button" onclick="toggleRitual()">
+                            <span id="ritual-text">激活仪式</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 牺牲系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">牺牲仪式</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span>献祭进度</span>
+                                <span id="sacrifice-percent">0%</span>
+                            </div>
+                            <div class="sacrifice-progress">
+                                <div class="sacrifice-fill" id="sacrifice-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="sacrifice-option" onclick="selectSacrifice('unit')">
+                                <h4 class="font-bold text-sm mb-1">单位献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲1个单位</p>
+                                <p class="text-xs text-red-400 mt-1">+20% 攻击力</p>
+                            </div>
+                            <div class="sacrifice-option" onclick="selectSacrifice('building')">
+                                <h4 class="font-bold text-sm mb-1">建筑献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲1个建筑</p>
+                                <p class="text-xs text-orange-400 mt-1">+30% 防御力</p>
+                            </div>
+                            <div class="sacrifice-option" onclick="selectSacrifice('resource')">
+                                <h4 class="font-bold text-sm mb-1">资源献祭</h4>
+                                <p class="text-xs text-gray-400">牺牲50%资源</p>
+                                <p class="text-xs text-yellow-400 mt-1">+50% 产量</p>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-red-900/20 rounded border border-red-500/30">
+                            <p class="text-sm">
+                                <span class="font-semibold">警告:</span> 
+                                <span class="text-red-400">献祭效果持续60秒，冷却时间120秒</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 强化效果 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">强化效果</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="buff-effect">
+                            <h4 class="font-bold mb-2">攻击强化</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>基础加成</span>
+                                    <span class="text-red-400">+15%</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>献祭加成</span>
+                                    <span id="attack-buff" class="text-orange-400">+0%</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-semibold">
+                                    <span>总计</span>
+                                    <span id="total-attack" class="text-red-400">+15%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="buff-effect">
+                            <h4 class="font-bold mb-2">防御强化</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>基础加成</span>
+                                    <span class="text-blue-400">+20%</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>献祭加成</span>
+                                    <span id="defense-buff" class="text-orange-400">+0%</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-semibold">
+                                    <span>总计</span>
+                                    <span id="total-defense" class="text-blue-400">+20%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="buff-effect">
+                            <h4 class="font-bold mb-2">速度强化</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>基础加成</span>
+                                    <span class="text-green-400">+10%</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>献祭加成</span>
+                                    <span id="speed-buff" class="text-orange-400">+0%</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-semibold">
+                                    <span>总计</span>
+                                    <span id="total-speed" class="text-green-400">+10%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="buff-effect">
+                            <h4 class="font-bold mb-2">资源强化</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>基础加成</span>
+                                    <span class="text-purple-400">+25%</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>献祭加成</span>
+                                    <span id="resource-buff" class="text-orange-400">+0%</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-semibold">
+                                    <span>总计</span>
+                                    <span id="total-resource" class="text-purple-400">+25%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：建筑信息 -->
+            <div class="space-y-6">
+                <!-- 基础信息 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑信息</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">种族</p>
+                            <p class="font-semibold">三角议会</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建筑类型</p>
+                            <p class="font-semibold">支援建筑</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">建造时间</p>
+                            <p class="font-semibold">180秒</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">占用人口</p>
+                            <p class="font-semibold">5</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <p class="text-gray-300 leading-relaxed">
+                            力量祭坛是三角议会的神圣建筑，通过献祭仪式来获得强大的强化效果。
+                            牺牲越大，获得的加成越高，但需要谨慎使用。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 建筑参数 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">建筑参数</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>生命值</span>
+                                <span id="health-text">1500/1500</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-green-500" id="health-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>护盾值</span>
+                                <span id="shield-text">750/750</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-blue-500" id="shield-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>能量值</span>
+                                <span id="energy-text">300/300</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-purple-500" id="energy-bar" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span>仪式等级</span>
+                                <span id="ritual-level-text">等级 1</span>
+                            </div>
+                            <div class="parameter-bar">
+                                <div class="parameter-fill bg-orange-500" id="ritual-level-bar" style="width: 33%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 终极能力 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">终极能力</h3>
+                    <div class="text-center mb-4">
+                        <h4 class="font-bold text-lg mb-2">血祭仪式</h4>
+                        <p class="text-sm text-gray-400 mb-4">牺牲大量单位，获得毁灭性的力量</p>
+                        <button class="ultimate-button" id="ultimate-btn" onclick="activateUltimate()">
+                            启动血祭仪式
+                        </button>
+                        <div class="mt-2 text-sm">
+                            冷却时间: <span id="ultimate-cooldown-text">就绪</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-red-900/30 rounded border border-red-500/50">
+                        <p class="text-sm">
+                            <span class="font-semibold text-red-400">效果:</span> 
+                            所有友方单位获得 +100% 攻击力，持续30秒
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 升级系统 -->
+                <div class="building-card p-6">
+                    <h3 class="font-orbitron text-xl font-bold mb-4">升级路径</h3>
+                    <div class="upgrade-path">
+                        <div class="upgrade-node active" onclick="selectUpgrade(0)">
+                            <span class="font-bold">T1</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(1)">
+                            <span class="font-bold">T2</span>
+                        </div>
+                        <div class="path-line"></div>
+                        <div class="upgrade-node" onclick="selectUpgrade(2)">
+                            <span class="font-bold">T3</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-gray-800 rounded-lg">
+                        <h4 class="font-bold mb-2" id="upgrade-title">T1 - 基础祭坛</h4>
+                        <p class="text-sm text-gray-400 mb-2" id="upgrade-desc">基础的献祭设施</p>
+                        <div class="flex justify-between items-center">
+                            <span>升级费用</span>
+                            <span id="upgrade-cost" class="font-semibold">1500 形魄</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 献祭历史 -->
+        <div class="mt-8 building-card p-6">
+            <h3 class="font-orbitron text-xl font-bold mb-4">献祭历史</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="text-left py-2">时间</th>
+                            <th class="text-left py-2">献祭类型</th>
+                            <th class="text-left py-2">献祭数量</th>
+                            <th class="text-left py-2">获得加成</th>
+                            <th class="text-left py-2">持续时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sacrifice-history">
+                        <tr class="border-b border-gray-800">
+                            <td class="py-2">2分钟前</td>
+                            <td class="py-2">单位献祭</td>
+                            <td class="py-2">3个步兵</td>
+                            <td class="py-2 text-green-400">+20% 攻击力</td>
+                            <td class="py-2">60秒</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="py-2">5分钟前</td>
+                            <td class="py-2">资源献祭</td>
+                            <td class="py-2">500形魄</td>
+                            <td class="py-2 text-purple-400">+50% 产量</td>
+                            <td class="py-2">60秒</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 场景设置
+        let scene, camera, renderer, altar;
+        let isRotating = true;
+        let isRitualActive = false;
+        let sacrificeProgress = 0;
+        let selectedSacrifice = null;
+        let ritualLevel = 1;
+        let ultimateCooldown = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0f172a, 10, 50);
+
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(15, 10, 15);
+            camera.lookAt(0, 0, 0);
+
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // 创建祭坛光环
+            for (let i = 0; i < 3; i++) {
+                const pointLight = new THREE.PointLight(0xef4444, 1, 15);
+                pointLight.position.set(
+                    Math.cos(i * Math.PI * 2 / 3) * 5,
+                    2,
+                    Math.sin(i * Math.PI * 2 / 3) * 5
+                );
+                scene.add(pointLight);
+            }
+
+            // 创建地面
+            const groundGeometry = new THREE.PlaneGeometry(30, 30);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1e293b,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // 创建力量祭坛
+            createAltar();
+
+            // 开始动画循环
+            animate();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createAltar() {
+            altar = new THREE.Group();
+
+            // 祭坛基座
+            const baseGeometry = new THREE.CylinderGeometry(4, 5, 1, 8);
+            const baseMaterial = new THREE.MeshPhongMaterial({
+                color: 0x7f1d1d,
+                emissive: 0xef4444,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.y = 0.5;
+            base.castShadow = true;
+            altar.add(base);
+
+            // 中央祭石
+            const stoneGeometry = new THREE.OctahedronGeometry(2, 0);
+            const stoneMaterial = new THREE.MeshPhongMaterial({
+                color: 0xef4444,
+                emissive: 0xf87171,
+                emissiveIntensity: 0.5,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const stone = new THREE.Mesh(stoneGeometry, stoneMaterial);
+            stone.position.y = 3;
+            stone.castShadow = true;
+            altar.add(stone);
+
+            // 祭坛支柱
+            for (let i = 0; i < 3; i++) {
+                const pillarGeometry = new THREE.CylinderGeometry(0.5, 0.8, 4, 6);
+                const pillar = new THREE.Mesh(pillarGeometry, baseMaterial);
+                const angle = i * Math.PI * 2 / 3;
+                pillar.position.x = Math.cos(angle) * 3;
+                pillar.position.z = Math.sin(angle) * 3;
+                pillar.position.y = 2;
+                pillar.castShadow = true;
+                altar.add(pillar);
+
+                // 支柱顶部
+                const topGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+                const top = new THREE.Mesh(topGeometry, stoneMaterial);
+                top.position.x = Math.cos(angle) * 3;
+                top.position.z = Math.sin(angle) * 3;
+                top.position.y = 4;
+                altar.add(top);
+            }
+
+            // 能量符文环
+            for (let i = 0; i < 6; i++) {
+                const runeGeometry = new THREE.TorusGeometry(3, 0.1, 8, 32);
+                const runeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf87171,
+                    emissive: 0xef4444,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const rune = new THREE.Mesh(runeGeometry, runeMaterial);
+                rune.position.y = 1 + i * 0.3;
+                rune.rotation.x = Math.PI / 2;
+                rune.name = `rune-${i}`;
+                altar.add(rune);
+            }
+
+            scene.add(altar);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 旋转祭坛
+            if (isRotating && altar) {
+                altar.rotation.y += 0.003;
+                
+                // 旋转符文环
+                altar.children.forEach((child, index) => {
+                    if (child.name && child.name.startsWith('rune-')) {
+                        child.rotation.z += 0.01 * (index % 2 === 0 ? 1 : -1);
+                    }
+                });
+                
+                // 脉动中央祭石
+                const stone = altar.children.find(child => child.geometry instanceof THREE.OctahedronGeometry);
+                if (stone) {
+                    const scale = 1 + Math.sin(Date.now() * 0.003) * 0.2;
+                    stone.scale.setScalar(scale);
+                    stone.rotation.y += 0.01;
+                }
+            }
+
+            // 仪式激活效果
+            if (isRitualActive) {
+                // 增强发光效果
+                altar.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissiveIntensity = 1;
+                    }
+                });
+            }
+
+            // 更新献祭进度
+            if (selectedSacrifice && sacrificeProgress < 100) {
+                sacrificeProgress += 0.5;
+                updateSacrificeDisplay();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // 控制函数
+        function toggleRotation() {
+            isRotating = !isRotating;
+            document.getElementById('rotation-text').textContent = isRotating ? '暂停旋转' : '开始旋转';
+        }
+
+        function toggleRitual() {
+            if (!selectedSacrifice) {
+                alert('请先选择献祭类型');
+                return;
+            }
+            
+            isRitualActive = !isRitualActive;
+            document.getElementById('ritual-text').textContent = isRitualActive ? '停止仪式' : '激活仪式';
+            
+            if (isRitualActive) {
+                startRitualEffect();
+                sacrificeProgress = 0;
+            } else {
+                completeSacrifice();
+            }
+        }
+
+        function startRitualEffect() {
+            const container = document.getElementById('model-container');
+            
+            // 创建仪式环效果
+            setInterval(() => {
+                if (isRitualActive) {
+                    const ritual = document.createElement('div');
+                    ritual.className = 'sacrifice-ritual';
+                    ritual.style.left = '50%';
+                    ritual.style.top = '50%';
+                    ritual.style.transform = 'translate(-50%, -50%)';
+                    container.appendChild(ritual);
+                    
+                    setTimeout(() => ritual.remove(), 2000);
+                }
+            }, 1000);
+        }
+
+        function selectSacrifice(type) {
+            selectedSacrifice = type;
+            document.querySelectorAll('.sacrifice-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // 重置进度
+            sacrificeProgress = 0;
+            updateSacrificeDisplay();
+        }
+
+        function updateSacrificeDisplay() {
+            document.getElementById('sacrifice-bar').style.width = sacrificeProgress + '%';
+            document.getElementById('sacrifice-percent').textContent = Math.round(sacrificeProgress) + '%';
+        }
+
+        function completeSacrifice() {
+            if (!selectedSacrifice || sacrificeProgress < 100) return;
+            
+            // 应用加成效果
+            const bonuses = {
+                unit: { attack: 20, type: '单位献祭' },
+                building: { defense: 30, type: '建筑献祭' },
+                resource: { resource: 50, type: '资源献祭' }
+            };
+            
+            const bonus = bonuses[selectedSacrifice];
+            
+            // 更新显示
+            if (bonus.attack) {
+                document.getElementById('attack-buff').textContent = `+${bonus.attack}%`;
+                document.getElementById('total-attack').textContent = `+${15 + bonus.attack}%`;
+            }
+            if (bonus.defense) {
+                document.getElementById('defense-buff').textContent = `+${bonus.defense}%`;
+                document.getElementById('total-defense').textContent = `+${20 + bonus.defense}%`;
+            }
+            if (bonus.resource) {
+                document.getElementById('resource-buff').textContent = `+${bonus.resource}%`;
+                document.getElementById('total-resource').textContent = `+${25 + bonus.resource}%`;
+            }
+            
+            // 添加到历史记录
+            addToSacrificeHistory(bonus.type, sacrificeProgress);
+            
+            // 重置
+            selectedSacrifice = null;
+            sacrificeProgress = 0;
+            document.querySelectorAll('.sacrifice-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            updateSacrificeDisplay();
+        }
+
+        function addToSacrificeHistory(type, progress) {
+            const history = document.getElementById('sacrifice-history');
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-800';
+            row.innerHTML = `
+                <td class="py-2">刚刚</td>
+                <td class="py-2">${type}</td>
+                <td class="py-2">完成</td>
+                <td class="py-2 text-green-400">获得加成</td>
+                <td class="py-2">60秒</td>
+            `;
+            history.insertBefore(row, history.firstChild);
+            
+            // 限制历史记录数量
+            while (history.children.length > 5) {
+                history.removeChild(history.lastChild);
+            }
+        }
+
+        function activateUltimate() {
+            if (ultimateCooldown > 0) return;
+            
+            const button = document.getElementById('ultimate-btn');
+            button.disabled = true;
+            button.textContent = '血祭仪式进行中...';
+            
+            // 创建强烈的视觉效果
+            createUltimateEffect();
+            
+            // 开始冷却
+            setTimeout(() => {
+                ultimateCooldown = 180; // 3分钟冷却
+                startUltimateCooldown();
+            }, 5000);
+        }
+
+        function createUltimateEffect() {
+            const container = document.getElementById('model-container');
+            
+            // 创建多个扩散的仪式环
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const ritual = document.createElement('div');
+                    ritual.className = 'sacrifice-ritual';
+                    ritual.style.left = '50%';
+                    ritual.style.top = '50%';
+                    ritual.style.transform = 'translate(-50%, -50%)';
+                    ritual.style.width = '300px';
+                    ritual.style.height = '300px';
+                    container.appendChild(ritual);
+                    
+                    setTimeout(() => ritual.remove(), 2000);
+                }, i * 200);
+            }
+            
+            // 3D场景中的特效
+            if (altar) {
+                altar.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissiveIntensity = 2;
+                        setTimeout(() => {
+                            child.material.emissiveIntensity = 0.5;
+                        }, 3000);
+                    }
+                });
+            }
+        }
+
+        function startUltimateCooldown() {
+            const button = document.getElementById('ultimate-btn');
+            const text = document.getElementById('ultimate-cooldown-text');
+            
+            const interval = setInterval(() => {
+                ultimateCooldown--;
+                const minutes = Math.floor(ultimateCooldown / 60);
+                const seconds = ultimateCooldown % 60;
+                text.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (ultimateCooldown <= 0) {
+                    clearInterval(interval);
+                    button.disabled = false;
+                    button.textContent = '启动血祭仪式';
+                    text.textContent = '就绪';
+                }
+            }, 1000);
+        }
+
+        let currentUpgrade = 0;
+        const upgradeData = [
+            { title: 'T1 - 基础祭坛', desc: '基础的献祭设施', cost: '1500 形魄', level: 1 },
+            { title: 'T2 - 强化祭坛', desc: '增加献祭效率和加成', cost: '3000 形魄', level: 2 },
+            { title: 'T3 - 终极祭坛', desc: '解锁终极献祭能力', cost: '6000 形魄', level: 3 }
+        ];
+
+        function selectUpgrade(level) {
+            currentUpgrade = level;
+            document.querySelectorAll('.upgrade-node').forEach((node, index) => {
+                node.classList.toggle('active', index === level);
+            });
+            
+            const upgrade = upgradeData[level];
+            document.getElementById('upgrade-title').textContent = upgrade.title;
+            document.getElementById('upgrade-desc').textContent = upgrade.desc;
+            document.getElementById('upgrade-cost').textContent = upgrade.cost;
+            
+            // 更新仪式等级
+            ritualLevel = upgrade.level;
+            document.getElementById('ritual-level-text').textContent = `等级 ${ritualLevel}`;
+            document.getElementById('ritual-level-bar').style.width = (ritualLevel / 3 * 100) + '%';
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            initThreeJS();
+            
+            // 创建符文效果
+            setInterval(() => {
+                if (isRitualActive) {
+                    const container = document.getElementById('model-container');
+                    const rune = document.createElement('div');
+                    rune.className = 'rune-symbol';
+                    rune.textContent = ['◆', '▲', '●', '■', '★', '✦'][Math.floor(Math.random() * 6)];
+                    rune.style.left = Math.random() * 80 + 10 + '%';
+                    rune.style.top = Math.random() * 80 + 10 + '%';
+                    container.appendChild(rune);
+                    
+                    setTimeout(() => rune.remove(), 4000);
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

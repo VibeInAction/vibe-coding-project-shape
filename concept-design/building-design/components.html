@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通用组件 - 建筑设计系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 种族颜色主题 */
+            --circle-color: #3b82f6;
+            --triangle-color: #ef4444;
+            --square-color: #10b981;
+            --spiral-color: #8b5cf6;
+            
+            /* 通用颜色 */
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 通用卡片样式 */
+        .building-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .building-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 种族边框样式 */
+        .race-border-circle { border-top: 3px solid var(--circle-color); }
+        .race-border-triangle { border-top: 3px solid var(--triangle-color); }
+        .race-border-square { border-top: 3px solid var(--square-color); }
+        .race-border-spiral { border-top: 3px solid var(--spiral-color); }
+
+        /* 参数条样式 */
+        .parameter-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .parameter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .parameter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 升级节点样式 */
+        .upgrade-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upgrade-node:hover {
+            transform: scale(1.1);
+            border-color: currentColor;
+        }
+
+        .upgrade-node.active {
+            background: currentColor;
+            color: white;
+        }
+
+        /* 3D展示容器 */
+        .model-container {
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 加载动画 */
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* 能量效果 */
+        .energy-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .energy-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            opacity: 0;
+            animation: energy-flow 3s infinite;
+        }
+
+        @keyframes energy-flow {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0) scale(0);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1);
+            }
+        }
+
+        /* 交互提示 */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* 响应式网格 */
+        .responsive-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        /* 动画按钮 */
+        .animated-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .animated-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .animated-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 组件预览区域 -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="font-orbitron text-3xl font-bold mb-8 text-center">建筑组件库</h1>
+        
+        <!-- 卡片组件示例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">建筑卡片</h2>
+            <div class="responsive-grid">
+                <div class="building-card race-border-circle p-6">
+                    <h3 class="font-orbitron text-lg font-bold mb-2">圆环族建筑</h3>
+                    <p class="text-gray-400 text-sm">和谐与循环的体现</p>
+                </div>
+                <div class="building-card race-border-triangle p-6">
+                    <h3 class="font-orbitron text-lg font-bold mb-2">三角议会建筑</h3>
+                    <p class="text-gray-400 text-sm">力量与效率的追求</p>
+                </div>
+                <div class="building-card race-border-square p-6">
+                    <h3 class="font-orbitron text-lg font-bold mb-2">方碑盟约建筑</h3>
+                    <p class="text-gray-400 text-sm">秩序与规则的维护</p>
+                </div>
+                <div class="building-card race-border-spiral p-6">
+                    <h3 class="font-orbitron text-lg font-bold mb-2">螺旋之子建筑</h3>
+                    <p class="text-gray-400 text-sm">变化与成长的适应</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 参数条示例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">参数展示</h2>
+            <div class="building-card p-6">
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>生命值</span>
+                            <span>8000/10000</span>
+                        </div>
+                        <div class="parameter-bar">
+                            <div class="parameter-fill bg-green-500" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>护盾值</span>
+                            <span>5000/5000</span>
+                        </div>
+                        <div class="parameter-bar">
+                            <div class="parameter-fill bg-blue-500" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>能量储备</span>
+                            <span>30/100</span>
+                        </div>
+                        <div class="parameter-bar">
+                            <div class="parameter-fill bg-purple-500" style="width: 30%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 升级节点示例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">升级路径</h2>
+            <div class="building-card p-6">
+                <div class="flex items-center justify-center space-x-8">
+                    <div class="upgrade-node active" style="color: var(--circle-color)">
+                        <span class="font-bold">T1</span>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-gray-600"></div>
+                    <div class="upgrade-node" style="color: var(--circle-color)">
+                        <span class="font-bold">T2</span>
+                    </div>
+                    <div class="flex-1 h-0.5 bg-gray-600"></div>
+                    <div class="upgrade-node" style="color: var(--circle-color)">
+                        <span class="font-bold">T3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签示例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">功能标签</h2>
+            <div class="flex flex-wrap gap-2">
+                <span class="tag">防御专精</span>
+                <span class="tag">能量操控</span>
+                <span class="tag">共鸣网络</span>
+                <span class="tag">旋转优化</span>
+                <span class="tag">护盾系统</span>
+                <span class="tag">资源收集</span>
+            </div>
+        </div>
+
+        <!-- 3D展示容器示例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">3D模型展示</h2>
+            <div class="model-container flex items-center justify-center">
+                <div class="loader" style="color: var(--circle-color)"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 动态生成能量粒子效果
+        function createEnergyEffect(container, color) {
+            const effect = document.createElement('div');
+            effect.className = 'energy-effect';
+            effect.style.color = color;
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'energy-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                effect.appendChild(particle);
+            }
+            
+            container.appendChild(effect);
+        }
+
+        // 参数动画更新
+        function animateParameter(barElement, targetPercent) {
+            const fill = barElement.querySelector('.parameter-fill');
+            fill.style.width = targetPercent + '%';
+        }
+
+        // 升级节点交互
+        document.querySelectorAll('.upgrade-node').forEach(node => {
+            node.addEventListener('click', function() {
+                document.querySelectorAll('.upgrade-node').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
